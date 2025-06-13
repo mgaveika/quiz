@@ -3,6 +3,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const User = require('./models/Users');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const verifyJwt = require('./middleware/Auth');
 require('dotenv').config()
 
 const app = express();
@@ -16,7 +18,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 
 
 app.use(cors({
-    origin: ['http://localhost:5173'], // ?
+    origin: ['http://localhost:5173'],
 }));
 
 app.use(express.json());
@@ -74,10 +76,19 @@ app.post('/api/auth/login', async (req, res) => {
     if (user.length > 0) {
         const checkedPass = await checkPassword(password, user[0].password);
         if (checkedPass) {
-            return res.json({ msg: "Login successful!", msgType: "success"});
+            const token = jwt.sign({ id: user[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            return res.json({ auth: true, token: token, msg: "Login successful!", msgType: "success" });
         }
     }
-    return res.json({ msg: "Invalid email or password.", msgType: "error" });
+    return res.json({ auth: false, msg: "Invalid email or password.", msgType: "error" });
+});
+
+app.get('/api/auth/isAuthenticated', verifyJwt, async (req, res) => {
+    const user = await User.findById(req.userId);
+    if (!user) {
+        return res.status(404).json({ auth: false, msg: "User not found.", msgType: "error" });
+    }
+    return res.json({ auth: true, user: { id: user.id, email: user.email, username: user.username }, msgType: "success" });
 });
 
 app.listen(port, () => {

@@ -31,7 +31,8 @@ export default function Register() {
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
                 <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
-                {errorMsg && <div className={`${errorMsg.msgType === "error" ? "text-red-500" : "text-green-500"} text-center mb-4`}>{errorMsg.msg}</div>}                <form onSubmit={handleSubmit} method='post'>
+                {errorMsg && <div className={`${errorMsg.msgType === "error" ? "text-red-500" : "text-green-500"} text-center mb-4`}>{errorMsg.msg}</div>}
+                <form onSubmit={handleSubmit} method='post'>
                     <div className="mb-4">
                         <label className="block text-sm font-medium mb-2" htmlFor="email">Email</label>
                         <input type="email"
