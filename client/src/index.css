@@ -4,4 +4,5 @@ body {
     background: radial-gradient(circle, transparent 20%, #ffffff 20%, #ffffff 80%, transparent 80%, transparent) 0% 0% / 64px 64px, radial-gradient(circle, transparent 20%, #ffffff 20%, #ffffff 80%, transparent 80%, transparent) 32px 32px / 64px 64px, linear-gradient(rgba(191, 191, 191, 0.25) 0.5px, transparent 0.5px) 0px -0.25px / 32px 32px, linear-gradient(90deg, rgba(191, 191, 191, 0.25) 0.5px, #ffffff 0.5px) -0.25px 0px / 32px 32px #ffffff;
     background-size: 64px 64px, 64px 64px, 32px 32px, 32px 32px;
     background-color: #ffffff;
+    color: #232323;
 }

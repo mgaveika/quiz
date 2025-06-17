@@ -83,12 +83,35 @@ app.post('/api/auth/login', async (req, res) => {
     return res.json({ auth: false, msg: "Invalid email or password.", msgType: "error" })
 })
 
+
 app.get('/api/auth/isAuthenticated', verifyJwt, async (req, res) => {
     const user = await User.findById(req.userId)
     if (!user) {
         return res.status(404).json({ auth: false, msg: "User not found.", msgType: "error" })
     }
-    return res.json({ auth: true, user: { id: user.id, email: user.email, username: user.username }, msgType: "success" })
+    return res.json({ auth: true, user: { id: user.id, email: user.email, username: user.username, created_at: user.created_at }, msgType: "success" })
+})
+
+app.post('/api/auth/updatePassword', verifyJwt, async (req, res) => {
+    const { currentPassword, newPassword, confirmNewPassword } = req.body
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+        return res.json({ msg: "All fields are required!", msgType: "error" })
+    }
+    if (newPassword != confirmNewPassword) {
+        return res.json({ msg: "Password doesn't match.", msgType: "error" })
+    }
+    const user = await User.findById(req.userId)
+    if (!user) {
+        return res.status(404).json({ msg: "User not found.", msgType: "error" })
+    }
+    const checkedPass = await checkPassword(currentPassword, user.password)
+    if (!checkedPass) {
+        return res.json({ msg: "Invalid user's password.", msgType: "error" })
+    }
+    user.password = await hashPassword(currentPassword)
+    user.updated_at = new Date()
+    await user.save()
+    return res.json({msg: "Password updated successfully!", msgType: "success"})
 })
 
 app.listen(port, () => {

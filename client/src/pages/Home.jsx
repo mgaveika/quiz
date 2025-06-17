@@ -6,6 +6,7 @@ export default function Home() {
     function logout() {
         localStorage.removeItem("token")
         setAuth({ loading: false, isAuthenticated: false, user: null })
+        window.location.href = "/"
     }
     useEffect(() => {
         const token = localStorage.getItem("token")
