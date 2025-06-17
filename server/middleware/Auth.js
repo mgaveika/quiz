@@ -11,7 +11,7 @@ const verifyJwt = (req, res, next) => {
         }
         req.userId = decoded.id
         next()
-    });
-};
+    })
+}
 
 module.exports = verifyJwt
