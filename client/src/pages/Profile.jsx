@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import Navigation from "../components/Navigation.jsx"
 import Avatar from "../components/Avatar.jsx"
+import DeleteAccount from "../components/DeleteAccount.jsx"
 
 export default function Profile() {
     const [auth, setAuth] = useState({ loading: true, isAuthenticated: false, user: null })
@@ -24,7 +25,7 @@ export default function Profile() {
                 logout()
                 return
             }
-            const response = await fetch("http://localhost:3000/api/auth/updatePassword", {
+            const response = await fetch("http://localhost:3000/api/user/updatePassword", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
