@@ -32,6 +32,14 @@ class AuthService {
         await user.save()
         return {msg: "Password updated successfully!", msgType: "success"}
     }
+    static async deleteAccount(id) {
+        const user = await User.findById(id)
+        if (!user) {
+            return { msg: "User not found.", msgType: "error" }
+        }
+        await User.deleteOne({ _id: id })
+        return { msg: "Account deleted successfully!", msgType: "success" }
+    }
 }
 
 module.exports = AuthService

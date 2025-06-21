@@ -7,11 +7,34 @@ export default function Profile() {
     const [auth, setAuth] = useState({ loading: true, isAuthenticated: false, user: null })
     const [activeTab, setActiveTab] = useState("profile");
     const [errorMsg, setErrorMsg] = useState([])
+    const [deleteAccount, setDeleteAccount] = useState(false)
 
     function logout() {
         localStorage.removeItem("token")
         setAuth({ loading: false, isAuthenticated: false, user: null })
         window.location.href = "/"
+    }
+
+    function closeDeleteAccount() {
+        setDeleteAccount(false)
+    }
+
+    async function confirmDeleteAccount() {
+        const token = localStorage.getItem("token")
+        if (!token) {
+            logout()
+            return
+        }
+        const response = await fetch("http://localhost:3000/api/user/deleteAccount", {
+            method: "DELETE",
+            headers: { "x-access-token": token }
+        })
+        const data = await response.json()
+        if (data.msgType === "success") {
+            logout()
+        } else {
+            setErrorMsg(data)
+        }
     }
 
     async function handleSubmit(event) {
@@ -65,6 +88,7 @@ export default function Profile() {
     }, [])
     return (
         <main className="min-h-screen">
+            {deleteAccount && <DeleteAccount confirm={confirmDeleteAccount} cancel={closeDeleteAccount} />}
             {auth.loading ? (
                 <div className="flex items-center justify-center h-screen">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
@@ -101,7 +125,7 @@ export default function Profile() {
                                 Change password
                              </button>
                         </div>
-                        <button className="bg-red-600 text-white rounded cursor-pointer hover:bg-red-700 w-full p-2 mt-20">
+                        <button onClick={() => setDeleteAccount(true)} className="bg-red-600 text-white rounded-md cursor-pointer hover:bg-red-700 w-full p-2 mt-20">
                             Delete account
                         </button>
                     </div>
