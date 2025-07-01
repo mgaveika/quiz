@@ -2,11 +2,11 @@ import { useEffect, useState } from "react"
 import Navigation from "../components/Navigation.jsx"
 import Avatar from "../components/Avatar.jsx"
 import DeleteAccount from "../components/DeleteAccount.jsx"
+import toast from "react-hot-toast"
 
 export default function Profile() {
     const [auth, setAuth] = useState({ loading: true, isAuthenticated: false, user: null })
     const [activeTab, setActiveTab] = useState("profile");
-    const [errorMsg, setErrorMsg] = useState([])
     const [deleteAccount, setDeleteAccount] = useState(false)
 
     function logout() {
@@ -31,9 +31,10 @@ export default function Profile() {
         })
         const data = await response.json()
         if (data.msgType === "success") {
+            toast.success("Your account has been successfully deleted!")
             logout()
         } else {
-            setErrorMsg(data)
+            toast.error(data.msg)
         }
     }
 
@@ -61,9 +62,15 @@ export default function Profile() {
                 }),
             })
             const data = await response.json()
-            setErrorMsg(data)
+            if (data.msgType == "success") {
+                toast.success(data.msg)
+            } else if (data.msgType == "error")  {
+                toast.error(data.msg)
+            } else {
+                toast(data.msg)
+            }
         } catch (error) {
-            setErrorMsg({msg: 'Error: '+ error.message, msgType: 'error'})
+            toast.error(error.message)
         }
     }
 
@@ -130,7 +137,6 @@ export default function Profile() {
                         </button>
                     </div>
                     <div className="flex-1 bg-white shadow-sm p-8 rounded">
-                        {errorMsg && <div className={`${errorMsg.msgType === "error" ? "text-red-500" : "text-green-500"} text-center mb-4`}>{errorMsg.msg}</div>}
                         {activeTab === "profile" && (
                             <div>
                                 <h2 className="text-xl font-semibold mb-4">Profile Settings</h2>

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router"
+import toast from "react-hot-toast"
 
 export default function Login() {
-    const [errorMsg, setErrorMsg] = useState([])
     async function handleSubmit(event) {
         event.preventDefault()
         const email = event.target.email.value
@@ -19,13 +19,19 @@ export default function Login() {
                 }),
             })
             const data = await response.json()
-            setErrorMsg(data)
+            if (data.msgType == "success") {
+                toast.success(data.msg)
+            } else if (data.msgType == "error")  {
+                toast.error(data.msg)
+            } else {
+                toast(data.msg)
+            }
             if (data.token) {
                 localStorage.setItem("token", data.token)
                 window.location.href = "/"
             }
-        } catch (error) {
-            setErrorMsg({msg: 'Error: '+ error.message, msgType: 'error'})
+        } catch (err) {
+            toast.error(err.message)
         }
     }
     useEffect(() => {
@@ -47,7 +53,6 @@ export default function Login() {
             <Link to="/"><img src="/quiz.svg" alt="Logo" className="w-14 mb-3"/></Link>
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
                 <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-                {errorMsg && <div className={`${errorMsg.msgType === "error" ? "text-red-500" : "text-green-500"} text-center mb-4`}>{errorMsg.msg}</div>}
                 <form onSubmit={handleSubmit} method='post'>
                     <div className="mb-4">
                         <label className="block text-sm font-medium mb-2" htmlFor="email">Email</label>

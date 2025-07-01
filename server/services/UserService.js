@@ -25,9 +25,9 @@ class AuthService {
         }
         const checkedPass = await checkPassword(currentPassword, user.password)
         if (!checkedPass) {
-            return { msg: "Invalid user's password.", msgType: "error" }
+            return { msg: "Invalid password.", msgType: "error" }
         }
-        user.password = await hashPassword(currentPassword)
+        user.password = await hashPassword(newPassword)
         user.updated_at = new Date()
         await user.save()
         return {msg: "Password updated successfully!", msgType: "success"}

@@ -25,7 +25,7 @@ export default function Navigation(props) {
 
             {props.auth.isAuthenticated ? (
                 <div className="relative" ref={dropdownRef}>
-                    <button onClick={() => setOptionsOpen(!optionsOpen)} type="button" className="flex items-center focus:outline-none" aria-haspopup="true" aria-expanded={optionsOpen} >
+                    <button onClick={() => setOptionsOpen(!optionsOpen)} type="button" className="flex items-center focus:outline-none cursor-pointer" aria-haspopup="true" aria-expanded={optionsOpen} >
                         <Avatar size="30px" fontSize="15px" name={props.auth.user.username} />
                         <img className={`ml-2 w-3 transform transition-transform duration-300 ${optionsOpen ? "rotate-180" : ""}`} src="/dropdown-arrow.png" alt="dropdown" />
                     </button>
@@ -34,6 +34,7 @@ export default function Navigation(props) {
                         <div className="py-1">
                             <div className="mx-2 px-2 py-2 text-sm text-gray-700 text-left border-b-1 border-gray-200">{props.auth.user.username}</div>
                             <Link to="/profile"><button className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left cursor-pointer">Profile</button></Link>
+                            <Link to="/my-quizzes"><button className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left cursor-pointer">My Quizzes</button></Link>
                             <button onClick={props.logout} className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left cursor-pointer">Log out</button>
                         </div>
                     </div>

@@ -22,8 +22,7 @@ router.post('/updatePassword', async (req, res) => {
 
 router.delete('/deleteAccount', async (req, res) => {
     try {
-        const id = req.userId
-        const data = await UserService.deleteAccount(id)
+        const data = await UserService.deleteAccount(req.userId)
         res.json(data)
     } catch (err) {
         console.log(err)
