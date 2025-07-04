@@ -12,26 +12,23 @@ router.post('/', async (req, res) => {
             quizId: req.body.quizId,
             order: req.body.order
         })
-        res.status(201).json(newQuizQuestion)
+        res.json({ data: newQuizQuestion, message: "Question created successfully!" , status: "success" })
     } catch (err) {
-        console.log(err)
+        res.json({ data: null, message: err.message , status: "error" })
     }
 })
 
 router.put('/:id', async (req, res) => {
     try {
-        const quizId = req.body.quizId
-        const order = req.body.order
-        const updates = {
+        const updatedQuizQuestion = await QuizQuestionService.updateQuizQuestion(req.body.quizId, req.body.order, {
             questionText: req.body.questionText,
             options: req.body.options,
             correctAnswer: req.body.correctAnswer,
             order: req.body.order
-        }
-        const updatedQuizQuestion = await QuizQuestionService.updateQuizQuestion(quizId, order, updates)
-        res.status(200).json(updatedQuizQuestion)
+        })
+        res.json({ data: updatedQuizQuestion, message: "Question updated successfully!" , status: "success" })
     } catch (err) {
-        console.log(err)
+        res.json({ data: null, message: err.message , status: "error" })
     }
 })
 
@@ -41,12 +38,13 @@ router.delete('/:id', async (req, res) => {
         const order = req.query.order
         if (order !== undefined) {
             await QuizQuestionService.deleteQuizQuestion(quizId, order)
+            res.json({ data: null, message: "Question deleted successfully!" , status: "success" })
         } else {
             await QuizQuestionService.deleteQuizQuestions(quizId)
+            res.json({ data: null, message: "Questions deleted successfully!" , status: "success" })
         }
-        res.status(204).send()
     } catch (err) {
-        console.log(err)
+        res.json({ data: null, message: err.message , status: "error" })
     }
 })
 

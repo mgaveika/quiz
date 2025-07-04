@@ -1,44 +1,34 @@
 import { useEffect, useState } from "react"
 import Navigation from "../components/Navigation.jsx"
+import { Link } from "react-router-dom"
 export default function Home() {
-    const [auth, setAuth] = useState({ loading: true, isAuthenticated: false, user: null })
-
-    function logout() {
-        localStorage.removeItem("token")
-        setAuth({ loading: false, isAuthenticated: false, user: null })
-        window.location.href = "/"
-    }
-    useEffect(() => {
-        const token = localStorage.getItem("token")
-        if (!token) {
-            setAuth({ loading: false, isAuthenticated: false, user: null })
-            return
-        }
-        fetch("http://localhost:3000/api/auth/isAuthenticated", {
-            headers: { "x-access-token": token }
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.auth) {
-                    setAuth({ loading: false, isAuthenticated: true, user: data.user })
-                } else {
-                    logout()
-                }
-            })
-            .catch(() => setAuth({ loading: false, isAuthenticated: false, user: null }))
-    }, [])
     return (
         <main className="min-h-screen">
-            {auth.loading ? (
-                <div className="flex items-center justify-center h-screen">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
-                </div>
-            ) : <> 
-                <Navigation auth={auth} logout={logout}/>
-                <div className="container mx-auto p-8">
-                    <h1 className="text-2xl font-bold">{auth.isAuthenticated ? `Hello, ${auth.user.username}` : "Welcome, guest!"}</h1>
-                </div> 
-            </>}
+            <Navigation />
+            <div className="text-gray-800 flex flex-col">
+                <section className="text-center py-16 px-4">
+                    <h2 className="text-4xl md:text-5xl font-extrabold mb-4">
+                    Your Place to Create and Take Quizzes
+                    </h2>
+                    <p className="text-lg text-gray-600 mb-8">
+                    Start testing your knowledge or make your own quiz for others to try!
+                    </p>
+                    <div className="flex justify-center gap-4">
+                    <Link
+                        to="/my-quizzes"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow"
+                    >
+                        Take a Quiz
+                    </Link>
+                    <Link
+                        to="/create-quiz"
+                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-xl shadow"
+                    >
+                        Create a Quiz
+                    </Link>
+                    </div>
+                </section>
+            </div>
         </main>
     )
 }

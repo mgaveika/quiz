@@ -13,20 +13,18 @@ router.post('/updatePassword', async (req, res) => {
             confirmNewPassword,
             id
         })
-        res.json(data)
+        res.json({ data: data, message: "Password updated successfully!", status: "success" })
     } catch (err) {
-        console.log(err)
-        res.json({ msg: err.message , msgType: "error" })
+        res.json({ data: null, message: err.message , status: "error" })
     }
 })
 
 router.delete('/deleteAccount', async (req, res) => {
     try {
         const data = await UserService.deleteAccount(req.userId)
-        res.json(data)
+        res.json({ data: data, message: "Account deleted successfully!", status: "success" })
     } catch (err) {
-        console.log(err)
-        res.json({ msg: err.message , msgType: "error" })
+        res.json({ data: null, message: err.message , status: "error" })
     }
 })
 

@@ -13,32 +13,38 @@ async function checkPassword(password, hashedPassword) {
 
 class AuthService {
     static async updatePassword({currentPassword, newPassword, confirmNewPassword, id}) {
-        if (!currentPassword || !newPassword || !confirmNewPassword) {
-            return { msg: "All fields are required!", msgType: "error" }
+        try {
+            if (!currentPassword || !newPassword || !confirmNewPassword) {
+                throw new Error("All fields are required!")
+            }
+            if (newPassword != confirmNewPassword) {
+                throw new Error("Passwords doesn't match.")
+            }
+            const user = await User.findById(id)
+            if (!user) {
+                throw new Error("User not found.")
+            }
+            const checkedPass = await checkPassword(currentPassword, user.password)
+            if (!checkedPass) {
+                throw new Error("Invalid password.")
+            }
+            user.password = await hashPassword(newPassword)
+            user.updated_at = new Date()
+            return await user.save()
+        } catch (err) {
+            throw err
         }
-        if (newPassword != confirmNewPassword) {
-            return { msg: "Password doesn't match.", msgType: "error" }
-        }
-        const user = await User.findById(id)
-        if (!user) {
-            return { msg: "User not found.", msgType: "error" }
-        }
-        const checkedPass = await checkPassword(currentPassword, user.password)
-        if (!checkedPass) {
-            return { msg: "Invalid password.", msgType: "error" }
-        }
-        user.password = await hashPassword(newPassword)
-        user.updated_at = new Date()
-        await user.save()
-        return {msg: "Password updated successfully!", msgType: "success"}
     }
     static async deleteAccount(id) {
-        const user = await User.findById(id)
-        if (!user) {
-            return { msg: "User not found.", msgType: "error" }
+        try {
+            const user = await User.findById(id)
+            if (!user) {
+                throw new Error("User not found.")
+            }
+            return await User.deleteOne({ _id: id })
+        } catch(err) {
+            throw err
         }
-        await User.deleteOne({ _id: id })
-        return { msg: "Account deleted successfully!", msgType: "success" }
     }
 }
 

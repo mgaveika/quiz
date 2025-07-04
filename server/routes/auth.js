@@ -11,10 +11,9 @@ router.post('/login', async (req, res) => {
             email,
             password
         })
-        res.json(data)
+        res.json({ data: data, message: "Authentication successful.", status: "success" })
     } catch (err) {
-        console.log(err)
-        res.json({ msg: err.message, msgType: "error" })
+        res.json({ data: null, message: err.message, status: "error" })
     }
 })
 
@@ -27,10 +26,9 @@ router.post('/register', async (req, res) => {
             password, 
             confirmPassword
         })
-        res.json(data)
+        res.json({ data: data, message: "User registered successfully.", status: "success" })
     } catch (err) {
-        console.log(err)
-        res.json({ msg: err.message, msgType: "error"  })
+        res.json({ data: null, message: err.message, status: "error"  })
     }
 })
 
@@ -38,10 +36,9 @@ router.get('/isAuthenticated', authorized, async (req, res) => {
     try {
         const id = req.userId
         const data = await AuthService.isAuth({id})
-        res.json(data)
+        res.json({ data: data, message: "User is authenticated.", status: "success" })
     } catch (err) {
-        console.log(err)
-        res.json({ msg: err.message, msgType: "error"  })
+        res.json({ data: null, message: err.message, status: "error"  })
     }
 })
 

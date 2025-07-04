@@ -3,38 +3,40 @@ import Navigation from "../components/Navigation.jsx"
 import Avatar from "../components/Avatar.jsx"
 import DeleteAccount from "../components/DeleteAccount.jsx"
 import toast from "react-hot-toast"
+import { useCookies } from "react-cookie"
 
 export default function Profile() {
-    const [auth, setAuth] = useState({ loading: true, isAuthenticated: false, user: null })
+    const [auth, setAuth] = useState({ isAuthenticated: false, user: null })
     const [activeTab, setActiveTab] = useState("profile");
     const [deleteAccount, setDeleteAccount] = useState(false)
-
-    function logout() {
-        localStorage.removeItem("token")
-        setAuth({ loading: false, isAuthenticated: false, user: null })
-        window.location.href = "/"
-    }
+    const [cookies, removeCookie] = useCookies(["jwt-auth"])
 
     function closeDeleteAccount() {
         setDeleteAccount(false)
     }
 
+    function logout() {
+        removeCookie("jwt-auth")
+        setAuth({ loading: false, isAuthenticated: false, user: null })
+        navigate("/login")
+    }
+
     async function confirmDeleteAccount() {
-        const token = localStorage.getItem("token")
+        const token = cookies["jwt-auth"]
         if (!token) {
             logout()
             return
         }
-        const response = await fetch("http://localhost:3000/api/user/deleteAccount", {
+        const response = await fetch("/api/user/deleteAccount", {
             method: "DELETE",
             headers: { "x-access-token": token }
         })
         const data = await response.json()
-        if (data.msgType === "success") {
-            toast.success("Your account has been successfully deleted!")
+        if (data.status === "success") {
+            toast.success(data.message)
             logout()
         } else {
-            toast.error(data.msg)
+            toast.error(data.message)
         }
     }
 
@@ -44,12 +46,12 @@ export default function Profile() {
         const newPassword = event.target.newPassword.value
         const confirmNewPassword = event.target.confirmNewPassword.value
         try {
-            const token = localStorage.getItem("token")
+            const token = cookies["jwt-auth"]
             if (!token) {
                 logout()
                 return
             }
-            const response = await fetch("http://localhost:3000/api/user/updatePassword", {
+            const response = await fetch("/api/user/updatePassword", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -62,12 +64,12 @@ export default function Profile() {
                 }),
             })
             const data = await response.json()
-            if (data.msgType == "success") {
-                toast.success(data.msg)
-            } else if (data.msgType == "error")  {
-                toast.error(data.msg)
+            if (data.status == "success") {
+                toast.success(data.message)
+            } else if (data.status == "error")  {
+                toast.error(data.message)
             } else {
-                toast(data.msg)
+                toast(data.message)
             }
         } catch (error) {
             toast.error(error.message)
@@ -75,33 +77,25 @@ export default function Profile() {
     }
 
     useEffect(() => {
-        const token = localStorage.getItem("token")
-        if (!token) {
-            logout()
-            return
-        }
-        fetch("http://localhost:3000/api/auth/isAuthenticated", {
-            headers: { "x-access-token": token }
-        })
+        if (cookies["jwt-auth"]) {
+            fetch("/api/auth/isAuthenticated", {
+                headers: { "x-access-token": cookies["jwt-auth"] }
+            })
             .then(res => res.json())
             .then(data => {
-                if (data.auth) {
-                    setAuth({ loading: false, isAuthenticated: true, user: data.user })
-                } else {
-                    logout()
-                }
+                setAuth({ isAuthenticated: true, user: data.data.user })
             })
-            .catch(() => setAuth({ loading: false, isAuthenticated: false, user: null }))
+        }
     }, [])
     return (
         <main className="min-h-screen">
             {deleteAccount && <DeleteAccount confirm={confirmDeleteAccount} cancel={closeDeleteAccount} />}
-            {auth.loading ? (
+            {!(auth.isAuthenticated) ? (
                 <div className="flex items-center justify-center h-screen">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
                 </div>
             ) : <> 
-                <Navigation auth={auth} logout={logout}/>
+                <Navigation />
                 <div className="max-w-5xl bg-white rounded shadow-sm mx-auto mt-5 flex flex-col items-center relative overflow-hidden">
                     <div className="w-full h-25 bg-linear-65 from-purple-500 to-pink-500 absolute z-0"></div>
                     <div className="mt-20 z-1"><Avatar size="80px" fontSize="40px" name={auth.user.username} outline="20px solid #ffffff"/></div>

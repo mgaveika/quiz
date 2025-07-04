@@ -1,43 +1,57 @@
 const Quiz = require('../models/Quiz')
+const QuizQuestions = require('../models/QuizQuestion')
 
 class QuizService {
     static async createQuiz(props) {
         try {
-            const existingQuiz = await Quiz.where("title").equals(props.title).where("creator").equals(props.creator)
+            const title = props.title
+            const creator = props.creator
+            const existingQuiz = await Quiz.where("title").equals(title).where("creator").equals(creator)
             if (existingQuiz.length > 0) {
-                return { msg: "Quiz with this name already exists", msgType: "error" }
+                throw new Error("Quiz with this name already exists")
             }
             const newQuiz = await Quiz.create({
-                title: props.title,
-                creator: props.creator
+                title: title,
+                creator: creator
             })
             return newQuiz
         } catch (err) {
-            return { msg: err.message, msgType: "error" }
+            throw err
         }
     }
 
     static async getUserQuizzes(userId) {
         try {
             const quizzes = await Quiz.find({ creator: userId })
+            if (!quizzes) { 
+                throw new Error("No Quizzes found!") 
+            }
             return quizzes
         } catch (err) {
-            return { msg: err.message, msgType: "error" }
+            throw err
         }
     }
 
     static async getQuizById(id) {
         try {
-            return await Quiz.findById(id)
+            const quiz = await Quiz.findById(id)
+            if (!quiz) { 
+                throw new Error("No Quiz found!") 
+            }
+            const quizQuestions = await QuizQuestions.find({quizId: id})
+            if (!quizQuestions) { 
+                throw new Error("No Quiz questions found!") 
+            }
+            return { quiz, quizQuestions }
         } catch (err) {
-            return { msg: err.message, msgType: "error" }
+            throw err
         }
     }
     static async updateQuiz(id, updatedData) {
         try {
             return await Quiz.findByIdAndUpdate(id, updatedData, { new: true })
         } catch (err) {
-            return { msg: err.message, msgType: "error" }
+            throw err
         }
     }
     
@@ -45,14 +59,15 @@ class QuizService {
     try {
         const quiz = await Quiz.findById(id)
         if (!quiz) {
-            return { msg: `Quiz with id ${id} was not found.`, msgType: "error" }
+            throw new Error(`Quiz with id ${id} was not found.`)
         }
         if (quiz.creator.toString() !== userId) {
-            return { msg: "You're not allowed to delete this quiz!", msgType: "error" }
+            throw new Error("You're not allowed to delete this quiz!")
         }
-        return await Quiz.findByIdAndDelete(id)
+        await Quiz.findByIdAndDelete(id)
+        return await QuizQuestions.deleteMany({ quizId: id })
     } catch (err) {
-        return { msg: err.message, msgType: "error" }
+        throw err
     }
 }
 }

@@ -1,68 +1,57 @@
 const express = require('express')
 const QuizService = require('../services/QuizService')
 
+
 const router = express.Router()
 
 router.post('/', async (req, res) => {
     try {
-        const newQuiz = await QuizService.createQuiz({
+        const data = await QuizService.createQuiz({
             title: req.body.title,
             creator: req.userId
         })
-        if (!newQuiz || newQuiz.msgType === "error") {
-            return res.json(newQuiz)
-        }
-        res.json(newQuiz)
+        res.json({ data: data, message: "Quiz created successfully.", status: "success" })
     } catch (err) {
-        res.json({ msg: err.message, msgType: "error" })
+        res.json({ data: null, message: err.message , status: "error" })
     }
 })
 
 router.get('/', async (req, res) => {
     try {
-        const quizzes = await QuizService.getUserQuizzes(req.userId)
-        res.json(quizzes)
+        const data = await QuizService.getUserQuizzes(req.userId)
+        res.json({ data: data, message: "Recieved user quizzes.", status: "success" })
     } catch (err) {
-        res.json({ msg: err.message, msgType: "error" })
+        res.json({ data: null, message: err.message , status: "error" })
     }
 })
 
 router.get('/:id', async (req, res) => {
     try {
-        const quiz = await QuizService.getQuizById(req.params.id)
-        if (!quiz) {
-            return res.status(404).json({ msg: "Quiz not found", msgType: "error" })
-        }
-        res.json(quiz)
+        const data = await QuizService.getQuizById(req.params.id)
+        res.json({ data: data, message: `Recieved quiz with ID: ${req.params.id}`, status: "success" })
     } catch (err) {
-        res.json({ msg: err.message, msgType: "error" })
+        res.json({ data: null, message: err.message , status: "error" })
     }
 })
 
 router.put('/:id', async (req, res) => {
     try {
-        const updatedQuiz = await QuizService.updateQuiz(req.params.id, {
+        const data = await QuizService.updateQuiz(req.params.id, {
             title: req.body.title,
             creator: req.userId
         })
-        if (!updatedQuiz) {
-            return res.json({ msg: "Quiz not found", msgType: "error"  })
-        }
-        res.json({ msg: "Quiz updated successfully!", msgType: "success"  })
+        res.json({ data: data, message: "Quiz updated successfully!", status: "success"  })
     } catch (err) {
-        res.json({ msg: err.message, msgType: "error" })
+        res.json({ data: null, message: err.message , status: "error" })
     }
 })
 
 router.delete('/:id', async (req, res) => {
     try {
-        const deletedQuiz = await QuizService.deleteQuiz(req.params.id, req.userId)
-        if (deletedQuiz.msg) {
-            return res.json(deletedQuiz)
-        }
-        res.json({ msg: "Quiz deleted successfully", msgType: "success" })
+        const data = await QuizService.deleteQuiz(req.params.id, req.userId)
+        res.json({ data: data, message: "Quiz deleted successfully", status: "success" })
     } catch (err) {
-        res.json({ msg: err.message, msgType: "error" })
+        res.json({ data: null, message: err.message , status: "error" })
     }
 })
 

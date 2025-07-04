@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
+import { useCookies } from "react-cookie"
 
 export default function Login() {
+    const navigate = useNavigate()
+    const [cookies, setCookie] = useCookies(["jwt-auth"])
     async function handleSubmit(event) {
         event.preventDefault()
         const email = event.target.email.value
         const password = event.target.password.value
         try {
-            const response = await fetch("http://localhost:3000/api/auth/login", {
+            const response = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -19,33 +22,32 @@ export default function Login() {
                 }),
             })
             const data = await response.json()
-            if (data.msgType == "success") {
-                toast.success(data.msg)
-            } else if (data.msgType == "error")  {
-                toast.error(data.msg)
+            if (data.status == "success") {
+                toast.success(data.message)
+            } else if (data.status == "error")  {
+                toast.error(data.message)
             } else {
-                toast(data.msg)
+                toast(data.message)
             }
-            if (data.token) {
-                localStorage.setItem("token", data.token)
-                window.location.href = "/"
+            if (data.data?.token) {
+                setCookie("jwt-auth", data.data?.token)
+                navigate("/")
             }
         } catch (err) {
             toast.error(err.message)
         }
     }
     useEffect(() => {
-        const token = localStorage.getItem("token")
-        if (token) {
-            fetch("http://localhost:3000/api/auth/isAuthenticated", {
-                headers: { "x-access-token": token }
+        if (cookies["jwt-auth"]) {
+            fetch("/api/auth/isAuthenticated", {
+                headers: { "x-access-token": cookies["jwt-auth"] }
             })
             .then(res => res.json())
             .then(data => {
-                if (data.auth) {
-                    window.location.href = "/"
+                if (data.data?.auth) {
+                    navigate("/")
                 }
-                })
+            })
         }
     }, [])
     return (

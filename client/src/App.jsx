@@ -1,14 +1,20 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
+import { StrictMode } from "react"
+import { createRoot } from "react-dom/client"
+import { Toaster } from "react-hot-toast";
 import { BrowserRouter as Router, Routes, Route } from "react-router"
+import { CookiesProvider } from "react-cookie"
+
+import "./index.css"
+
 import Register from "./pages/Register.jsx"
 import Login from "./pages/Login.jsx"
 import Home from "./pages/Home.jsx"
-import Profile from './pages/Profile.jsx'
-import QuizList from './pages/QuizList.jsx'
-import CreateQuiz from './pages/CreateQuiz.jsx'
-import { Toaster } from 'react-hot-toast';
+import Profile from "./pages/Profile.jsx"
+import QuizList from "./pages/QuizList.jsx"
+import CreateQuiz from "./pages/CreateQuiz.jsx"
+import ViewQuiz from "./pages/ViewQuiz.jsx"
+
+import ProtectedRoutes from "./utils/ProtectedRoutes.jsx"
 
 export default function App() {
   return (
@@ -17,17 +23,22 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/my-quizzes" element={<QuizList />} />
-        <Route path="/create-quiz" element={<CreateQuiz />} />
+        <Route element={<ProtectedRoutes />} >
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/my-quizzes" element={<QuizList />} />
+          <Route path="/create-quiz" element={<CreateQuiz />} />
+          <Route path="/view-quiz/:id" element={<ViewQuiz />} />
+        </Route>
       </Routes>
     </Router>
-  );
+  )
 }
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Toaster />
-    <App />
+    <CookiesProvider>
+      <App />
+    </CookiesProvider>
   </StrictMode>
 )

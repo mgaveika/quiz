@@ -12,7 +12,7 @@ class QuizQuestionService {
             })
             return newQuizQuestion
         } catch (err) {
-            console.log(err)
+            throw err
         }
     }
 
@@ -32,7 +32,7 @@ class QuizQuestionService {
             )
             return updatedQuizQuestion
         } catch (err) {
-            console.log(err)
+            throw err
         }
     }
 
@@ -41,16 +41,7 @@ class QuizQuestionService {
             const deletedQuizQuestion = await quizQuestion.findOneAndDelete({ quizId: quizId, order: order })
             return deletedQuizQuestion
         } catch (err) {
-            console.log(err)
-        }
-    }
-
-    static async deleteQuizQuestions(quizId) {
-        try {
-            const deletedQuizQuestions = await quizQuestion.deleteMany({ quizId: quizId })
-            return deletedQuizQuestions
-        } catch (err) {
-            console.log(err)
+            throw err
         }
     }
 }
