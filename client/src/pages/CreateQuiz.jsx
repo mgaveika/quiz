@@ -1,7 +1,6 @@
 import { useState } from "react"
 import Navigation from "../components/Navigation.jsx"
 import { useNavigate } from "react-router-dom"
-import { useCookies } from "react-cookie"
 import toast from "react-hot-toast"
 
 export default function CreateQuiz() {
@@ -10,7 +9,6 @@ export default function CreateQuiz() {
         { questionText: "", options: ["", ""], correctAnswer: 0 }
     ])
     const navigate = useNavigate()
-    const [cookies] = useCookies(["jwt-auth"]) 
 
     const handleQuestionChange = (questionIndex, newQuestionText) => {
         setQuestions(prevQuestions => prevQuestions.map((question, key) =>
@@ -70,38 +68,45 @@ export default function CreateQuiz() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        const token = cookies["jwt-auth"]
-        const res = await fetch("/api/quizzes", {
+        fetch("/api/quizzes", {
             method: "POST",
+            credentials: 'include',
             headers: {
                 "Content-Type": "application/json",
-                "x-access-token": token
             },
             body: JSON.stringify({ title })
+        }).then(res => res.json())
+        .then(data => {
+            if (data.status == "success") {
+                for (let i = 0; i < questions.length; i++) {
+                    fetch("/api/quiz-questions", {
+                        method: "POST",
+                        credentials: 'include',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            quizId: data.data._id,
+                            questionText: questions[i].questionText,
+                            options: questions[i].options,
+                            correctAnswer: questions[i].correctAnswer,
+                            order: i
+                        })
+                    }).then(res => res.json())
+                    .then(data => {
+                        if (data.status == "error") {
+                            toast.error(data.message)
+                        }
+                    })
+                }
+                toast.success(data.message)
+                navigate("/my-quizzes")
+            } else if (data.status == "error")  {
+                toast.error(data.message)
+            } else {
+                toast(data.message)
+            }
         })
-        const quiz = await res.json()
-        if (!quiz.data) {
-            toast.error(quiz.message)
-            return
-        }
-        for (let i = 0; i < questions.length; i++) {
-            await fetch("/api/quiz-questions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-access-token": token
-                },
-                body: JSON.stringify({
-                    quizId: quiz.data._id,
-                    questionText: questions[i].questionText,
-                    options: questions[i].options,
-                    correctAnswer: questions[i].correctAnswer,
-                    order: i
-                })
-            })
-        }
-        toast.success(quiz.message)
-        navigate("/my-quizzes")
     }
 
     return (

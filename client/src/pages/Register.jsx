@@ -1,10 +1,8 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
-import { useCookies } from "react-cookie"
 
 export default function Register() {
-    const [cookies] = useCookies(["jwt-auth"])
     const navigate = useNavigate()
     async function handleSubmit(event) {
         event.preventDefault()
@@ -12,20 +10,19 @@ export default function Register() {
         const username = event.target.username.value
         const password = event.target.password.value
         const confirmPassword = event.target.confirmPassword.value
-        try {
-            const response = await fetch("/api/auth/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email,
-                    username,
-                    password,
-                    confirmPassword
-                }),
-            })
-            const data = await response.json()
+        fetch("/api/auth/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                email,
+                username,
+                password,
+                confirmPassword
+            }),
+        }).then(res => res.json())
+        .then(data => {
             if (data.status == "success") {
                 toast.success(data.message)
                 navigate("/login")
@@ -34,22 +31,18 @@ export default function Register() {
             } else {
                 toast(data.message)
             }
-        } catch (err) {
-            toast.error(err.message)
-        }
+        })
     }
     useEffect(() => {
-        if (cookies["jwt-auth"]) {
-            fetch("/api/auth/isAuthenticated", {
-                headers: { "x-access-token": cookies["jwt-auth"] }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.data?.auth) {
-                    navigate("/")
-                }
-            })
-        }
+        fetch("/api/auth/isAuthenticated", {
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.data?.auth) {
+                navigate("/")
+            }
+        })
     }, [])
     return (
          <div className="flex flex-col items-center justify-center min-h-screen">

@@ -4,16 +4,14 @@ import Avatar from "../components/Avatar.jsx"
 import DeleteAccount from "../components/DeleteAccount.jsx"
 import toast from "react-hot-toast"
 import { useCookies } from "react-cookie"
+import { useNavigate } from "react-router-dom"
 
 export default function Profile() {
     const [auth, setAuth] = useState({ isAuthenticated: false, user: null })
     const [activeTab, setActiveTab] = useState("profile");
     const [deleteAccount, setDeleteAccount] = useState(false)
-    const [cookies, removeCookie] = useCookies(["jwt-auth"])
-
-    function closeDeleteAccount() {
-        setDeleteAccount(false)
-    }
+    const [cookie, setCookie, removeCookie] = useCookies(["jwt-auth"])
+    const navigate = useNavigate()
 
     function logout() {
         removeCookie("jwt-auth")
@@ -22,22 +20,19 @@ export default function Profile() {
     }
 
     async function confirmDeleteAccount() {
-        const token = cookies["jwt-auth"]
-        if (!token) {
-            logout()
-            return
-        }
-        const response = await fetch("/api/user/deleteAccount", {
+        fetch("/api/user/deleteAccount", {
             method: "DELETE",
-            headers: { "x-access-token": token }
+            credentials: 'include'
         })
-        const data = await response.json()
-        if (data.status === "success") {
-            toast.success(data.message)
-            logout()
-        } else {
-            toast.error(data.message)
-        }
+        .then(res => res.json())
+        .then(data => {
+            if (data.status == "success") {
+                toast.success(data.message)
+                logout()
+            } else {
+                toast.error(data.message)
+            }
+        })
     }
 
     async function handleSubmit(event) {
@@ -45,51 +40,42 @@ export default function Profile() {
         const currentPassword = event.target.currentPassword.value
         const newPassword = event.target.newPassword.value
         const confirmNewPassword = event.target.confirmNewPassword.value
-        try {
-            const token = cookies["jwt-auth"]
-            if (!token) {
-                logout()
-                return
-            }
-            const response = await fetch("/api/user/updatePassword", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-access-token": token
-                },
-                body: JSON.stringify({
-                    currentPassword,
-                    newPassword,
-                    confirmNewPassword
-                }),
-            })
-            const data = await response.json()
+        fetch("/api/user/updatePassword", {
+            method: "POST",
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                currentPassword,
+                newPassword,
+                confirmNewPassword
+            }),
+        }).then(res => res.json())
+        .then(data => {
             if (data.status == "success") {
                 toast.success(data.message)
+                logout()
             } else if (data.status == "error")  {
                 toast.error(data.message)
             } else {
                 toast(data.message)
             }
-        } catch (error) {
-            toast.error(error.message)
-        }
+        })
     }
 
     useEffect(() => {
-        if (cookies["jwt-auth"]) {
-            fetch("/api/auth/isAuthenticated", {
-                headers: { "x-access-token": cookies["jwt-auth"] }
-            })
-            .then(res => res.json())
-            .then(data => {
-                setAuth({ isAuthenticated: true, user: data.data.user })
-            })
-        }
+        fetch("/api/auth/isAuthenticated", {
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            setAuth({ isAuthenticated: true, user: data.data.user })
+        })
     }, [])
     return (
         <main className="min-h-screen">
-            {deleteAccount && <DeleteAccount confirm={confirmDeleteAccount} cancel={closeDeleteAccount} />}
+            {deleteAccount && <DeleteAccount confirm={confirmDeleteAccount} cancel={() => setDeleteAccount(false)} />}
             {!(auth.isAuthenticated) ? (
                 <div className="flex items-center justify-center h-screen">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>

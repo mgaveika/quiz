@@ -7,7 +7,7 @@ export default function Navigation() {
     const [auth, setAuth] = useState({ isAuthenticated: false, user: null })
     const [optionsOpen, setOptionsOpen] = useState(false)
     const dropdownRef = useRef()
-    const [cookies, removeCookie] = useCookies(["jwt-auth"])
+    const [cookie, setCookie, removeCookie] = useCookies(["jwt-auth"])
     const navigate = useNavigate()
 
     function logout() {
@@ -27,15 +27,13 @@ export default function Navigation() {
     }, [])
 
     useEffect(() => {
-        if (cookies["jwt-auth"]) {
-            fetch("/api/auth/isAuthenticated", {
-                headers: { "x-access-token": cookies["jwt-auth"] }
-            })
-            .then(res => res.json())
-            .then(data => {
-                setAuth({ isAuthenticated: true, user: data.data.user })
-            })
-        }
+        fetch("/api/auth/isAuthenticated", {
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            setAuth({ isAuthenticated: true, user: data.data.user })
+        })
     }, [])
     return (
         <nav className="w-full h-16 bg-white flex items-center justify-between px-8 shadow-sm">
@@ -45,7 +43,9 @@ export default function Navigation() {
                 <div className="relative" ref={dropdownRef}>
                     <button onClick={() => setOptionsOpen(!optionsOpen)} type="button" className="flex items-center focus:outline-none cursor-pointer" aria-haspopup="true" aria-expanded={optionsOpen} >
                         <Avatar size="30px" fontSize="15px" name={auth.user.username} />
-                        <img className={`ml-2 w-3 transform transition-transform duration-300 ${optionsOpen ? "rotate-180" : ""}`} src="/dropdown-arrow.png" alt="dropdown" />
+                        <svg className={`ml-2 w-5 transform transition-transform duration-300 ${optionsOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
                     </button>
 
                     <div className={`absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 transition-all duration-200 ease-out transform ${ optionsOpen ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none" }`} role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabIndex={-1} >

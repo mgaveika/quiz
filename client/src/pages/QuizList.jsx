@@ -2,15 +2,12 @@ import { useEffect, useState } from "react"
 import Navigation from "../components/Navigation.jsx"
 import { Link } from "react-router-dom"
 import toast from "react-hot-toast"
-import { useCookies } from "react-cookie"
 
 export default function QuizList() {
     const [quizzes, setQuizzes] = useState([])
-    const [cookies] = useCookies(["jwt-auth"])
     useEffect(() => {
-        const token = cookies["jwt-auth"]
         fetch("/api/quizzes", {
-            headers: { "x-access-token": token }
+            credentials: 'include'
         })
             .then(res => res.json())
             .then(data => setQuizzes(data.data || []))
@@ -18,20 +15,21 @@ export default function QuizList() {
     }, [])
 
     async function handleDeleteQuiz(quizId) {
-        const token = cookies["jwt-auth"]
-        if (!token) {
-            return
-        }
-        const response = await fetch(`/api/quizzes/${quizId}`, {
+        fetch(`/api/quizzes/${quizId}`, {
             method: "DELETE",
-            headers: { "x-access-token": token }
+            credentials: 'include'
         })
-        if (response.ok) {
-            setQuizzes(prev => prev.filter(q => q._id !== quizId))
-            toast.success(response.message)
-            return
-        }
-        toast.error("An error appeared when deleting quiz!")
+        .then(res => res.json())
+        .then(data => {
+            if (data.status == "success") {
+                setQuizzes(prev => prev.filter(q => q._id !== quizId))
+                toast.success(data.message)
+            } else if (data.status == "error")  {
+                toast.error(data.message)
+            } else {
+                toast(data.message)
+            }
+        })
     }
 
     return (

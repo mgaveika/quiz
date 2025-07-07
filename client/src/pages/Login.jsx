@@ -5,23 +5,22 @@ import { useCookies } from "react-cookie"
 
 export default function Login() {
     const navigate = useNavigate()
-    const [cookies, setCookie] = useCookies(["jwt-auth"])
+    const [cookie, setCookie] = useCookies(["jwt-auth"])
     async function handleSubmit(event) {
         event.preventDefault()
         const email = event.target.email.value
         const password = event.target.password.value
-        try {
-            const response = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email,
-                    password
-                }),
-            })
-            const data = await response.json()
+        fetch("/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                email,
+                password
+            }),
+        }).then(res => res.json())
+        .then(data => {
             if (data.status == "success") {
                 toast.success(data.message)
             } else if (data.status == "error")  {
@@ -33,22 +32,18 @@ export default function Login() {
                 setCookie("jwt-auth", data.data?.token)
                 navigate("/")
             }
-        } catch (err) {
-            toast.error(err.message)
-        }
+        })
     }
     useEffect(() => {
-        if (cookies["jwt-auth"]) {
-            fetch("/api/auth/isAuthenticated", {
-                headers: { "x-access-token": cookies["jwt-auth"] }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.data?.auth) {
-                    navigate("/")
-                }
-            })
-        }
+        fetch("/api/auth/isAuthenticated", {
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.data?.auth) {
+                navigate("/")
+            }
+        })
     }, [])
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">

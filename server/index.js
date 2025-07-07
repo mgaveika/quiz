@@ -5,6 +5,7 @@ require('dotenv').config()
 const app = express()
 const port = process.env.PORT
 const routes = require('./routes')
+const cookieParser = require('cookie-parser')
 
 mongoose.connect(process.env.MONGO_URI).then(() => {
     console.log("MongoDB connected successfully.")
@@ -17,7 +18,7 @@ app.use(cors({
 }))
 
 app.use(express.json())
-
+app.use(cookieParser())
 app.use('/api', routes)
 
 app.listen(port, () => {
