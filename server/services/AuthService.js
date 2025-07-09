@@ -1,6 +1,7 @@
-const bcrypt = require('bcrypt')
-const User = require('../models/Users')
-const jwt = require('jsonwebtoken')
+const bcrypt = require("bcrypt")
+const User = require("../models/Users")
+const jwt = require("jsonwebtoken")
+const accessTokenSchema = require("../models/AccessTokens")
 
 async function checkPassword(password, hashedPassword) {
     const isMatch = await bcrypt.compare(password, hashedPassword)
@@ -22,8 +23,13 @@ class AuthService {
         if (user.length > 0) {
             const checkedPass = await checkPassword(password, user[0].password)
             if (checkedPass) {
-                const token = jwt.sign({ id: user[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' })
-                return { auth: true, token: token }
+                const existingAccessToken = await accessTokenSchema.findOne({userId: user[0].id})
+                if (existingAccessToken) {
+                    return { token: existingAccessToken.token }
+                }
+                const token = jwt.sign({ id: user[0].id }, process.env.JWT_SECRET)
+                await accessTokenSchema.create({userId: user[0].id, token: token})
+                return { token: token }
             }
         }
         throw new Error("Invalid email or password.")
@@ -65,7 +71,16 @@ class AuthService {
     }
   }
 
-  static async isAuth({id}) {
+  static async logoutUserById({id}) {
+    try {
+        const data = await accessTokenSchema.findOneAndDelete({userId: id})
+        return data
+    } catch (err) {
+        throw err
+    }
+  }
+
+  static async getUserById({id}) {
     try {
         const user = await User.findById(id)
     if (!user) {

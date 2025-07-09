@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
 import Navigation from "../components/Navigation.jsx"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 
 export default function QuizList() {
     const [quizzes, setQuizzes] = useState([])
+    const navigate = useNavigate()
     useEffect(() => {
         fetch("/api/quizzes", {
             credentials: 'include'
@@ -51,7 +52,7 @@ export default function QuizList() {
                                 <li key={q._id} className="bg-white shadow-sm p-3 flex justify-between">
                                     <a href="" className="font-semibold">{q.title}</a>
                                     <div className="flex items-center">
-                                        <button type="button"
+                                        <button type="button" onClick={() => navigate(`/view-quiz/${q._id}`)}
                                             className="ml-2 text-gray-950  w-5 h-5 cursor-pointer"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">

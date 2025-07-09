@@ -11,7 +11,12 @@ router.post('/login', async (req, res) => {
             email,
             password
         })
-        res.json({ data: data, message: "Authentication successful.", status: "success" })
+        res.cookie("accessCookie", data.token, {
+            httpOnly: true,
+            sameSite: "strict",
+            maxAge: 600000 // 10 min
+        })
+        res.json({ data: {auth: true}, message: "Authentication successful.", status: "success" })
     } catch (err) {
         res.json({ data: null, message: err.message, status: "error" })
     }
@@ -35,8 +40,19 @@ router.post('/register', async (req, res) => {
 router.get('/isAuthenticated', authorized, async (req, res) => {
     try {
         const id = req.userId
-        const data = await AuthService.isAuth({id})
+        const data = await AuthService.getUserById({id})
         res.json({ data: data, message: "User is authenticated.", status: "success" })
+    } catch (err) {
+        res.json({ data: null, message: err.message, status: "error"  })
+    }
+})
+
+router.get('/logout', authorized, async (req, res) => {
+    try {
+        const id = req.userId
+        await AuthService.logoutUserById({id})
+        res.clearCookie("accessCookie")
+        res.json({ data: null, message: "User logged out.", status: "success" })
     } catch (err) {
         res.json({ data: null, message: err.message, status: "error"  })
     }

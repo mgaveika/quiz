@@ -3,20 +3,27 @@ import Navigation from "../components/Navigation.jsx"
 import Avatar from "../components/Avatar.jsx"
 import DeleteAccount from "../components/DeleteAccount.jsx"
 import toast from "react-hot-toast"
-import { useCookies } from "react-cookie"
 import { useNavigate } from "react-router-dom"
 
 export default function Profile() {
     const [auth, setAuth] = useState({ isAuthenticated: false, user: null })
     const [activeTab, setActiveTab] = useState("profile");
     const [deleteAccount, setDeleteAccount] = useState(false)
-    const [cookie, setCookie, removeCookie] = useCookies(["jwt-auth"])
     const navigate = useNavigate()
 
     function logout() {
-        removeCookie("jwt-auth")
-        setAuth({ loading: false, isAuthenticated: false, user: null })
-        navigate("/login")
+        fetch("/api/user/logout", {
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status == "success") {
+                //setAuth({ loading: false, isAuthenticated: false, user: null })
+                navigate("/login")
+            } else {
+                toast.error(data.message)
+            }
+        })
     }
 
     async function confirmDeleteAccount() {

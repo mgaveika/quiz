@@ -1,19 +1,24 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate } from "react-router";
 import Avatar from "../components/Avatar.jsx"
-import { useCookies } from "react-cookie"
 
 export default function Navigation() {
     const [auth, setAuth] = useState({ isAuthenticated: false, user: null })
     const [optionsOpen, setOptionsOpen] = useState(false)
     const dropdownRef = useRef()
-    const [cookie, setCookie, removeCookie] = useCookies(["jwt-auth"])
     const navigate = useNavigate()
 
     function logout() {
-        removeCookie("jwt-auth")
-        setAuth({ loading: false, isAuthenticated: false, user: null })
-        navigate("/login")
+        fetch("/api/auth/logout", {
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                //setAuth({ loading: false, isAuthenticated: false, user: null })
+                navigate("/login")
+            }
+        })
     }
 
     useEffect(() => {
@@ -32,7 +37,9 @@ export default function Navigation() {
         })
         .then(res => res.json())
         .then(data => {
-            setAuth({ isAuthenticated: true, user: data.data.user })
+            if (data.status === "success") {
+                setAuth({ isAuthenticated: true, user: data.data.user })
+            }
         })
     }, [])
     return (

@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
-import { useCookies } from "react-cookie"
 
 export default function Login() {
     const navigate = useNavigate()
-    const [cookie, setCookie] = useCookies(["jwt-auth"])
     async function handleSubmit(event) {
         event.preventDefault()
         const email = event.target.email.value
@@ -23,14 +21,11 @@ export default function Login() {
         .then(data => {
             if (data.status == "success") {
                 toast.success(data.message)
+                navigate("/")
             } else if (data.status == "error")  {
                 toast.error(data.message)
             } else {
                 toast(data.message)
-            }
-            if (data.data?.token) {
-                setCookie("jwt-auth", data.data?.token)
-                navigate("/")
             }
         })
     }
@@ -40,7 +35,7 @@ export default function Login() {
         })
         .then(res => res.json())
         .then(data => {
-            if (data.data?.auth) {
+            if (data.status === "success") {
                 navigate("/")
             }
         })

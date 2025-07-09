@@ -39,7 +39,7 @@ export default function Register() {
         })
         .then(res => res.json())
         .then(data => {
-            if (data.data?.auth) {
+            if (data.status === "success") {
                 navigate("/")
             }
         })
