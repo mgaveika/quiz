@@ -2,9 +2,11 @@ import { useState } from "react"
 import Navigation from "../components/Navigation.jsx"
 import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
+import Icons from "../components/Icons.jsx"
 
 export default function CreateQuiz() {
     const [title, setTitle] = useState("")
+    const [description, setDescription] = useState("")
     const [questions, setQuestions] = useState([
         { questionText: "", options: ["", ""], correctAnswer: 0 }
     ])
@@ -74,7 +76,7 @@ export default function CreateQuiz() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ title })
+            body: JSON.stringify({ title, description })
         }).then(res => res.json())
         .then(data => {
             if (data.status == "success") {
@@ -113,35 +115,70 @@ export default function CreateQuiz() {
         <main className="min-h-screen">
             <Navigation />
             <div className="max-w-5xl mx-auto mt-5 flex flex-col bg-white rounded shadow-sm p-5">
-                <h1 className="text-2xl font-bold mb-4">Create Quiz</h1>
+                <h2 className="text-2xl font-bold mb-4">Create Quiz</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="w-full bg-white rounded shadow-sm p-5 mb-5">
-                        <label htmlFor="title" className="block text-sm font-medium mb-2">Quiz Title</label>
+                        <label htmlFor="title" className="block text-sm font-medium mb-2">Title</label>
                         <input
                             id="title"
-                            className="border border-gray-300 rounded p-2 mb-4 w-full"
-                            placeholder="Quiz title"
+                            className="border border-gray-300 rounded p-2 mb-2 w-full"
+                            placeholder="Enter quiz title"
                             value={title}
                             onChange={(e) => (setTitle(e.target.value))}
                             required
                         />
+                        <label htmlFor="description" className="block text-sm font-medium mb-2">Description</label>
+                        <textarea
+                            id="description"
+                            rows={3}
+                            className="border border-gray-300 rounded p-2 mb-4 w-full"
+                            placeholder="Enter quiz description"
+                            value={description}
+                            onChange={(e) => (setDescription(e.target.value))}
+                        />
                         {questions.map((q, questionId) => (
                             <div key={questionId} className="block text-sm font-medium mb-2 bg-white shadow-sm rounded p-5">
                                 <div className="flex justify-between items-center mb-2">
-                                    <label className="block mb-2">Question {questionId + 1}</label>
+                                    <span className="mb-2">Question {questionId + 1}</span>
                                     {questions.length > 1 && (
                                         <button type="button" onClick={() => handleRemoveQuestion(questionId)} className="text-red-500 hover:text-red-700 cursor-pointer text-sm border-1 rounded px-2 py-1">
                                             Remove Question
                                         </button>
                                     )}
                                 </div>
-                                <input
+                                <textarea
                                     className="border border-gray-300 rounded p-2 mb-4 w-full"
-                                    placeholder="Question"
+                                    placeholder="Enter your question"
+                                    rows={2}
                                     value={q.questionText}
                                     onChange={e => handleQuestionChange(questionId, e.target.value)}
                                     required
                                 />
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
+                                    <select
+                                        onChange={() => {}}
+                                        value="single"
+                                        className="px-4 py-2 border border-gray-300 rounded"
+                                    >
+                                        <option value="single">Single Answer</option>
+                                        <option value="multi">Multiple Answers</option>
+                                        <option value="connection">Connection/Matching</option>
+                                    </select>
+                                </div>
+                                <div className="flex items-center justify-between mb-2 h-8">
+                                    <span>Answer Options</span>
+                                    {q.options.length < 4 &&
+                                        <button
+                                            onClick={() => handleAddAnswer(questionId)}
+                                            type="button"
+                                            className="flex items-center cursor-pointer space-x-2 px-3 py-1 bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition-colors text-sm"
+                                        >
+                                        <Icons icon="plus" className="w-4 h-4 inline-block mr-1" />
+                                        <span>Add Option</span>
+                                        </button>
+                                    }
+                                </div>
                                 {q.options.map((opt, optionId) => (
                                     <div key={optionId} className="flex items-center mb-2">
                                         <input
@@ -152,7 +189,7 @@ export default function CreateQuiz() {
                                         />
                                         <input
                                             className="border border-gray-300 rounded p-2 flex-1"
-                                            placeholder={`Answer ${optionId + 1}`}
+                                            placeholder={`Option ${optionId + 1}`}
                                             value={opt}
                                             onChange={e => handleOptionChange(questionId, optionId, e.target.value)}
                                             required
@@ -163,22 +200,11 @@ export default function CreateQuiz() {
                                                 onClick={() => handleRemoveAnswer(questionId, optionId)}
                                                 className="ml-2 text-red-500 hover:text-red-700 w-5 h-5 cursor-pointer"
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M9 3V4H4V6H5V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V6H20V4H15V3H9ZM7 6H17V20H7V6ZM9 8V18H11V8H9ZM13 8V18H15V8H13Z" />
-                                                </svg>
+                                            <Icons icon="bin" />
                                             </button>
                                         )}
                                     </div>
                                 ))}
-                                {q.options.length < 4 &&
-                                <button
-                                    type="button"
-                                    onClick={() => handleAddAnswer(questionId)}
-                                    className="border-2 border-dotted border-blue-600 text-blue-600 w-full px-4 py-2 rounded cursor-pointer flex items-center justify-center"
-                                >
-                                <svg className="w-4 h-4 inline-block mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M12 4v16m8-8H4" /></svg>
-                                    Add Answer
-                                </button>}
                             </div>
                         ))}
                         <button
@@ -186,11 +212,11 @@ export default function CreateQuiz() {
                             onClick={handleAddQuestion}
                             className="border-2 border-dotted cursor-pointer border-gray-500 rounded p-2 mb-4 w-full flex items-center justify-center"
                         >
-                            <svg className="w-4 h-4 inline-block mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M12 4v16m8-8H4" /></svg>
+                            <Icons icon="plus" className="w-4 h-4 inline-block mr-1" />
                             Add Question
                         </button>
                     </div>
-                    <button type="submit" className="bg-purple-700 hover:bg-purple-800 cursor-pointer text-white px-4 py-2 w-full rounded font-bold">
+                    <button type="submit" className="bg-purple-700 hover:bg-purple-800 transition-colors cursor-pointer text-white px-4 py-2 w-full rounded font-bold">
                         Create Quiz
                     </button>
                 </form>

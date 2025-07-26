@@ -14,7 +14,7 @@ router.post('/login', async (req, res) => {
         res.cookie("accessCookie", data.token, {
             httpOnly: true,
             sameSite: "strict",
-            maxAge: 600000 // 10 min
+            maxAge: 3600000 // 1h
         })
         res.json({ data: {auth: true}, message: "Authentication successful.", status: "success" })
     } catch (err) {
@@ -47,7 +47,7 @@ router.get('/isAuthenticated', authorized, async (req, res) => {
     }
 })
 
-router.get('/logout', authorized, async (req, res) => {
+router.post('/logout', authorized, async (req, res) => {
     try {
         const id = req.userId
         await AuthService.logoutUserById({id})

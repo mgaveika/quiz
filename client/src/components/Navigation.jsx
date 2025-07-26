@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate } from "react-router";
 import Avatar from "../components/Avatar.jsx"
+import Icons from "./Icons.jsx";
 
 export default function Navigation() {
     const [auth, setAuth] = useState({ isAuthenticated: false, user: null })
@@ -10,6 +11,7 @@ export default function Navigation() {
 
     function logout() {
         fetch("/api/auth/logout", {
+            method: "POST",
             credentials: 'include'
         })
         .then(res => res.json())
@@ -50,9 +52,7 @@ export default function Navigation() {
                 <div className="relative" ref={dropdownRef}>
                     <button onClick={() => setOptionsOpen(!optionsOpen)} type="button" className="flex items-center focus:outline-none cursor-pointer" aria-haspopup="true" aria-expanded={optionsOpen} >
                         <Avatar size="30px" fontSize="15px" name={auth.user.username} />
-                        <svg className={`ml-2 w-5 transform transition-transform duration-300 ${optionsOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                        <Icons icon="dropdown-arrow" className={`ml-2 w-5 transform transition-transform duration-300 ${optionsOpen ? "rotate-180" : ""}`}/>
                     </button>
 
                     <div className={`absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 transition-all duration-200 ease-out transform ${ optionsOpen ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none" }`} role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabIndex={-1} >

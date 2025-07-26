@@ -1,10 +1,12 @@
-const Quiz = require('../models/Quiz')
-const QuizQuestions = require('../models/QuizQuestion')
+const Quiz = require("../models/Quiz")
+const QuizQuestions = require("../models/QuizQuestion")
+const User = require("../models/Users")
 
 class QuizService {
     static async createQuiz(props) {
         try {
             const title = props.title
+            const description = props.description ? props.description : ""
             const creator = props.creator
             const existingQuiz = await Quiz.where("title").equals(title).where("creator").equals(creator)
             if (existingQuiz.length > 0) {
@@ -12,6 +14,7 @@ class QuizService {
             }
             const newQuiz = await Quiz.create({
                 title: title,
+                description: description,
                 creator: creator
             })
             return newQuiz
@@ -42,7 +45,9 @@ class QuizService {
             if (!quizQuestions) { 
                 throw new Error("No Quiz questions found!") 
             }
-            return { quiz, quizQuestions }
+            const user = await User.findById(quiz.creator)
+            const username = user ? user.username : "N/A"
+            return {quiz, quizQuestions, username}
         } catch (err) {
             throw err
         }

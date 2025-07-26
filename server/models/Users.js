@@ -16,15 +16,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    created_at: {
-        type: Date,
-        default: Date.now,
-        immunable: true,
-    },
-    updated_at: {
-        type: Date,
-        default: Date.now,
-    }
-})
+}, { timestamps: true })
 
 module.exports = mongoose.model('Users', userSchema)

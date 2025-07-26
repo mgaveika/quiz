@@ -13,6 +13,7 @@ export default function Profile() {
 
     function logout() {
         fetch("/api/user/logout", {
+            method: "POST",
             credentials: 'include'
         })
         .then(res => res.json())
@@ -92,19 +93,19 @@ export default function Profile() {
                 <div className="max-w-5xl bg-white rounded shadow-sm mx-auto mt-5 flex flex-col items-center relative overflow-hidden">
                     <div className="w-full h-25 bg-linear-65 from-purple-500 to-pink-500 absolute z-0"></div>
                     <div className="mt-20 z-1"><Avatar size="80px" fontSize="40px" name={auth.user.username} outline="20px solid #ffffff"/></div>
-                    <h1 className="font-bold text-lg z-1">{auth.user.username}</h1>
-                    <h1 className="font-thin text-gray-700">{auth.user.email}</h1>
+                    <span className="font-bold text-lg z-1">{auth.user.username}</span>
+                    <span className="font-thin text-gray-700">{auth.user.email}</span>
                     <div className="flex gap-6 mt-5 h-15">
                         <div className="flex flex-col cursor-default items-center px-2 hover:border-b-3 border-blue-700 transform duration-100">
-                            <h1 className="font-bold">Points</h1>
+                            <span className="font-bold">Points</span>
                             <span className="text-gray-700">TBA</span>
                         </div>
                         <div className="flex flex-col cursor-default items-center px-2 hover:border-b-3 border-blue-700 transform duration-100">
-                            <h1 className="font-bold">Member since</h1>
-                            <span className="text-gray-700">{auth.user.created_at.substring(0,10).replace(/-/g,".")}</span>
+                            <span className="font-bold">Member since</span>
+                            <span className="text-gray-700">{auth.user.createdAt.substring(0,10).replace(/-/g,".")}</span>
                         </div>
                         <div className="flex flex-col cursor-default items-center px-2 hover:border-b-3 border-blue-700 transform duration-100">
-                            <h1 className="font-bold">Quizes</h1>
+                            <span className="font-bold">Quizes</span>
                             <span className="text-gray-700">TBA</span>
                         </div>
                     </div>

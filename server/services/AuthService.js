@@ -61,9 +61,7 @@ class AuthService {
         const newUser = await User.create({
             email: email.toLowerCase(),
             username: username,
-            password: hashedPassword,
-            created_at: new Date(),
-            updated_at: new Date()
+            password: hashedPassword
         })
         return newUser
     } catch(err) {
@@ -86,7 +84,7 @@ class AuthService {
     if (!user) {
         throw new Error("User not found.")
     }
-    return { auth: true, user: { id: user.id, email: user.email, username: user.username, created_at: user.created_at }}
+    return { auth: true, user: { id: user.id, email: user.email, username: user.username, createdAt: user.createdAt }}
     } catch(err) {
         throw err
     }

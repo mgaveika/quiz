@@ -11,7 +11,8 @@ import Home from "./pages/Home.jsx"
 import Profile from "./pages/Profile.jsx"
 import QuizList from "./pages/QuizList.jsx"
 import CreateQuiz from "./pages/CreateQuiz.jsx"
-import ViewQuiz from "./pages/ViewQuiz.jsx"
+import TakeQuiz from "./pages/TakeQuiz.jsx"
+import QuizRezult from "./pages/QuizRezult.jsx"
 
 import ProtectedRoutes from "./utils/ProtectedRoutes.jsx"
 
@@ -26,7 +27,8 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/my-quizzes" element={<QuizList />} />
           <Route path="/create-quiz" element={<CreateQuiz />} />
-          <Route path="/view-quiz/:id" element={<ViewQuiz />} />
+          <Route path="/quiz/:quizId" element={<TakeQuiz />} />
+          <Route path="/quiz/:quizId/results/:attemptId" element={<QuizRezult />} />
         </Route>
       </Routes>
     </Router>

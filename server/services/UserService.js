@@ -29,7 +29,6 @@ class AuthService {
                 throw new Error("Invalid password.")
             }
             user.password = await hashPassword(newPassword)
-            user.updated_at = new Date()
             return await user.save()
         } catch (err) {
             throw err
