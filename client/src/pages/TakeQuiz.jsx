@@ -65,7 +65,6 @@ export default function ViewQuiz() {
             }).then(res => res.json())
             .then(data => {
                 if (data.status == "success") {
-                    console.log(data.data)
                     setAttemptData(data.data)
                     setStarted(true)
                 } else {
@@ -91,8 +90,8 @@ export default function ViewQuiz() {
         <>
             <Navigation />
             {!quizData ? (
-                <div className="max-w-5xl bg-white rounded shadow-sm mx-auto p-5 mt-5 flex flex-col">
-                    <h2 className="text-2xl mx-auto">Loading...</h2>
+                <div className="flex items-center justify-center h-screen">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
                 </div>
             ) : ( <>
                 {!started ? (

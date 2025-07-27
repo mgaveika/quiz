@@ -20,7 +20,11 @@ export default function QuizRezult() {
     return (
         <>
             <Navigation />
-            {result && (
+            {result === null ? 
+                <div className="flex items-center justify-center h-screen">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+                </div>
+            : (
                 <>
                 <div className="max-w-5xl bg-white rounded shadow-sm mx-auto p-5 mt-5 flex flex-col">
                     <Icons icon="trophy" className="text-white bg-purple-800 w-20 h-20 p-5 mx-auto rounded-full" />
