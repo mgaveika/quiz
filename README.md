@@ -49,7 +49,7 @@ A full-stack web application for creating, taking, and managing quizzes. Built w
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/quiz-app.git
+git clone https://github.com/mgaveika/quiz.git
 cd quiz-app
 ```
 
