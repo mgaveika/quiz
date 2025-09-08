@@ -13,6 +13,7 @@ import QuizList from "./pages/QuizList.jsx"
 import CreateQuiz from "./pages/CreateQuiz.jsx"
 import TakeQuiz from "./pages/TakeQuiz.jsx"
 import QuizRezult from "./pages/QuizRezult.jsx"
+import EditQuiz from "./pages/EditQuiz.jsx"
 
 import ProtectedRoutes from "./utils/ProtectedRoutes.jsx"
 
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/create-quiz" element={<CreateQuiz />} />
           <Route path="/quiz/:quizId" element={<TakeQuiz />} />
           <Route path="/quiz/:quizId/results/:attemptId" element={<QuizRezult />} />
+          <Route path="/quiz/:quizId/edit" element={<EditQuiz />} />
         </Route>
       </Routes>
     </Router>
@@ -36,8 +38,10 @@ export default function App() {
 }
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  //<StrictMode>
+  <>
     <Toaster />
     <App />
-  </StrictMode>
+  </>
+  //</StrictMode>
 )

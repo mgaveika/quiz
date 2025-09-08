@@ -9,7 +9,8 @@ router.post('/', async (req, res) => {
         const data = await QuizService.createQuiz({
             title: req.body.title,
             description: req.body.description,
-            creator: req.userId
+            creator: req.userId,
+            participants: req.body.participants
         })
         res.json({ data: data, message: "Quiz created successfully.", status: "success" })
     } catch (err) {
@@ -28,7 +29,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        const data = await QuizService.getQuizById(req.params.id)
+        const data = await QuizService.getQuizById(req.params.id, req.userId)
         res.json({ data: data, message: `Recieved quiz with ID: ${req.params.id}`, status: "success" })
     } catch (err) {
         res.json({ data: null, message: err.message , status: "error" })
@@ -37,10 +38,12 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
+        console.log("'Triggered")
         const data = await QuizService.updateQuiz(req.params.id, {
             title: req.body.title,
             description: req.body.description,
-            creator: req.userId
+            creator: req.userId,
+            participants: req.body.participants
         })
         res.json({ data: data, message: "Quiz updated successfully!", status: "success"  })
     } catch (err) {

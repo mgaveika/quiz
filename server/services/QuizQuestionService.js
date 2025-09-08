@@ -16,7 +16,7 @@ class QuizQuestionService {
         }
     }
 
-    static async updateQuizQuestion(quizId, order, updates) {
+    /*static async updateQuizQuestion(quizId, order, updates) {
         try {
             const updatedQuizQuestion = await quizQuestion.findOneAndUpdate(
                 { quizId: quizId, order: order },
@@ -34,12 +34,21 @@ class QuizQuestionService {
         } catch (err) {
             throw err
         }
-    }
+    }*/
 
     static async deleteQuizQuestion(quizId, order) {
         try {
             const deletedQuizQuestion = await quizQuestion.findOneAndDelete({ quizId: quizId, order: order })
             return deletedQuizQuestion
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async deleteQuizQuestions(quizId) {
+        try {
+            const deletedQuizQuestions = await quizQuestion.deleteMany({ quizId: quizId })
+            return deletedQuizQuestions
         } catch (err) {
             throw err
         }

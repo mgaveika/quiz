@@ -1,18 +1,40 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Navigation from "../components/Navigation.jsx"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import toast from "react-hot-toast"
 import Icons from "../components/Icons.jsx"
 import Avatar from "../components/Avatar.jsx"
 
-export default function CreateQuiz() {
+export default function EditQuiz() {
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
-    const [questions, setQuestions] = useState([
-        { questionText: "", options: ["", ""], correctAnswer: 0 }
-    ])
+    const [questions, setQuestions] = useState([])
     const [participants, setParticipants] = useState([])
     const navigate = useNavigate()
+    const {quizId} = useParams()
+    useEffect(() => {
+        fetch(`/api/quizzes/${quizId}`, {
+            credentials: "include",
+        }).then(res => res.json())
+        .then(data => {
+            if (data.status == "success") {
+                console.log(data)
+                setTitle(data.data.quiz.title)
+                setDescription(data.data.quiz.description)
+                data.data.quizQuestions.map(quest => (
+                    questions.push({
+                        questionText: quest.questionText,
+                        options: quest.options,
+                        correctAnswer: quest.correctAnswer
+                    })
+                ))
+                setParticipants(data.data.quiz.participants)
+            } else {
+                toast.error(data.message)
+                navigate("/my-quizzes")
+            }
+        })
+    }, [])
 
     const handleParticipantCheck = () => {
         const inputData = document.getElementById('participants').value
@@ -105,52 +127,67 @@ export default function CreateQuiz() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        fetch("/api/quizzes", {
-            method: "POST",
+        fetch(`/api/quizzes/${quizId}`, {
+            method: "PUT",
             credentials: 'include',
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ title, description, participants })
-        }).then(res => res.json())
+        })
+        .then(res => res.json())
         .then(data => {
+            console.log(data)
             if (data.status == "success") {
-                for (let i = 0; i < questions.length; i++) {
-                    fetch("/api/quiz-questions", {
-                        method: "POST",
-                        credentials: 'include',
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            quizId: data.data._id,
-                            questionText: questions[i].questionText,
-                            options: questions[i].options,
-                            correctAnswer: questions[i].correctAnswer,
-                            order: i
-                        })
-                    }).then(res => res.json())
-                    .then(data => {
-                        if (data.status == "error") {
-                            toast.error(data.message)
+                fetch(`/api/quiz-questions/${quizId}`, {
+                    method: "DELETE",
+                    credentials: 'include',
+                }).then(res => res.json())
+                .then(deleteData => {
+                    if (deleteData.status == "success") {
+                        for (let i = 0; i < questions.length; i++) {
+                            fetch("/api/quiz-questions", {
+                                method: "POST",
+                                credentials: 'include',
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    quizId: data.data._id,
+                                    questionText: questions[i].questionText,
+                                    options: questions[i].options,
+                                    correctAnswer: questions[i].correctAnswer,
+                                    order: i
+                                })
+                            }).then(res => res.json())
+                            .then(data => {
+                                if (data.status == "error") {
+                                    toast.error(data.message)
+                                }
+                            })
                         }
-                    })
-                }
-                toast.success(data.message)
-                navigate("/my-quizzes")
+                        toast.success(data.message)
+                        navigate("/my-quizzes")
+                    } else if (data.status == "error")  {
+                        toast.error(data.message)
+                    } else {
+                        toast(data.message)
+                    }
+                })
             } else if (data.status == "error")  {
                 toast.error(data.message)
             } else {
                 toast(data.message)
             }
         })
+        
     }
 
     return (
         <main className="min-h-screen">
             <Navigation />
             <div className="max-w-5xl mx-auto mt-5 flex flex-col bg-white rounded shadow-sm p-5">
-                <h2 className="text-2xl font-bold mb-4">Create Quiz</h2>
+                <h2 className="text-2xl font-bold mb-4">Edit Quiz</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="w-full bg-white rounded shadow-sm p-5 mb-5">
                         <label htmlFor="title" className="block text-sm font-medium mb-2">Title</label>
@@ -209,7 +246,7 @@ export default function CreateQuiz() {
                                 </div>
                             }
                         </div>
-                        {questions.map((q, questionId) => (
+                        {questions && questions.map((q, questionId) => (
                             <div key={questionId} className="block text-sm font-medium mb-2 bg-white shadow-sm rounded p-5">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="mb-2">Question {questionId + 1}</span>
@@ -290,7 +327,7 @@ export default function CreateQuiz() {
                         </button>
                     </div>
                     <button type="submit" className="bg-purple-700 hover:bg-purple-800 transition-colors cursor-pointer text-white px-4 py-2 w-full rounded font-bold">
-                        Create Quiz
+                        Save changes
                     </button>
                 </form>
             </div>

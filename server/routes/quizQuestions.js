@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
     }
 })
 
-router.put('/:id', async (req, res) => {
+/*router.put('/:id', async (req, res) => {
     try {
         const updatedQuizQuestion = await QuizQuestionService.updateQuizQuestion(req.body.quizId, req.body.order, {
             questionText: req.body.questionText,
@@ -30,7 +30,7 @@ router.put('/:id', async (req, res) => {
     } catch (err) {
         res.json({ data: null, message: err.message , status: "error" })
     }
-})
+})*/
 
 router.delete('/:id', async (req, res) => {
     try {

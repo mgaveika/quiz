@@ -13,7 +13,11 @@ const quizSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Users',
         required: true
-    }
+    },
+    participants: [{
+        name: String,
+        user: String
+    }]
 })
 
 module.exports = mongoose.model('Quiz', quizSchema)

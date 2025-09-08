@@ -45,6 +45,18 @@ class AuthService {
             throw err
         }
     }
+
+    static async getUserByName(name) {
+        try {
+            const user = await User.find({username: name})
+            if (user.length === 0) {
+                throw new Error("User not found.")
+            }
+            return user
+        } catch(err) {
+            throw err
+        }
+    }
 }
 
 module.exports = AuthService

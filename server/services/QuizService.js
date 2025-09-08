@@ -8,6 +8,7 @@ class QuizService {
             const title = props.title
             const description = props.description ? props.description : ""
             const creator = props.creator
+            const participants = props.participants
             const existingQuiz = await Quiz.where("title").equals(title).where("creator").equals(creator)
             if (existingQuiz.length > 0) {
                 throw new Error("Quiz with this name already exists")
@@ -15,7 +16,8 @@ class QuizService {
             const newQuiz = await Quiz.create({
                 title: title,
                 description: description,
-                creator: creator
+                creator: creator,
+                participants: participants
             })
             return newQuiz
         } catch (err) {
@@ -35,7 +37,7 @@ class QuizService {
         }
     }
 
-    static async getQuizById(id) {
+    static async getQuizById(id, userId) {
         try {
             const quiz = await Quiz.findById(id)
             if (!quiz) { 
@@ -45,13 +47,29 @@ class QuizService {
             if (!quizQuestions) { 
                 throw new Error("No Quiz questions found!") 
             }
-            const user = await User.findById(quiz.creator)
+            const user = await User.findById(userId)
             const username = user ? user.username : "N/A"
-            return {quiz, quizQuestions, username}
+
+            if (String(quiz.creator) === userId) {
+                return {quiz, quizQuestions, username}
+            } else {
+                let allowed = false
+                quiz.participants.map((part) => {
+                    if (String(part.user) === String(userId)) {
+                        allowed = true
+                    }
+                })
+                if (allowed) {
+                    return {quiz, quizQuestions, username}
+                } else {
+                    throw new Error("You're not allowed to visit this page!")
+                }
+            }
         } catch (err) {
             throw err
         }
     }
+    
     static async updateQuiz(id, updatedData) {
         try {
             return await Quiz.findByIdAndUpdate(id, updatedData, { new: true })

@@ -15,7 +15,7 @@ export default function QuizRezult() {
             setResult(data.data)
             console.log(data)
         })
-    }, []);
+    }, [])
 
     return (
         <>

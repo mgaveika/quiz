@@ -37,13 +37,13 @@ export default function ViewQuiz() {
                 if (data.status == "success") {
                     ((quizData.quizQuestions.length - 1) > currentQuestion) && setCurrentQuestion(currentQuestion + 1)
                     toast.success(data.message)
+                    if (action === "submit") {
+                        navigate(`/quiz/${quizId}/results/${attemptData._id}`)
+                    }
                 } else {
                     toast.error(data.message)
                 }
             })
-            if (action === "submit") {
-                navigate(`/quiz/${quizId}/results/${attemptData._id}`)
-            }
         } else if (action === "prev") {
             (currentQuestion >= 1) && setCurrentQuestion(currentQuestion - 1)
         } else if (action === "select") {
@@ -81,6 +81,7 @@ export default function ViewQuiz() {
             if (data.status == "success") {
                 setQuizData(data.data)
             } else {
+                toast.error(data.message)
                 navigate("/my-quizzes")
             }
         })

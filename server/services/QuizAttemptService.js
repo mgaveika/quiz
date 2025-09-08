@@ -18,6 +18,7 @@ class QuizQuestionService {
             throw err
         }
     }
+
     static async updateQuizAttempt(attemptId, questionId, answer) {
         try {
             const attempt = await QuizAttempt.findById(attemptId)
@@ -44,6 +45,7 @@ class QuizQuestionService {
             throw err
         }
     }
+    
     static async getQuizAttempt(attemptId) {
         try {
             const attempt = await QuizAttempt.findById(attemptId)

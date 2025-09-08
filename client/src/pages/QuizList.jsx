@@ -45,6 +45,7 @@ export default function QuizList() {
                     </Link>
                 </div>
                 <div className="w-full bg-white rounded shadow-sm p-5">
+                    <h2 className="text-2xl font-bold mb-4">Your quiz list</h2>
                     {quizzes.length === 0 ? (
                         <div className="text-center">No quizzes found.</div>
                     ) : (
@@ -53,7 +54,7 @@ export default function QuizList() {
                                 <li key={q._id} className="bg-white shadow-sm p-3 flex justify-between">
                                     <Link to={`/quiz/${q._id}`} className="font-semibold">{q.title}</Link>
                                     <div className="flex items-center">
-                                        <button type="button" onClick={() => {}}
+                                        <button type="button" onClick={() => navigate(`/quiz/${q._id}/edit`)}
                                             className="ml-2 text-gray-950  w-5 h-5 cursor-pointer"
                                         >
                                             <Icons icon="pen"/>
