@@ -50,7 +50,7 @@ A full-stack web application for creating, taking, and managing quizzes. Built w
 
 ```bash
 git clone https://github.com/mgaveika/quiz.git
-cd quiz-app
+cd quiz
 ```
 
 ### 2. Install dependencies
