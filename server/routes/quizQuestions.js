@@ -8,9 +8,9 @@ router.post('/', async (req, res) => {
         const newQuizQuestion = await QuizQuestionService.createQuizQuestion({
             questionText: req.body.questionText,
             options: req.body.options,
-            correctAnswer: req.body.correctAnswer,
             quizId: req.body.quizId,
-            order: req.body.order
+            order: req.body.order,
+            answerType: req.body.answerType
         })
         res.json({ data: newQuizQuestion, message: "Question created successfully!" , status: "success" })
     } catch (err) {

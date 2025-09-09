@@ -7,8 +7,8 @@ class QuizQuestionService {
                 quizId: props.quizId,
                 questionText: props.questionText,
                 options: props.options,
-                correctAnswer: props.correctAnswer,
-                order: props.order
+                order: props.order,
+                answerType: props.answerType
             })
             return newQuizQuestion
         } catch (err) {

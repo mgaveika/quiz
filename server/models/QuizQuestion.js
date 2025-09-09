@@ -10,16 +10,17 @@ const quizQuestionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    options: {
-        type: [String],
-        required: true
-    },
-    correctAnswer: {
-        type: Number,
-        required: true
-    },
+    options: [{
+        option: { type: String, required: true },
+        correctAnswer: { type: mongoose.Schema.Types.Mixed, required: true }
+    }],
     order: {
         type: Number,
+        required: true
+    },
+    answerType: {
+        type: String,
+        //enum: ['single', 'multi', 'connection'],
         required: true
     }
 })

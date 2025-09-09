@@ -16,11 +16,34 @@ export default function ViewQuiz() {
     const {quizId} = useParams()
     const navigate = useNavigate()
 
+    function handleSelectOption(optionId) {
+        const answerType = quizData.quizQuestions[currentQuestion].answerType;
+        setSelectedAnswers(prev => {
+            const updated = [...prev];
+            if (answerType === "multi") {
+                const currentSelected = updated[currentQuestion] || [];
+                if (currentSelected.includes(optionId)) {
+                    updated[currentQuestion] = currentSelected.filter(i => i !== optionId);
+                } else {
+                    updated[currentQuestion] = [...currentSelected, optionId];
+                }
+            } else {
+                updated[currentQuestion] = optionId;
+            }
+            return updated;
+        });
+    }
+
     function handleClick(action, value) {
+        const answerType = quizData?.quizQuestions[currentQuestion]?.answerType;
         if (action === "next" || action === "submit") {
-            if (selectedAnswers[currentQuestion] == null) {
-                toast.error("Select answer first!")
-                return
+            const answer = selectedAnswers[currentQuestion];
+            if (
+                (answerType === "multi" && (!answer || answer.length === 0)) ||
+                (answerType !== "multi" && answer == null)
+            ) {
+                toast.error("Select answer first!");
+                return;
             }
             fetch(`/api/quiz-attempt/${attemptData._id}`, {
                 method: "PUT",
@@ -30,28 +53,25 @@ export default function ViewQuiz() {
                 },
                 body: JSON.stringify({
                     questionId: quizData.quizQuestions[currentQuestion]._id,
-                    answer: selectedAnswers[currentQuestion]
+                    answer: answer // array for multi, index for single
                 })
-            }).then(res => res.json())
+            })
+            .then(res => res.json())
             .then(data => {
                 if (data.status == "success") {
-                    ((quizData.quizQuestions.length - 1) > currentQuestion) && setCurrentQuestion(currentQuestion + 1)
-                    toast.success(data.message)
+                    ((quizData.quizQuestions.length - 1) > currentQuestion) && setCurrentQuestion(currentQuestion + 1);
+                    toast.success(data.message);
                     if (action === "submit") {
-                        navigate(`/quiz/${quizId}/results/${attemptData._id}`)
+                        navigate(`/quiz/${quizId}/results/${attemptData._id}`);
                     }
                 } else {
-                    toast.error(data.message)
+                    toast.error(data.message);
                 }
-            })
+            });
         } else if (action === "prev") {
             (currentQuestion >= 1) && setCurrentQuestion(currentQuestion - 1)
         } else if (action === "select") {
-            setSelectedAnswers(prev => {
-                const updated = [...prev]
-                updated[currentQuestion] = value
-                return updated
-            })
+            handleSelectOption(value);
         } else if (action === "start") {
             fetch("/api/quiz-attempt", {
                 method: "POST",
@@ -137,18 +157,37 @@ export default function ViewQuiz() {
                     <div className="max-w-5xl bg-white rounded shadow-sm mx-auto p-5 mt-5 flex flex-col">
                         <h2 className="text-2xl font-bold">{quizData.quizQuestions[currentQuestion].questionText}</h2>
                         <div className="flex flex-col gap-y-2 mt-5">
-                            {quizData.quizQuestions[currentQuestion].options.map((option, id) => (
-                                <button
-                                    key={id}
-                                    onClick={() => handleClick("select", id)}
-                                    className={`w-full p-4 cursor-pointer text-left border-2 rounded-xl transition-all duration-200 hover:shadow-md
-                                    ${selectedAnswers[currentQuestion] === id ? "border-purple-950 bg-purple-50" : "border-gray-200 hover:border-gray-300"}`}
-                                >
-                                    <span className="text-gray-900">
-                                        {option}
-                                    </span>
-                                </button>
-                            ))}
+                            {quizData.quizQuestions[currentQuestion].options.map((option, id) => {
+                                const answerType = quizData.quizQuestions[currentQuestion].answerType;
+                                if (answerType === "multi") {
+                                    const checked = (selectedAnswers[currentQuestion] || []).includes(id);
+                                    return (
+                                        <label
+                                            key={id}
+                                            className={`w-full p-4 cursor-pointer text-left border-2 rounded-xl flex items-center gap-2 transition-all duration-200 hover:shadow-md
+                                                ${checked ? "border-purple-950 bg-purple-50" : "border-gray-200 hover:border-gray-300"}`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={checked}
+                                                onChange={() => handleSelectOption(id)}
+                                            />
+                                            <span className="text-gray-900">{option.option}</span>
+                                        </label>
+                                    );
+                                } else {
+                                    return (
+                                        <button
+                                            key={id}
+                                            onClick={() => handleSelectOption(id)}
+                                            className={`w-full p-4 cursor-pointer text-left border-2 rounded-xl transition-all duration-200 hover:shadow-md
+                                                ${selectedAnswers[currentQuestion] === id ? "border-purple-950 bg-purple-50" : "border-gray-200 hover:border-gray-300"}`}
+                                        >
+                                            <span className="text-gray-900">{option.option}</span>
+                                        </button>
+                                    );
+                                }
+                            })}
                         </div>
                         <div className="flex items-center justify-between mt-5">
                             <button 

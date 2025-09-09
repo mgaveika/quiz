@@ -7,7 +7,7 @@ const answerSchema = new mongoose.Schema({
         required: true
     },
     answer: {
-        type: Number,
+        type: mongoose.Schema.Types.Mixed,
         required: true
     }
 }, { _id: false })

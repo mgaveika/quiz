@@ -38,7 +38,6 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
-        console.log("'Triggered")
         const data = await QuizService.updateQuiz(req.params.id, {
             title: req.body.title,
             description: req.body.description,

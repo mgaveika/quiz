@@ -8,6 +8,10 @@ const accessTokenSchema = new mongoose.Schema({
     token: {
         type: String,
         required: true,
+    },
+    expireDate: {
+        type: Date,
+        required: true
     }
 })
 

@@ -9,8 +9,15 @@ export default function CreateQuiz() {
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
     const [questions, setQuestions] = useState([
-        { questionText: "", options: ["", ""], correctAnswer: 0 }
-    ])
+    {
+        questionText: "",
+        options: [
+            { option: "", correctAnswer: true },
+            { option: "", correctAnswer: false }
+        ],
+        answerType: "single"
+    }
+])
     const [participants, setParticipants] = useState([])
     const navigate = useNavigate()
 
@@ -21,7 +28,6 @@ export default function CreateQuiz() {
                 credentials: "include",
             }).then(res => res.json())
             .then(data => {
-                console.log(data)
                 if (data.status == "success") {
                     let checkStatus = false
                     participants.map((part) => {
@@ -31,7 +37,7 @@ export default function CreateQuiz() {
                         }
                     })
                     if (!checkStatus) {
-                        setParticipants((prev) => [...prev, {name: inputData, user: data.data[0]._id}])
+                        setParticipants((prev) => [...prev, {option: inputData, user: data.data[0]._id}])
                         document.getElementById('participants').value = ""
                     }
                 } else {
@@ -56,42 +62,89 @@ export default function CreateQuiz() {
     const handleOptionChange = (questionIndex, optionIndex, newOptionText) => {
         setQuestions(prevQuestions => prevQuestions.map((question, key) =>
             key === questionIndex
-                ? { ...question, options: question.options.map((option, optId) => optId === optionIndex ? newOptionText : option) }
+                ? {
+                    ...question,
+                    options: question.options.map((option, optId) =>
+                        optId === optionIndex ? { ...option, option: newOptionText } : option
+                    )
+                }
                 : question
         ))
     }
 
-    const handleCorrectChange = (questionIndex, optionIndex) => {
-        setQuestions(prevQuestions => prevQuestions.map((question, key) =>
-            key === questionIndex ? { ...question, correctAnswer: optionIndex } : question
-        ))
+    const handleCorrectChange = (questionIndex, optionIndex, answerTypeValue) => {
+        setQuestions(prevQuestions => prevQuestions.map((question, key) => {
+            if (key !== questionIndex) return question
+            if (answerTypeValue === "single") {
+                return {
+                    ...question,
+                    options: question.options.map((option, idx) => ({
+                        ...option,
+                        correctAnswer: idx === optionIndex
+                    }))
+                }
+            } else if (answerTypeValue === "multi") {
+                return {
+                    ...question,
+                    options: question.options.map((option, idx) => ({
+                        ...option,
+                        correctAnswer: idx === optionIndex ? !option.correctAnswer : option.correctAnswer
+                    }))
+                }
+            }
+            return question
+        }))
+}
+
+    const handleTypeChange = (questionIndex, answerTypeValue) => {
+        if (answerTypeValue === "single" || answerTypeValue === "multi") {
+            var newOptions = []
+            for (var i = 0; i < questions[questionIndex].options.length; i++) {
+                newOptions.push({option: questions[questionIndex].options[i].option, correctAnswer: i === 0})
+            }
+            setQuestions(prevQuestions => prevQuestions.map((question, key) =>
+                key === questionIndex ? { ...question, options: newOptions, answerType: answerTypeValue } : question
+            ))
+        } else if (answerTypeValue === "connection") {
+
+        }
     }
 
     const handleAddAnswer = (questionIndex) => {
-        setQuestions(prevQuestions => prevQuestions.map((question, key) =>
-            key === questionIndex ? { ...question, options: [...question.options, ""] } : question
-        ))
+        if (questions[questionIndex].answerType === "single" || questions[questionIndex].answerType === "multi") {
+            setQuestions(prevQuestions => prevQuestions.map((question, key) =>
+                key === questionIndex ? { ...question, options: [...question.options, {option: "", correctAnswer: false}] } : question
+            ))
+        } else if (answerTypeValue === "connection") {
+
+        }
     }
 
     const handleRemoveAnswer = (questionIndex, optionIndex) => {
-        setQuestions(prevQuestions => prevQuestions.map((question, key) => {
-            if (key !== questionIndex) return question
-            const updatedOptions = question.options.filter((_, optId) => optId !== optionIndex)
-            let updatedCorrectAnswer = question.correctAnswer
-            if (optionIndex === question.correctAnswer) {
-                updatedCorrectAnswer = 0
-            }
-            else if (optionIndex < question.correctAnswer) {
-                updatedCorrectAnswer = question.correctAnswer - 1
-            }
-            return { ...question, options: updatedOptions, correctAnswer: updatedCorrectAnswer }
-        }))
+        if (questions[questionIndex].answerType === "single") {
+            setQuestions(prevQuestions => prevQuestions.map((question, key) => {
+                if (key !== questionIndex) return question
+                var updatedOptions = question.options.filter((_, optId) => optId !== optionIndex)
+                if (question.options[optionIndex].answer) {
+                    updatedOptions[0] = {option: updatedOptions[0].option}
+                }
+                return { ...question, options: updatedOptions }
+            }))
+        } else if (questions[questionIndex].answerType === "multi") {
+            setQuestions(prevQuestions => prevQuestions.map((question, key) => {
+                if (key !== questionIndex) return question
+                const updatedOptions = question.options.filter((_, optId) => optId !== optionIndex)
+                return { ...question, options: updatedOptions }
+            }))
+        } else if (answerTypeValue === "connection") {
+
+        }
     }
 
     const handleAddQuestion = () => {
         setQuestions(prevQuestions => [
             ...prevQuestions,
-            { questionText: "", options: ["", ""], correctAnswer: 0 }
+            { questionText: "", options: [{option: "", correctAnswer: true}, {option: "", correctAnswer: false}], answerType: "single" }
         ])
     }
 
@@ -126,8 +179,8 @@ export default function CreateQuiz() {
                             quizId: data.data._id,
                             questionText: questions[i].questionText,
                             options: questions[i].options,
-                            correctAnswer: questions[i].correctAnswer,
-                            order: i
+                            order: i,
+                            answerType: questions[i].answerType
                         })
                     }).then(res => res.json())
                     .then(data => {
@@ -151,7 +204,7 @@ export default function CreateQuiz() {
             <Navigation />
             <div className="max-w-5xl mx-auto mt-5 flex flex-col bg-white rounded shadow-sm p-5">
                 <h2 className="text-2xl font-bold mb-4">Create Quiz</h2>
-                <form onSubmit={handleSubmit}>
+                <form name="createForm" onSubmit={handleSubmit}>
                     <div className="w-full bg-white rounded shadow-sm p-5 mb-5">
                         <label htmlFor="title" className="block text-sm font-medium mb-2">Title</label>
                         <input
@@ -171,7 +224,7 @@ export default function CreateQuiz() {
                             value={description}
                             onChange={(e) => (setDescription(e.target.value))}
                         />
-                        <div className="flex align-middle w-full mb-2">
+                        <div className="flex align-middle w-full">
                             <label htmlFor="participants" className="block text-sm font-medium mb-2">Add participants
                                 <input
                                     id="participants"
@@ -190,13 +243,13 @@ export default function CreateQuiz() {
                         <p className="text-sm font-medium mb-2">Participant list</p>
                         <div className="border border-gray-300 rounded p-2 mb-2">
                             {participants.length === 0 ?
-                                <p>Empty</p>
+                                <p>None</p>
                                 :
                                 <div className="flex gap-1">
                                 {participants.map((p,id) => (
                                     <div key={id} className="flex gap-1 px-2 py-1 border border-gray-400 rounded w-fit">
-                                        <Avatar size="30px" fontSize="15px" name={p.name} />
-                                        <p>{p.name}</p>
+                                        <Avatar size="30px" fontSize="15px" name={p.option} />
+                                        <p>{p.option}</p>
                                         <button
                                             type="button"
                                             onClick={() => handleParticipantDelete(id)}
@@ -220,6 +273,7 @@ export default function CreateQuiz() {
                                     )}
                                 </div>
                                 <textarea
+                                    name="quizDescription"
                                     className="border border-gray-300 rounded p-2 mb-4 w-full"
                                     placeholder="Enter your question"
                                     rows={2}
@@ -228,15 +282,16 @@ export default function CreateQuiz() {
                                     required
                                 />
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
+                                    <label htmlFor={`selectType-${questionId}`} className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
                                     <select
-                                        onChange={() => {}}
-                                        value="single"
+                                        id={`selectType-${questionId}`}
+                                        value={q.answerType}
+                                        onChange={e => handleTypeChange(questionId, e.target.value)}
                                         className="px-4 py-2 border border-gray-300 rounded"
                                     >
                                         <option value="single">Single Answer</option>
                                         <option value="multi">Multiple Answers</option>
-                                        <option value="connection">Connection/Matching</option>
+                                        {/*<option value="connection">Connection/Matching</option>*/}
                                     </select>
                                 </div>
                                 <div className="flex items-center justify-between mb-2 h-8">
@@ -254,19 +309,41 @@ export default function CreateQuiz() {
                                 </div>
                                 {q.options.map((opt, optionId) => (
                                     <div key={optionId} className="flex items-center mb-2">
-                                        <input
-                                            type="checkbox"
-                                            className="mr-2 w-3.5 h-3.5"
-                                            checked={q.correctAnswer === optionId}
-                                            onChange={() => handleCorrectChange(questionId, optionId)}
-                                        />
-                                        <input
-                                            className="border border-gray-300 rounded p-2 flex-1"
-                                            placeholder={`Option ${optionId + 1}`}
-                                            value={opt}
-                                            onChange={e => handleOptionChange(questionId, optionId, e.target.value)}
-                                            required
-                                        />
+                                        {q.answerType === "single" ? <>
+                                            <input
+                                                name="correctAnswerCheckbox"
+                                                type="checkbox"
+                                                className="mr-2 w-3.5 h-3.5"
+                                                checked={opt.correctAnswer}
+                                                onChange={() => handleCorrectChange(questionId, optionId, q.answerType)}
+                                            />
+                                            <input
+                                                name="correctAnswerInput"
+                                                className="border border-gray-300 rounded p-2 flex-1"
+                                                placeholder={`Option ${optionId + 1}`}
+                                                value={opt.option}
+                                                onChange={e => handleOptionChange(questionId, optionId, e.target.value)}
+                                                required
+                                            />
+                                        </> : q.answerType === "multi" ? <>
+                                            <input
+                                                name="correctAnswerCheckbox"
+                                                type="checkbox"
+                                                className="mr-2 w-3.5 h-3.5"
+                                                checked={opt.correctAnswer}
+                                                onChange={() => handleCorrectChange(questionId, optionId, q.answerType)}
+                                            />
+                                            <input
+                                                name="correctAnswerInput"
+                                                className="border border-gray-300 rounded p-2 flex-1"
+                                                placeholder={`Option ${optionId + 1}`}
+                                                value={opt.option}
+                                                onChange={e => handleOptionChange(questionId, optionId, e.target.value)}
+                                                required
+                                            />
+                                        </> : q.answerType === "connection" ? <>
+                                            
+                                        </> : null }
                                         {q.options.length > 2 && (
                                             <button
                                                 type="button"
