@@ -5,16 +5,38 @@ import toast from "react-hot-toast"
 import Icons from "../components/Icons.jsx"
 
 export default function QuizList() {
-    const [quizzes, setQuizzes] = useState([])
+    const [privateQuizzes, setPrivateQuizzes] = useState([])
+    const [publicQuizzes, setPublicQuizzes] = useState([])
+    const [userAttempts, setUserAttempts] = useState([])
     const navigate = useNavigate()
     useEffect(() => {
         fetch("/api/quizzes", {
             credentials: 'include'
         })
-            .then(res => res.json())
-            .then(data => setQuizzes(data.data || []))
-            .catch(() => setQuizzes([]))
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                setPrivateQuizzes(data.data.privateQuizzes || [])
+                setPublicQuizzes(data.data.publicQuizzes || [])
+                fetch("/api/quiz-attempt", {
+                    credentials: 'include'
+                })
+                .then(res => res.json())
+                .then(data2 => {
+                    setUserAttempts(data2.data || [])
+                    console.log(data2.data)
+                })
+            } else {
+                toast.error(data.message)
+            }
+        })
     }, [])
+
+    function getAttemptId(quizId) {
+        if (!Array.isArray(userAttempts)) return null;
+        const attempt = userAttempts.find(a => a.quizId === quizId);
+        return attempt ? attempt._id : null;
+    }
 
     async function handleDeleteQuiz(quizId) {
         fetch(`/api/quizzes/${quizId}`, {
@@ -24,7 +46,7 @@ export default function QuizList() {
         .then(res => res.json())
         .then(data => {
             if (data.status == "success") {
-                setQuizzes(prev => prev.filter(q => q._id !== quizId))
+                setPrivateQuizzes(prev => prev.filter(q => q._id !== quizId))
                 toast.success(data.message)
             } else if (data.status == "error")  {
                 toast.error(data.message)
@@ -44,18 +66,24 @@ export default function QuizList() {
                         Create Quiz
                     </Link>
                 </div>
-                <div className="w-full bg-white rounded shadow-sm p-5">
-                    <h2 className="text-2xl font-bold mb-4">Your quiz list</h2>
-                    {quizzes.length === 0 ? (
+                <div className="w-full bg-white rounded shadow-sm p-5 mb-2">
+                    <h2 className="text-2xl font-bold mb-4">My quiz list</h2>
+                    {privateQuizzes.length === 0 ? (
                         <div className="text-center">No quizzes found.</div>
                     ) : (
                         <ul className="flex flex-col space-y-2">
-                            {quizzes.map(q => (
+                            {privateQuizzes.map(q => (
                                 <li key={q._id} className="bg-white shadow-sm p-3 flex justify-between">
                                     <Link to={`/quiz/${q._id}`} className="font-semibold">{q.title}</Link>
                                     <div className="flex items-center">
+                                        {getAttemptId(q._id) && <button type="button"
+                                            className="ml-2 text-gray-500 hover:text-gray-900 w-5 h-5 cursor-pointer"
+                                            onClick={() => navigate(`/quiz/${q._id}/results/${getAttemptId(q._id)}`)}
+                                        >
+                                            <Icons icon="history"/>
+                                        </button>}
                                         <button type="button" onClick={() => navigate(`/quiz/${q._id}/edit`)}
-                                            className="ml-2 text-gray-950  w-5 h-5 cursor-pointer"
+                                            className="ml-2 text-gray-500 hover:text-gray-900 w-5 h-5 cursor-pointer"
                                         >
                                             <Icons icon="pen"/>
                                         </button>
@@ -65,6 +93,20 @@ export default function QuizList() {
                                             <Icons icon="bin"/>
                                         </button>
                                     </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+                <div className="w-full bg-white rounded shadow-sm p-5">
+                    <h2 className="text-2xl font-bold mb-4">Public quizzes</h2>
+                    {publicQuizzes.length === 0 ? (
+                        <div className="text-center">No quizzes found.</div>
+                    ) : (
+                        <ul className="flex flex-col space-y-2">
+                            {publicQuizzes.map(q => (
+                                <li key={q._id} className="bg-white shadow-sm p-3 flex justify-between">
+                                    <Link to={`/quiz/${q._id}`} className="font-semibold">{q.title}</Link>
                                 </li>
                             ))}
                         </ul>

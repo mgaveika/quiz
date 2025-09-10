@@ -17,7 +17,11 @@ const quizSchema = new mongoose.Schema({
     participants: [{
         name: String,
         user: String
-    }]
+    }],
+    visibility: {
+        type: Boolean,
+        required: true
+    }
 })
 
 module.exports = mongoose.model('Quiz', quizSchema)

@@ -4,18 +4,18 @@ const jwt = require("jsonwebtoken")
 const accessTokenSchema = require("../models/AccessTokens")
 const moment = require("moment")
 
-async function checkPassword(password, hashedPassword) {
+async function checkPassword({password, hashedPassword}) {
     const isMatch = await bcrypt.compare(password, hashedPassword)
     return isMatch
 }
 
-async function hashPassword(password) {
+async function hashPassword({password}) {
     const hashedPassword = await bcrypt.hash(password, 10)
     return hashedPassword
 }
 
 class AuthService {
-    static async createToken(userId) {
+    static async createToken({userId}) {
         await accessTokenSchema.deleteMany({userId: userId})
         const newToken = jwt.sign({ id: userId }, process.env.JWT_SECRET)
         let today = moment()
@@ -30,13 +30,13 @@ class AuthService {
             }
             const user = await User.where("email").equals(email.toLowerCase())
             if (user.length > 0) {
-                const checkedPass = await checkPassword(password, user[0].password)
+                const checkedPass = await checkPassword({password, hashedPassword: user[0].password})
                 if (checkedPass) {
                     const existingAccessToken = await accessTokenSchema.findOne({userId: user[0].id})
                     if (existingAccessToken) {
                         return { token: existingAccessToken.token }
                     }
-                    const token = await this.createToken(user[0].id)
+                    const token = await this.createToken({userId: user[0].id})
                     return { token: token }
                 }
             }
@@ -65,7 +65,7 @@ class AuthService {
             if (checkUsername.length > 0) {
                 throw new Error("User with this name already exists.")
             }
-            const hashedPassword = await hashPassword(password)
+            const hashedPassword = await hashPassword({password})
             const newUser = await User.create({
                 email: email.toLowerCase(),
                 username: username,

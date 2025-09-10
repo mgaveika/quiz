@@ -3,13 +3,8 @@ const quizQuestion = require('../models/QuizQuestion')
 class QuizQuestionService {
     static async createQuizQuestion(props) {
         try {
-            const newQuizQuestion = await quizQuestion.create({
-                quizId: props.quizId,
-                questionText: props.questionText,
-                options: props.options,
-                order: props.order,
-                answerType: props.answerType
-            })
+            const {quizId,questionText,options,order,answerType} = props
+            const newQuizQuestion = await quizQuestion.create({quizId,questionText,options,order,answerType})
             return newQuizQuestion
         } catch (err) {
             throw err
@@ -36,18 +31,18 @@ class QuizQuestionService {
         }
     }*/
 
-    static async deleteQuizQuestion(quizId, order) {
+    static async deleteQuizQuestion({quizId, order}) {
         try {
-            const deletedQuizQuestion = await quizQuestion.findOneAndDelete({ quizId: quizId, order: order })
+            const deletedQuizQuestion = await quizQuestion.findOneAndDelete({ quizId, order })
             return deletedQuizQuestion
         } catch (err) {
             throw err
         }
     }
 
-    static async deleteQuizQuestions(quizId) {
+    static async deleteQuizQuestions({quizId}) {
         try {
-            const deletedQuizQuestions = await quizQuestion.deleteMany({ quizId: quizId })
+            const deletedQuizQuestions = await quizQuestion.deleteMany({ quizId })
             return deletedQuizQuestions
         } catch (err) {
             throw err

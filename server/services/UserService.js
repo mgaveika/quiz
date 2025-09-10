@@ -17,7 +17,7 @@ class AuthService {
             if (!currentPassword || !newPassword || !confirmNewPassword) {
                 throw new Error("All fields are required!")
             }
-            if (newPassword != confirmNewPassword) {
+            if (newPassword !== confirmNewPassword) {
                 throw new Error("Passwords doesn't match.")
             }
             const user = await User.findById(id)
@@ -34,7 +34,7 @@ class AuthService {
             throw err
         }
     }
-    static async deleteAccount(id) {
+    static async deleteAccount({id}) {
         try {
             const user = await User.findById(id)
             if (!user) {
@@ -46,7 +46,7 @@ class AuthService {
         }
     }
 
-    static async getUserByName(name) {
+    static async getUserByName({name}) {
         try {
             const user = await User.find({username: name})
             if (user.length === 0) {

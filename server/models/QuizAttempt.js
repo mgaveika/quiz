@@ -30,6 +30,10 @@ const quizAttemptSchema = new mongoose.Schema({
     score: {
         type: Number,
         default: 0
+    },
+    rating: {
+        type: Number,
+        default: -1
     }
 }, { timestamps: true })
 

@@ -3,21 +3,18 @@ const QuizQuestions = require("../models/QuizQuestion")
 const User = require("../models/Users")
 
 class QuizService {
-    static async createQuiz(props) {
+    static async createQuiz({title, description, creator, participants, visibility}) {
         try {
-            const title = props.title
-            const description = props.description ? props.description : ""
-            const creator = props.creator
-            const participants = props.participants
             const existingQuiz = await Quiz.where("title").equals(title).where("creator").equals(creator)
             if (existingQuiz.length > 0) {
                 throw new Error("Quiz with this name already exists")
             }
             const newQuiz = await Quiz.create({
-                title: title,
-                description: description,
-                creator: creator,
-                participants: participants
+                title,
+                description,
+                creator,
+                participants,
+                visibility
             })
             return newQuiz
         } catch (err) {
@@ -25,19 +22,20 @@ class QuizService {
         }
     }
 
-    static async getUserQuizzes(userId) {
+    static async getUserQuizzes({userId}) {
         try {
-            const quizzes = await Quiz.find({ creator: userId })
-            if (!quizzes) { 
-                throw new Error("No Quizzes found!") 
-            }
-            return quizzes
+            const privateQuizzes = await Quiz.find({ creator: userId })
+            const publicQuizzes = await Quiz.find({
+                participants: { $elemMatch: { user: userId } },
+                creator: { $ne: userId }
+            })
+            return {privateQuizzes, publicQuizzes}
         } catch (err) {
             throw err
         }
     }
 
-    static async getQuizById(id, userId) {
+    static async getQuizById({id, userId}) {
         try {
             const quiz = await Quiz.findById(id)
             if (!quiz) { 
@@ -70,7 +68,7 @@ class QuizService {
         }
     }
     
-    static async updateQuiz(id, updatedData) {
+    static async updateQuiz({id, updatedData}) {
         try {
             return await Quiz.findByIdAndUpdate(id, updatedData, { new: true })
         } catch (err) {
@@ -78,7 +76,7 @@ class QuizService {
         }
     }
     
-    static async deleteQuiz(id, userId) {
+    static async deleteQuiz({id, userId}) {
     try {
         const quiz = await Quiz.findById(id)
         if (!quiz) {

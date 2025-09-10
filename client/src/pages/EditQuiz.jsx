@@ -8,6 +8,7 @@ import Avatar from "../components/Avatar.jsx"
 export default function EditQuiz() {
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
+    const [visible, setVisible] = useState(false)
     const [questions, setQuestions] = useState([])
     const [participants, setParticipants] = useState([])
     const navigate = useNavigate()
@@ -20,13 +21,12 @@ export default function EditQuiz() {
             if (data.status == "success") {
                 setTitle(data.data.quiz.title)
                 setDescription(data.data.quiz.description)
-                data.data.quizQuestions.map(quest => (
-                    questions.push({
-                        questionText: quest.questionText,
-                        options: quest.options,
-                        answerType: quest.answerType
-                    })
-                ))
+                setVisible(data.data.quiz.visibility)
+                setQuestions(data.data.quizQuestions.map(quest => ({
+                    questionText: quest.questionText,
+                    options: quest.options,
+                    answerType: quest.answerType
+                })))
                 setParticipants(data.data.quiz.participants)
             } else {
                 toast.error(data.message)
@@ -152,6 +152,10 @@ export default function EditQuiz() {
         )
     }
 
+    const handleVisibilityChange = (e) => {
+        setVisible(() => (e.target.name === "public" ? false : true) )
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         fetch(`/api/quizzes/${quizId}`, {
@@ -160,7 +164,7 @@ export default function EditQuiz() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ title, description, participants })
+            body: JSON.stringify({ title, description, participants, visibility: visible })
         })
         .then(res => res.json())
         .then(data => {
@@ -233,44 +237,58 @@ export default function EditQuiz() {
                             value={description}
                             onChange={(e) => (setDescription(e.target.value))}
                         />
-                        <div className="flex align-middle w-full">
-                            <label htmlFor="participants" className="block text-sm font-medium mb-2">Add participants
-                                <input
-                                    id="participants"
-                                    className="border border-gray-300 rounded p-2 mb-2 w-full mt-2"
-                                    placeholder="Enter participant name"
-                                />
+                        <div className="flex gap-3 mb-2">
+                            <label htmlFor="publicVisibility">
+                                <input onChange={handleVisibilityChange} checked={!visible} value={!visible} className="mr-1" type="radio" name="public" id="publicVisibility"/>
+                                Public
                             </label>
-                            <button
-                                type="button"
-                                onClick={handleParticipantCheck}
-                                className="ml-2 mt-2 text-gray-700 hover:text-gray-900 w-5 cursor-pointer"
-                            >
-                            <Icons icon="plus" />
-                            </button>
+                            <label htmlFor="privateVisibility">
+                                <input onChange={handleVisibilityChange} checked={visible} value={visible} className="mr-1" type="radio" name="private" id="privateVisibility"/>
+                                Private
+                            </label>
                         </div>
-                        <p className="text-sm font-medium mb-2">Participant list</p>
-                        <div className="border border-gray-300 rounded p-2 mb-2">
-                            {participants.length === 0 ?
-                                <p>None</p>
-                                :
-                                <div className="flex gap-1">
-                                {participants.map((p,id) => (
-                                    <div key={id} className="flex gap-1 px-2 py-1 border border-gray-400 rounded w-fit">
-                                        <Avatar size="30px" fontSize="15px" name={p.name} />
-                                        <p>{p.name}</p>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleParticipantDelete(id)}
-                                            className="ml-2 text-red-500 hover:text-red-700 w-5 cursor-pointer h-full"
-                                        >
-                                            <Icons icon="bin" className="w-5 my-auto"/>
-                                        </button>
-                                    </div>
-                                ))}
+                        {visible && 
+                            <>
+                                <div className="flex align-middle w-full">
+                                    <label htmlFor="participants" className="block text-sm font-medium mb-2">Add participants
+                                        <input
+                                            id="participants"
+                                            className="border border-gray-300 rounded p-2 mb-2 w-full mt-2"
+                                            placeholder="Enter participant name"
+                                        />
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={handleParticipantCheck}
+                                        className="ml-2 mt-2 text-gray-700 hover:text-gray-900 w-5 cursor-pointer"
+                                    >
+                                    <Icons icon="plus" />
+                                    </button>
                                 </div>
-                            }
-                        </div>
+                                <p className="text-sm font-medium mb-2">Participant list</p>
+                                <div className="border border-gray-300 rounded p-2 mb-2">
+                                    {participants.length === 0 ?
+                                        <p>None</p>
+                                        :
+                                        <div className="flex gap-1">
+                                        {participants.map((p,id) => (
+                                            <div key={id} className="flex gap-1 px-2 py-1 border border-gray-400 rounded w-fit">
+                                                <Avatar size="30px" fontSize="15px" name={p.name} />
+                                                <p>{p.name}</p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleParticipantDelete(id)}
+                                                    className="ml-2 text-red-500 hover:text-red-700 w-5 cursor-pointer h-full"
+                                                >
+                                                    <Icons icon="bin" className="w-5 my-auto"/>
+                                                </button>
+                                            </div>
+                                        ))}
+                                        </div>
+                                    }
+                                </div>
+                            </>
+                        }
                         {questions && questions.map((q, questionId) => (
                             <div key={questionId} className="block text-sm font-medium mb-2 bg-white shadow-sm rounded p-5">
                                 <div className="flex justify-between items-center mb-2">
@@ -329,7 +347,7 @@ export default function EditQuiz() {
                                             name="optionInput"
                                             className="border border-gray-300 rounded p-2 flex-1"
                                             placeholder={`Option ${optionId + 1}`}
-                                            value={opt.option}
+                                            value={opt.option ?? ""}
                                             onChange={e => handleOptionChange(questionId, optionId, e.target.value)}
                                             required
                                         />

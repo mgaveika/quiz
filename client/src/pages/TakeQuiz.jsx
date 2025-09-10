@@ -37,11 +37,8 @@ export default function ViewQuiz() {
     function handleClick(action, value) {
         const answerType = quizData?.quizQuestions[currentQuestion]?.answerType;
         if (action === "next" || action === "submit") {
-            const answer = selectedAnswers[currentQuestion];
-            if (
-                (answerType === "multi" && (!answer || answer.length === 0)) ||
-                (answerType !== "multi" && answer == null)
-            ) {
+            const answer = selectedAnswers[currentQuestion]
+            if ((answerType === "multi" && (!answer || answer.length === 0)) || (answerType !== "multi" && answer == null)) {
                 toast.error("Select answer first!");
                 return;
             }
@@ -53,7 +50,7 @@ export default function ViewQuiz() {
                 },
                 body: JSON.stringify({
                     questionId: quizData.quizQuestions[currentQuestion]._id,
-                    answer: answer // array for multi, index for single
+                    answer
                 })
             })
             .then(res => res.json())

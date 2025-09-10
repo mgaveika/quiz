@@ -8,34 +8,35 @@ import Avatar from "../components/Avatar.jsx"
 export default function CreateQuiz() {
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
+    const [visible, setVisible] = useState(false)
     const [questions, setQuestions] = useState([
-    {
-        questionText: "",
-        options: [
-            { option: "", correctAnswer: true },
-            { option: "", correctAnswer: false }
-        ],
-        answerType: "single"
-    }
-])
+        {
+            questionText: "",
+            options: [
+                { option: "", correctAnswer: true },
+                { option: "", correctAnswer: false }
+            ],
+            answerType: "single"
+        }
+    ])
     const [participants, setParticipants] = useState([])
     const navigate = useNavigate()
 
     const handleParticipantCheck = () => {
         const inputData = document.getElementById('participants').value
         if (inputData !== "") {
+            let checkStatus = false
+            participants.map((part) => {
+                if (part.name === inputData) {
+                    checkStatus = true
+                    toast.error("User has already been added")
+                }
+            })
             fetch(`/api/user/${inputData}`, {
                 credentials: "include",
             }).then(res => res.json())
             .then(data => {
                 if (data.status == "success") {
-                    let checkStatus = false
-                    participants.map((part) => {
-                        if (part.name === inputData) {
-                            checkStatus = true
-                            toast.error("User has already been added")
-                        }
-                    })
                     if (!checkStatus) {
                         setParticipants((prev) => [...prev, {option: inputData, user: data.data[0]._id}])
                         document.getElementById('participants').value = ""
@@ -156,6 +157,10 @@ export default function CreateQuiz() {
         )
     }
 
+    const handleVisibilityChange = (e) => {
+        setVisible(() => (e.target.name === "public" ? false : true) )
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         fetch("/api/quizzes", {
@@ -164,7 +169,7 @@ export default function CreateQuiz() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ title, description, participants })
+            body: JSON.stringify({ title, description, participants, visibility: visible })
         }).then(res => res.json())
         .then(data => {
             if (data.status == "success") {
@@ -224,44 +229,58 @@ export default function CreateQuiz() {
                             value={description}
                             onChange={(e) => (setDescription(e.target.value))}
                         />
-                        <div className="flex align-middle w-full">
-                            <label htmlFor="participants" className="block text-sm font-medium mb-2">Add participants
-                                <input
-                                    id="participants"
-                                    className="border border-gray-300 rounded p-2 mb-2 w-full mt-2"
-                                    placeholder="Enter participant name"
-                                />
+                        <div className="flex gap-3 mb-2">
+                            <label htmlFor="publicVisibility">
+                                <input onChange={handleVisibilityChange} checked={!visible} className="mr-1" type="radio" name="public" id="publicVisibility" value="public"/>
+                                Public
                             </label>
-                            <button
-                                type="button"
-                                onClick={handleParticipantCheck}
-                                className="ml-2 mt-2 text-gray-700 hover:text-gray-900 w-5 cursor-pointer"
-                            >
-                            <Icons icon="plus" />
-                            </button>
+                            <label htmlFor="privateVisibility">
+                                <input onChange={handleVisibilityChange} checked={visible} className="mr-1" type="radio" name="private" id="privateVisibility" value="private"/>
+                                Private
+                            </label>
                         </div>
-                        <p className="text-sm font-medium mb-2">Participant list</p>
-                        <div className="border border-gray-300 rounded p-2 mb-2">
-                            {participants.length === 0 ?
-                                <p>None</p>
-                                :
-                                <div className="flex gap-1">
-                                {participants.map((p,id) => (
-                                    <div key={id} className="flex gap-1 px-2 py-1 border border-gray-400 rounded w-fit">
-                                        <Avatar size="30px" fontSize="15px" name={p.option} />
-                                        <p>{p.option}</p>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleParticipantDelete(id)}
-                                            className="ml-2 text-red-500 hover:text-red-700 w-5 cursor-pointer h-full"
-                                        >
-                                            <Icons icon="bin" className="w-5 my-auto"/>
-                                        </button>
-                                    </div>
-                                ))}
+                        {visible &&
+                            <>
+                                <div className="flex align-middle w-full">
+                                    <label htmlFor="participants" className="block text-sm font-medium mb-2">Add participants
+                                        <input
+                                            id="participants"
+                                            className="border border-gray-300 rounded p-2 mb-2 w-full mt-2"
+                                            placeholder="Enter participant name"
+                                        />
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={handleParticipantCheck}
+                                        className="ml-2 mt-2 text-gray-700 hover:text-gray-900 w-5 cursor-pointer"
+                                    >
+                                    <Icons icon="plus" />
+                                    </button>
                                 </div>
-                            }
-                        </div>
+                                <p className="text-sm font-medium mb-2">Participant list</p>
+                                <div className="border border-gray-300 rounded p-2 mb-2">
+                                    {participants.length === 0 ?
+                                        <p>None</p>
+                                        :
+                                        <div className="flex gap-1">
+                                        {participants.map((p,id) => (
+                                            <div key={id} className="flex gap-1 px-2 py-1 border border-gray-400 rounded w-fit">
+                                                <Avatar size="30px" fontSize="15px" name={p.option} />
+                                                <p>{p.option}</p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleParticipantDelete(id)}
+                                                    className="ml-2 text-red-500 hover:text-red-700 w-5 cursor-pointer h-full"
+                                                >
+                                                    <Icons icon="bin" className="w-5 my-auto"/>
+                                                </button>
+                                            </div>
+                                        ))}
+                                        </div>
+                                    }
+                                </div>
+                            </>
+                        }
                         {questions.map((q, questionId) => (
                             <div key={questionId} className="block text-sm font-medium mb-2 bg-white shadow-sm rounded p-5">
                                 <div className="flex justify-between items-center mb-2">
