@@ -17,20 +17,20 @@ export default function ViewQuiz() {
     const navigate = useNavigate()
 
     function handleSelectOption(optionId) {
-        const answerType = quizData.quizQuestions[currentQuestion].answerType;
+        const answerType = quizData.quizQuestions[currentQuestion].answerType
         setSelectedAnswers(prev => {
-            const updated = [...prev];
-            if (answerType === "multi") {
-                const currentSelected = updated[currentQuestion] || [];
+            const updated = [...prev]
+            if (answerType === "single") {
+                updated[currentQuestion] = [optionId]
+            } else if (answerType === "multi") {
+                const currentSelected = updated[currentQuestion] || []
                 if (currentSelected.includes(optionId)) {
-                    updated[currentQuestion] = currentSelected.filter(i => i !== optionId);
+                    updated[currentQuestion] = currentSelected.filter(i => i !== optionId)
                 } else {
-                    updated[currentQuestion] = [...currentSelected, optionId];
+                    updated[currentQuestion] = [...currentSelected, optionId]
                 }
-            } else {
-                updated[currentQuestion] = optionId;
             }
-            return updated;
+            return updated
         });
     }
 
@@ -42,6 +42,7 @@ export default function ViewQuiz() {
                 toast.error("Select answer first!");
                 return;
             }
+            console.log(answer)
             fetch(`/api/quiz-attempt/${attemptData._id}`, {
                 method: "PUT",
                 credentials: "include",
@@ -155,9 +156,21 @@ export default function ViewQuiz() {
                         <h2 className="text-2xl font-bold">{quizData.quizQuestions[currentQuestion].questionText}</h2>
                         <div className="flex flex-col gap-y-2 mt-5">
                             {quizData.quizQuestions[currentQuestion].options.map((option, id) => {
-                                const answerType = quizData.quizQuestions[currentQuestion].answerType;
-                                if (answerType === "multi") {
-                                    const checked = (selectedAnswers[currentQuestion] || []).includes(id);
+                                const answerType = quizData.quizQuestions[currentQuestion].answerType
+                                if (answerType === "single") {
+                                    const checked = (selectedAnswers[currentQuestion] || []).includes(id)
+                                    return (
+                                        <button
+                                            key={id}
+                                            onClick={() => handleSelectOption(id)}
+                                            className={`w-full p-4 cursor-pointer text-left border-2 rounded-xl transition-all duration-200 hover:shadow-md
+                                                ${checked ? "border-purple-950 bg-purple-50" : "border-gray-200 hover:border-gray-300"}`}
+                                        >
+                                            <span className="text-gray-900">{option.option}</span>
+                                        </button>
+                                    )
+                                } else if (answerType === "multi") {
+                                    const checked = (selectedAnswers[currentQuestion] || []).includes(id)
                                     return (
                                         <label
                                             key={id}
@@ -171,18 +184,7 @@ export default function ViewQuiz() {
                                             />
                                             <span className="text-gray-900">{option.option}</span>
                                         </label>
-                                    );
-                                } else {
-                                    return (
-                                        <button
-                                            key={id}
-                                            onClick={() => handleSelectOption(id)}
-                                            className={`w-full p-4 cursor-pointer text-left border-2 rounded-xl transition-all duration-200 hover:shadow-md
-                                                ${selectedAnswers[currentQuestion] === id ? "border-purple-950 bg-purple-50" : "border-gray-200 hover:border-gray-300"}`}
-                                        >
-                                            <span className="text-gray-900">{option.option}</span>
-                                        </button>
-                                    );
+                                    )
                                 }
                             })}
                         </div>

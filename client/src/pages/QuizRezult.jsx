@@ -82,7 +82,7 @@ export default function QuizRezult() {
                         <div
                             className="h-2 w-full rounded-full"
                             style={{
-                                background: `linear-gradient(90deg,rgba(184, 11, 11, 1) ${result.attempt.score/result.questions.length*100}%, rgba(16, 194, 33, 1) 100%)`
+                                background: `linear-gradient(90deg,rgba(11, 184, 11, 1) ${result.attempt.score/result.questions.length*100}%, rgba(184, 11, 11, 1) 100%)`
                             }}
                         ></div>
                     </div>
@@ -97,12 +97,10 @@ export default function QuizRezult() {
                             <span className="text-gray-400">{qid + 1} of {result.questions.length}</span>
                         </div>
                         {question.options.map((option, oid) => {
-                            const answerObj = result.attempt.answers.find(a => a.questionId === question._id);
-                            const userAnswer = answerObj ? answerObj.answer : null;                            const answerType = question.answerType;
-                            const isUserAnswer = answerType === "multi"
-                                ? Array.isArray(userAnswer) && userAnswer.includes(oid)
-                                : oid === userAnswer;
-                            const isCorrect = option.correctAnswer;
+                            const answerObj = result.attempt.answers.find(a => a.questionId === question._id)
+                            const userAnswer = answerObj ? answerObj.answer : null
+                            const isUserAnswer = Array.isArray(userAnswer) && userAnswer.includes(oid)
+                            const isCorrect = option.correctAnswer
                             return (
                                 <div
                                     key={oid}
