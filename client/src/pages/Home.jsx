@@ -15,13 +15,13 @@ export default function Home() {
                     </p>
                     <div className="flex justify-center gap-4">
                     <Link
-                        to="/my-quizzes"
+                        to="/list"
                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow"
                     >
-                        Take a Quiz
+                        Quiz list
                     </Link>
                     <Link
-                        to="/create-quiz"
+                        to="/create"
                         className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-xl shadow"
                     >
                         Create a Quiz

@@ -7,13 +7,14 @@ const router = express.Router()
 
 router.post('/', async (req, res) => {
     try {
-        const {title,description,participants,visibility} = req.body
+        const {title,description,participants,visibility,categories} = req.body
         const data = await QuizService.createQuiz({
             title,
             description,
             creator: req.userId,
             participants,
-            visibility
+            visibility,
+            categories
         })
         res.json({ data: data, message: "Quiz created successfully.", status: "success" })
     } catch (err) {

@@ -42,7 +42,6 @@ export default function ViewQuiz() {
                 toast.error("Select answer first!");
                 return;
             }
-            console.log(answer)
             fetch(`/api/quiz-attempt/${attemptData._id}`, {
                 method: "PUT",
                 credentials: "include",

@@ -10,6 +10,17 @@ export default function EditQuiz() {
     const [description, setDescription] = useState("")
     const [visible, setVisible] = useState(false)
     const [questions, setQuestions] = useState([])
+    const [categories, setCategories] = useState([])
+    const categoryOptions = [
+        "Music",
+        "Science",
+        "History",
+        "Sports",
+        "Movies",
+        "Geography",
+        "Literature"
+    ]
+    const [selectedCategory, setSelectedCategory] = useState(categoryOptions[0])
     const [participants, setParticipants] = useState([])
     const navigate = useNavigate()
     const {quizId} = useParams()
@@ -28,12 +39,27 @@ export default function EditQuiz() {
                     answerType: quest.answerType
                 })))
                 setParticipants(data.data.quiz.participants)
+                setCategories(data.data.quiz.categories)
             } else {
                 toast.error(data.message)
                 navigate("/my-quizzes")
             }
         })
     }, [])
+
+    const handleCategoriesChange = (value) => {
+        setSelectedCategory(value)
+    }
+
+    const handleAddCategory = () => {
+        if (!categories.includes(selectedCategory)) {
+            setCategories(prev => [...prev, selectedCategory])
+        }
+    }
+
+    const handleRemoveCategory = (cat) => {
+        setCategories(prev => prev.filter(c => c !== cat))
+    }
 
     const handleParticipantCheck = () => {
         const inputData = document.getElementById('participants').value
@@ -164,7 +190,7 @@ export default function EditQuiz() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ title, description, participants, visibility: visible })
+            body: JSON.stringify({ title, description, participants, visibility: visible, categories })
         })
         .then(res => res.json())
         .then(data => {
@@ -289,6 +315,46 @@ export default function EditQuiz() {
                                 </div>
                             </>
                         }
+                        <div className="flex flex-col mb-4">
+                            <label htmlFor="categories" className="text-sm font-medium mb-2">Categories</label>
+                            <div className="flex gap-2">
+                                <select
+                                    id="categories"
+                                    value={selectedCategory}
+                                    onChange={e => handleCategoriesChange(e.target.value)}
+                                    className="px-4 py-2 border border-gray-300 rounded"
+                                >
+                                    {categoryOptions.map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={handleAddCategory}
+                                    className="flex items-center cursor-pointer space-x-2 px-2 py-1 bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition-colors text-sm"
+                                >
+                                    <Icons icon="plus" className="w-4 h-4 inline-block mr-1" />
+                                    <span>Add</span>
+                                </button>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {categories.length > 0 &&
+                                    categories.map(cat => (
+                                        <div key={cat} className="flex items-center align-middle border-1 border-gray-300 bg-gray-100 px-3 py-1 rounded-full">
+                                            <span>{cat}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveCategory(cat)}
+                                                className="ml-2 text-red-500 hover:text-red-700 w-4 cursor-pointer"
+                                                title="Remove"
+                                            >
+                                                <Icons icon="bin" />
+                                            </button>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        </div>
                         {questions && questions.map((q, questionId) => (
                             <div key={questionId} className="block text-sm font-medium mb-2 bg-white shadow-sm rounded p-5">
                                 <div className="flex justify-between items-center mb-2">

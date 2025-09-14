@@ -24,7 +24,6 @@ export default function QuizList() {
                 .then(res => res.json())
                 .then(data2 => {
                     setUserAttempts(data2.data || [])
-                    console.log(data2.data)
                 })
             } else {
                 toast.error(data.message)
@@ -61,7 +60,7 @@ export default function QuizList() {
             <Navigation />
             <div className="max-w-5xl mx-auto mt-5 flex flex-col">
                 <div className="flex justify-end mb-3">
-                    <Link to="/create-quiz" className="bg-purple-700 hover:bg-purple-800 cursor-pointer text-white px-4 py-2 rounded w-40 font-bold flex items-center justify-center">
+                    <Link to="/create" className="bg-purple-700 hover:bg-purple-800 cursor-pointer text-white px-4 py-2 rounded w-40 font-bold flex items-center justify-center">
                         <Icons icon="plus" className="w-4 h-4 inline-block mr-1" />
                         Create Quiz
                     </Link>

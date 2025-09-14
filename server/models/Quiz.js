@@ -21,6 +21,9 @@ const quizSchema = new mongoose.Schema({
     visibility: {
         type: Boolean,
         required: true
+    },
+    categories: {
+        type: [String],
     }
 })
 

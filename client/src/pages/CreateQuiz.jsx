@@ -19,8 +19,33 @@ export default function CreateQuiz() {
             answerType: "single"
         }
     ])
+    const [categories, setCategories] = useState([])
+    const categoryOptions = [
+        "Music",
+        "Science",
+        "History",
+        "Sports",
+        "Movies",
+        "Geography",
+        "Literature"
+    ]
+    const [selectedCategory, setSelectedCategory] = useState(categoryOptions[0])
     const [participants, setParticipants] = useState([])
     const navigate = useNavigate()
+
+    const handleCategoriesChange = (value) => {
+        setSelectedCategory(value)
+    }
+
+    const handleAddCategory = () => {
+        if (!categories.includes(selectedCategory)) {
+            setCategories(prev => [...prev, selectedCategory])
+        }
+    }
+
+    const handleRemoveCategory = (cat) => {
+        setCategories(prev => prev.filter(c => c !== cat))
+    }
 
     const handleParticipantCheck = () => {
         const inputData = document.getElementById('participants').value
@@ -169,7 +194,7 @@ export default function CreateQuiz() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ title, description, participants, visibility: visible })
+            body: JSON.stringify({ title, description, participants, visibility: visible, categories })
         }).then(res => res.json())
         .then(data => {
             if (data.status == "success") {
@@ -207,7 +232,7 @@ export default function CreateQuiz() {
     return (
         <main className="min-h-screen">
             <Navigation />
-            <div className="max-w-5xl mx-auto mt-5 flex flex-col bg-white rounded shadow-sm p-5">
+            <div className="max-w-5xl mx-auto mt-5 flex flex-col bg-white text-gray-700 rounded shadow-sm p-5">
                 <h2 className="text-2xl font-bold mb-4">Create Quiz</h2>
                 <form name="createForm" onSubmit={handleSubmit}>
                     <div className="w-full bg-white rounded shadow-sm p-5 mb-5">
@@ -224,12 +249,13 @@ export default function CreateQuiz() {
                         <textarea
                             id="description"
                             rows={3}
-                            className="border border-gray-300 rounded p-2 mb-4 w-full"
+                            className="border border-gray-300 rounded p-2 mb-2 w-full"
                             placeholder="Enter quiz description"
                             value={description}
                             onChange={(e) => (setDescription(e.target.value))}
                         />
-                        <div className="flex gap-3 mb-2">
+                        <p className="text-sm font-medium mb-2">Visibility settings</p>
+                        <div className="flex gap-3 mb-3">
                             <label htmlFor="publicVisibility">
                                 <input onChange={handleVisibilityChange} checked={!visible} className="mr-1" type="radio" name="public" id="publicVisibility" value="public"/>
                                 Public
@@ -252,13 +278,13 @@ export default function CreateQuiz() {
                                     <button
                                         type="button"
                                         onClick={handleParticipantCheck}
-                                        className="ml-2 mt-2 text-gray-700 hover:text-gray-900 w-5 cursor-pointer"
+                                        className="ml-2 mt-2 hover:text-gray-900 w-5 cursor-pointer"
                                     >
                                     <Icons icon="plus" />
                                     </button>
                                 </div>
                                 <p className="text-sm font-medium mb-2">Participant list</p>
-                                <div className="border border-gray-300 rounded p-2 mb-2">
+                                <div className="border border-gray-300 rounded p-2 mb-3">
                                     {participants.length === 0 ?
                                         <p>None</p>
                                         :
@@ -281,6 +307,46 @@ export default function CreateQuiz() {
                                 </div>
                             </>
                         }
+                        <div className="flex flex-col mb-4">
+                            <label htmlFor="categories" className="text-sm font-medium mb-2">Categories</label>
+                            <div className="flex gap-2">
+                                <select
+                                    id="categories"
+                                    value={selectedCategory}
+                                    onChange={e => handleCategoriesChange(e.target.value)}
+                                    className="px-4 py-2 border border-gray-300 rounded"
+                                >
+                                    {categoryOptions.map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={handleAddCategory}
+                                    className="flex items-center cursor-pointer space-x-2 px-2 py-1 bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition-colors text-sm"
+                                >
+                                    <Icons icon="plus" className="w-4 h-4 inline-block mr-1" />
+                                    <span>Add</span>
+                                </button>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {categories.length > 0 &&
+                                    categories.map(cat => (
+                                        <div key={cat} className="flex items-center align-middle border-1 border-gray-300 bg-gray-100 px-3 py-1 rounded-full">
+                                            <span>{cat}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveCategory(cat)}
+                                                className="ml-2 text-red-500 hover:text-red-700 w-4 cursor-pointer"
+                                                title="Remove"
+                                            >
+                                                <Icons icon="bin" />
+                                            </button>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        </div>
                         {questions.map((q, questionId) => (
                             <div key={questionId} className="block text-sm font-medium mb-2 bg-white shadow-sm rounded p-5">
                                 <div className="flex justify-between items-center mb-2">
@@ -301,7 +367,7 @@ export default function CreateQuiz() {
                                     required
                                 />
                                 <div className="mb-4">
-                                    <label htmlFor={`selectType-${questionId}`} className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
+                                    <label htmlFor={`selectType-${questionId}`} className="block text-sm font-medium mb-2">Question Type</label>
                                     <select
                                         id={`selectType-${questionId}`}
                                         value={q.answerType}

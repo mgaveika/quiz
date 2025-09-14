@@ -3,7 +3,7 @@ const QuizQuestions = require("../models/QuizQuestion")
 const User = require("../models/Users")
 
 class QuizService {
-    static async createQuiz({title, description, creator, participants, visibility}) {
+    static async createQuiz({title, description, creator, participants, visibility, categories}) {
         try {
             const existingQuiz = await Quiz.where("title").equals(title).where("creator").equals(creator)
             if (existingQuiz.length > 0) {
@@ -14,7 +14,8 @@ class QuizService {
                 description,
                 creator,
                 participants,
-                visibility
+                visibility,
+                categories
             })
             return newQuiz
         } catch (err) {

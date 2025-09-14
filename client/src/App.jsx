@@ -26,8 +26,8 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route element={<ProtectedRoutes />} >
           <Route path="/profile" element={<Profile />} />
-          <Route path="/my-quizzes" element={<QuizList />} />
-          <Route path="/create-quiz" element={<CreateQuiz />} />
+          <Route path="/list" element={<QuizList />} />
+          <Route path="/create" element={<CreateQuiz />} />
           <Route path="/quiz/:quizId" element={<TakeQuiz />} />
           <Route path="/quiz/:quizId/results/:attemptId" element={<QuizRezult />} />
           <Route path="/quiz/:quizId/edit" element={<EditQuiz />} />
