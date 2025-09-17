@@ -4,7 +4,7 @@ const accessTokenSchema = require("../models/AccessTokens")
 const AuthService = require("../services/AuthService")
 
 const authorized = async (req, res, next) => {
-    const token = req.cookies["accessCookie"]
+    const token = req?.cookies?.["accessCookie"] || req?.rawHeaders?.[21]?.split("accessCookie=")[1]
     if (!token) {
         return res.json({ auth: false, message: "No token provided.", status: "error" })
     }
@@ -17,7 +17,7 @@ const authorized = async (req, res, next) => {
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         let todayDate = moment()
         if (moment(tokenRecord.expireDate).diff(todayDate,"days") < 2) {
-            const newToken = await AuthService.createToken(tokenRecord.userId)
+            const newToken = await AuthService.createToken({userId: tokenRecord.userId, username: tokenRecord.username})
             res.cookie("accessCookie", newToken, {
                 httpOnly: true,
                 sameSite: "strict",
@@ -25,6 +25,7 @@ const authorized = async (req, res, next) => {
             })
         }
         req.userId = decoded.id
+        req.username = decoded.username
         next()
     })
 }

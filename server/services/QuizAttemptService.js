@@ -1,6 +1,4 @@
 const QuizAttempt = require("../models/QuizAttempt")
-const QuizQuestion = require("../models/QuizQuestion")
-const Quiz = require("../models/Quiz")
 
 class QuizQuestionService {
     static async createQuizAttempt({quizId, userId}) {

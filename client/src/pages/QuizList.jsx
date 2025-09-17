@@ -3,11 +3,13 @@ import Navigation from "../components/Navigation.jsx"
 import { Link, useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 import Icons from "../components/Icons.jsx"
+import categoryOptions from "../utils/Categories.json"
 
 export default function QuizList() {
     const [privateQuizzes, setPrivateQuizzes] = useState([])
     const [publicQuizzes, setPublicQuizzes] = useState([])
     const [userAttempts, setUserAttempts] = useState([])
+    const [filter, setFilter] = useState([])
     const navigate = useNavigate()
     useEffect(() => {
         fetch("/api/quizzes", {
@@ -37,6 +39,16 @@ export default function QuizList() {
         return attempt ? attempt._id : null;
     }
 
+    const handleFilterChange = (c) => {
+        if (filter.includes(c)) {
+            setFilter(prev => (
+                prev.filter(val => val !== c)
+            ))
+        } else {
+            setFilter(prev => ([...prev, c]))
+        }
+    }
+
     async function handleDeleteQuiz(quizId) {
         fetch(`/api/quizzes/${quizId}`, {
             method: "DELETE",
@@ -58,7 +70,7 @@ export default function QuizList() {
     return (
         <main className="min-h-screen">
             <Navigation />
-            <div className="max-w-5xl mx-auto mt-5 flex flex-col">
+            <div className="max-w-5xl mx-auto mt-5 flex flex-col text-gray-700">
                 <div className="flex justify-end mb-3">
                     <Link to="/create" className="bg-purple-700 hover:bg-purple-800 cursor-pointer text-white px-4 py-2 rounded w-40 font-bold flex items-center justify-center">
                         <Icons icon="plus" className="w-4 h-4 inline-block mr-1" />
@@ -74,20 +86,25 @@ export default function QuizList() {
                             {privateQuizzes.map(q => (
                                 <li key={q._id} className="bg-white shadow-sm p-3 flex justify-between">
                                     <Link to={`/quiz/${q._id}`} className="font-semibold">{q.title}</Link>
-                                    <div className="flex items-center">
-                                        {getAttemptId(q._id) && <button type="button"
-                                            className="ml-2 text-gray-500 hover:text-gray-900 w-5 h-5 cursor-pointer"
-                                            onClick={() => navigate(`/quiz/${q._id}/results/${getAttemptId(q._id)}`)}
-                                        >
-                                            <Icons icon="history"/>
-                                        </button>}
+                                    <div className="flex items-center gap-2">
+                                        {q.categories.map(c => (
+                                            <div key={c + q.title} className="text-sm rounded-full border-1 border-gray-200 bg-gray-100 px-2">{c}</div>
+                                        ))}
+                                        {getAttemptId(q._id) && 
+                                            <button type="button"
+                                                className="text-gray-500 hover:text-gray-900 w-5 h-5 cursor-pointer"
+                                                onClick={() => navigate(`/quiz/${q._id}/results/${getAttemptId(q._id)}`)}
+                                            >
+                                                <Icons icon="history"/>
+                                            </button>
+                                        }
                                         <button type="button" onClick={() => navigate(`/quiz/${q._id}/edit`)}
-                                            className="ml-2 text-gray-500 hover:text-gray-900 w-5 h-5 cursor-pointer"
+                                            className="text-gray-500 hover:text-gray-900 w-5 h-5 cursor-pointer"
                                         >
                                             <Icons icon="pen"/>
                                         </button>
                                         <button type="button" onClick={() => handleDeleteQuiz(q._id)}
-                                            className="ml-2 text-red-500 hover:text-red-700 w-5 h-5 cursor-pointer"
+                                            className="text-red-500 hover:text-red-700 w-5 h-5 cursor-pointer"
                                         >
                                             <Icons icon="bin"/>
                                         </button>
@@ -96,6 +113,11 @@ export default function QuizList() {
                             ))}
                         </ul>
                     )}
+                </div>
+                <div className="flex gap-2 mb-3">
+                    {categoryOptions.map(c => (
+                        <button onClick={() => handleFilterChange(c)} key={c} className={`border-1 ${filter.includes(c) ? "bg-gray-200 border-purple-700" : "bg-gray-100 border-gray-200"} border-gray-200 hover:bg-gray-200 transform duration-300 px-2 py-1 rounded-full`}>{c}</button>
+                    ))}
                 </div>
                 <div className="w-full bg-white rounded shadow-sm p-5">
                     <h2 className="text-2xl font-bold mb-4">Public quizzes</h2>

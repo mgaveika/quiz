@@ -4,22 +4,14 @@ import { useNavigate, useParams } from "react-router-dom"
 import toast from "react-hot-toast"
 import Icons from "../components/Icons.jsx"
 import Avatar from "../components/Avatar.jsx"
+import categoryOptions from "../utils/Categories.json"
 
 export default function EditQuiz() {
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
-    const [visible, setVisible] = useState(false)
+    const [visibility, setVisibility] = useState(false)
     const [questions, setQuestions] = useState([])
     const [categories, setCategories] = useState([])
-    const categoryOptions = [
-        "Music",
-        "Science",
-        "History",
-        "Sports",
-        "Movies",
-        "Geography",
-        "Literature"
-    ]
     const [selectedCategory, setSelectedCategory] = useState(categoryOptions[0])
     const [participants, setParticipants] = useState([])
     const navigate = useNavigate()
@@ -32,7 +24,7 @@ export default function EditQuiz() {
             if (data.status == "success") {
                 setTitle(data.data.quiz.title)
                 setDescription(data.data.quiz.description)
-                setVisible(data.data.quiz.visibility)
+                setVisibility(data.data.quiz.visibility)
                 setQuestions(data.data.quizQuestions.map(quest => ({
                     questionText: quest.questionText,
                     options: quest.options,
@@ -42,7 +34,7 @@ export default function EditQuiz() {
                 setCategories(data.data.quiz.categories)
             } else {
                 toast.error(data.message)
-                navigate("/my-quizzes")
+                navigate("/list")
             }
         })
     }, [])
@@ -179,7 +171,7 @@ export default function EditQuiz() {
     }
 
     const handleVisibilityChange = (e) => {
-        setVisible(() => (e.target.name === "public" ? false : true) )
+        setVisibility(() => (e.target.name === "public" ? false : true) )
     }
 
     const handleSubmit = async (e) => {
@@ -190,7 +182,7 @@ export default function EditQuiz() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ title, description, participants, visibility: visible, categories })
+            body: JSON.stringify({ title, description, participants, visibility, categories })
         })
         .then(res => res.json())
         .then(data => {
@@ -223,7 +215,7 @@ export default function EditQuiz() {
                             })
                         }
                         toast.success(data.message)
-                        navigate("/my-quizzes")
+                        navigate("/list")
                     } else if (data.status == "error")  {
                         toast.error(data.message)
                     } else {
@@ -241,7 +233,7 @@ export default function EditQuiz() {
     return (
         <main className="min-h-screen">
             <Navigation />
-            <div className="max-w-5xl mx-auto mt-5 flex flex-col bg-white rounded shadow-sm p-5">
+            <div className="max-w-5xl mx-auto mt-5 flex flex-col bg-white text-gray-700 rounded shadow-sm p-5">
                 <h2 className="text-2xl font-bold mb-4">Edit Quiz</h2>
                 <form name="editForm" onSubmit={handleSubmit}>
                     <div className="w-full bg-white rounded shadow-sm p-5 mb-5">
@@ -265,15 +257,15 @@ export default function EditQuiz() {
                         />
                         <div className="flex gap-3 mb-2">
                             <label htmlFor="publicVisibility">
-                                <input onChange={handleVisibilityChange} checked={!visible} value={!visible} className="mr-1" type="radio" name="public" id="publicVisibility"/>
+                                <input onChange={handleVisibilityChange} checked={!visibility} value={!visibility} className="mr-1" type="radio" name="public" id="publicVisibility"/>
                                 Public
                             </label>
                             <label htmlFor="privateVisibility">
-                                <input onChange={handleVisibilityChange} checked={visible} value={visible} className="mr-1" type="radio" name="private" id="privateVisibility"/>
+                                <input onChange={handleVisibilityChange} checked={visibility} value={visibility} className="mr-1" type="radio" name="private" id="privateVisibility"/>
                                 Private
                             </label>
                         </div>
-                        {visible && 
+                        {visibility && 
                             <>
                                 <div className="flex align-middle w-full">
                                     <label htmlFor="participants" className="block text-sm font-medium mb-2">Add participants
@@ -286,7 +278,7 @@ export default function EditQuiz() {
                                     <button
                                         type="button"
                                         onClick={handleParticipantCheck}
-                                        className="ml-2 mt-2 text-gray-700 hover:text-gray-900 w-5 cursor-pointer"
+                                        className="ml-2 mt-2 hover:text-gray-900 w-5 cursor-pointer"
                                     >
                                     <Icons icon="plus" />
                                     </button>
@@ -298,7 +290,7 @@ export default function EditQuiz() {
                                         :
                                         <div className="flex gap-1">
                                         {participants.map((p,id) => (
-                                            <div key={id} className="flex gap-1 px-2 py-1 border border-gray-400 rounded w-fit">
+                                            <div key={id} className="flex gap-1 px-2 py-1 bg-white shadow-sm border-1 border-gray-200 rounded w-fit">
                                                 <Avatar size="30px" fontSize="15px" name={p.name} />
                                                 <p>{p.name}</p>
                                                 <button
@@ -375,7 +367,7 @@ export default function EditQuiz() {
                                     required
                                 />
                                 <div className="mb-4">
-                                    <label htmlFor={`selectType-${questionId}`} className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
+                                    <label htmlFor={`selectType-${questionId}`} className="block text-sm font-medium mb-2">Question Type</label>
                                     <select
                                         id={`selectType-${questionId}`}
                                         onChange={e => handleTypeChange(questionId, e.target.value)}

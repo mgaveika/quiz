@@ -11,9 +11,11 @@ import Home from "./pages/Home.jsx"
 import Profile from "./pages/Profile.jsx"
 import QuizList from "./pages/QuizList.jsx"
 import CreateQuiz from "./pages/CreateQuiz.jsx"
-import TakeQuiz from "./pages/TakeQuiz.jsx"
+import QuizHome from "./pages/QuizHome.jsx"
 import QuizRezult from "./pages/QuizRezult.jsx"
 import EditQuiz from "./pages/EditQuiz.jsx"
+import Room from "./pages/Room.jsx"
+import Play from "./pages/Play.jsx"
 
 import ProtectedRoutes from "./utils/ProtectedRoutes.jsx"
 
@@ -28,7 +30,9 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/list" element={<QuizList />} />
           <Route path="/create" element={<CreateQuiz />} />
-          <Route path="/quiz/:quizId" element={<TakeQuiz />} />
+          <Route path="/quiz/:quizId" element={<QuizHome />} />
+          <Route path="/room/:code" element={<Room />} />
+          <Route path="/room/:code/live" element={<Play />} />
           <Route path="/quiz/:quizId/results/:attemptId" element={<QuizRezult />} />
           <Route path="/quiz/:quizId/edit" element={<EditQuiz />} />
         </Route>

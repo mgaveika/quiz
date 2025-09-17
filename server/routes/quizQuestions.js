@@ -19,20 +19,6 @@ router.post('/', async (req, res) => {
     }
 })
 
-/*router.put('/:id', async (req, res) => {
-    try {
-        const updatedQuizQuestion = await QuizQuestionService.updateQuizQuestion(req.body.quizId, req.body.order, {
-            questionText: req.body.questionText,
-            options: req.body.options,
-            correctAnswer: req.body.correctAnswer,
-            order: req.body.order
-        })
-        res.json({ data: updatedQuizQuestion, message: "Question updated successfully!" , status: "success" })
-    } catch (err) {
-        res.json({ data: null, message: err.message , status: "error" })
-    }
-})*/
-
 router.delete('/:id', async (req, res) => {
     try {
         const {id} = req.params

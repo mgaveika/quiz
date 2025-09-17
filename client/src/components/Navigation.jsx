@@ -59,7 +59,7 @@ export default function Navigation() {
                         <div className="py-1">
                             <div className="mx-2 px-2 py-2 text-sm text-gray-700 text-left border-b-1 border-gray-200">{auth.user.username}</div>
                             <Link to="/profile"><button className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left cursor-pointer">Profile</button></Link>
-                            <Link to="/my-quizzes"><button className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left cursor-pointer">My Quizzes</button></Link>
+                            <Link to="/list"><button className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left cursor-pointer">My Quizzes</button></Link>
                             <button onClick={logout} className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left cursor-pointer">Log out</button>
                         </div>
                     </div>

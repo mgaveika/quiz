@@ -1,7 +1,5 @@
 const express = require('express')
 const QuizService = require('../services/QuizService')
-const { rawListeners } = require('../models/Quiz')
-
 
 const router = express.Router()
 
@@ -24,12 +22,25 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const data = await QuizService.getUserQuizzes({userId: req.userId})
-        res.json({ data: data, message: "Recieved user quizzes.", status: "success" })
+        const userId = req.userId
+        const privateQuizzes = await QuizService.getUserQuizzes({userId})
+        const publicQuizzes = await QuizService.getPublicQuizzes({userId})
+        res.json({ data: {privateQuizzes, publicQuizzes}, message: "Recieved all quizzes.", status: "success" })
     } catch (err) {
         res.json({ data: null, message: err.message , status: "error" })
     }
 })
+
+// router.get('/filter/:array', async (req, res) => {
+//     try {
+//         const userId = req.userId
+//         const {array} = req.params
+//         const privateQuizzes = await QuizService.getFilteredQuizzes({userId, array})
+//         res.json({ data: {privateQuizzes, publicQuizzes}, message: "Recieved filtered quizzes.", status: "success" })
+//     } catch (err) {
+//         res.json({ data: null, message: err.message , status: "error" })
+//     }
+// })
 
 router.get('/:id', async (req, res) => {
     try {
@@ -43,14 +54,15 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
-        const {title,description,participants,visibility} = req.body
+        const {title,description,participants,visibility,categories} = req.body
         const {id} = req.params
         const data = await QuizService.updateQuiz({id, updatedData: {
             title,
             description,
             creator: req.userId,
             participants,
-            visibility
+            visibility,
+            categories
         }})
         res.json({ data: data, message: "Quiz updated successfully!", status: "success"  })
     } catch (err) {

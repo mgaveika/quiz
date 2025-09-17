@@ -1,6 +1,7 @@
 const Quiz = require("../models/Quiz")
 const QuizQuestions = require("../models/QuizQuestion")
 const User = require("../models/Users")
+const mongoose = require('mongoose')
 
 class QuizService {
     static async createQuiz({title, description, creator, participants, visibility, categories}) {
@@ -26,11 +27,32 @@ class QuizService {
     static async getUserQuizzes({userId}) {
         try {
             const privateQuizzes = await Quiz.find({ creator: userId })
+            return privateQuizzes
+        } catch (err) {
+            throw err
+        }
+    }
+    
+    static async getPublicQuizzes({userId}) {
+        try {
             const publicQuizzes = await Quiz.find({
                 participants: { $elemMatch: { user: userId } },
                 creator: { $ne: userId }
             })
-            return {privateQuizzes, publicQuizzes}
+            return publicQuizzes
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async getFilteredQuizzes({userId, array}) {
+        try {
+            const filteredQuizzes = await Quiz.find({
+                participants: { $elemMatch: { user: userId } },
+                creator: { $ne: userId },
+                categories: { $all: array}
+            })
+            return filteredQuizzes
         } catch (err) {
             throw err
         }
@@ -38,19 +60,22 @@ class QuizService {
 
     static async getQuizById({id, userId}) {
         try {
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                throw new Error("Quiz not found")
+            }
             const quiz = await Quiz.findById(id)
             if (!quiz) { 
-                throw new Error("No Quiz found!") 
+                throw new Error("Quiz not found") 
             }
             const quizQuestions = await QuizQuestions.find({quizId: id})
             if (!quizQuestions) { 
-                throw new Error("No Quiz questions found!") 
+                throw new Error("Quiz questions not found") 
             }
-            const user = await User.findById(userId)
+            const user = await User.findById(quiz.creator)
             const username = user ? user.username : "N/A"
 
             if (String(quiz.creator) === userId) {
-                return {quiz, quizQuestions, username}
+                return {quiz, quizQuestions, username, creator: true}
             } else {
                 let allowed = false
                 quiz.participants.map((part) => {
@@ -59,7 +84,7 @@ class QuizService {
                     }
                 })
                 if (allowed) {
-                    return {quiz, quizQuestions, username}
+                    return {quiz, quizQuestions, username, creator: false}
                 } else {
                     throw new Error("You're not allowed to visit this page!")
                 }

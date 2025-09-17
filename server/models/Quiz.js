@@ -24,6 +24,7 @@ const quizSchema = new mongoose.Schema({
     },
     categories: {
         type: [String],
+        default: []
     }
 })
 

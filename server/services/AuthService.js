@@ -15,9 +15,9 @@ async function hashPassword({password}) {
 }
 
 class AuthService {
-    static async createToken({userId}) {
+    static async createToken({userId, username}) {
         await accessTokenSchema.deleteMany({userId: userId})
-        const newToken = jwt.sign({ id: userId }, process.env.JWT_SECRET)
+        const newToken = jwt.sign({ id: userId, username: username }, process.env.JWT_SECRET)
         let today = moment()
         today.add(7, "days")
         await accessTokenSchema.create({userId: userId, token: newToken, expireDate: today})
@@ -36,7 +36,7 @@ class AuthService {
                     if (existingAccessToken) {
                         return { token: existingAccessToken.token }
                     }
-                    const token = await this.createToken({userId: user[0].id})
+                    const token = await this.createToken({userId: user[0].id, username: user[0].username})
                     return { token: token }
                 }
             }

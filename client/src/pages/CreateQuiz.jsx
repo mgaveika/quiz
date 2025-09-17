@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 import Icons from "../components/Icons.jsx"
 import Avatar from "../components/Avatar.jsx"
+import categoryOptions from "../utils/Categories.json"
 
 export default function CreateQuiz() {
     const [title, setTitle] = useState("")
@@ -20,15 +21,6 @@ export default function CreateQuiz() {
         }
     ])
     const [categories, setCategories] = useState([])
-    const categoryOptions = [
-        "Music",
-        "Science",
-        "History",
-        "Sports",
-        "Movies",
-        "Geography",
-        "Literature"
-    ]
     const [selectedCategory, setSelectedCategory] = useState(categoryOptions[0])
     const [participants, setParticipants] = useState([])
     const navigate = useNavigate()
@@ -57,19 +49,21 @@ export default function CreateQuiz() {
                     toast.error("User has already been added")
                 }
             })
-            fetch(`/api/user/${inputData}`, {
-                credentials: "include",
-            }).then(res => res.json())
-            .then(data => {
-                if (data.status == "success") {
-                    if (!checkStatus) {
-                        setParticipants((prev) => [...prev, {option: inputData, user: data.data[0]._id}])
-                        document.getElementById('participants').value = ""
+            if (!checkStatus) {
+                fetch(`/api/user/${inputData}`, {
+                    credentials: "include",
+                }).then(res => res.json())
+                .then(data => {
+                    if (data.status == "success") {
+                        if (!checkStatus) {
+                            setParticipants((prev) => [...prev, {option: inputData, user: data.data[0]._id}])
+                            document.getElementById('participants').value = ""
+                        }
+                    } else {
+                        toast.error(data.message)
                     }
-                } else {
-                    toast.error(data.message)
-                }
-            })
+                })
+            }
         }
     }
 
@@ -220,7 +214,7 @@ export default function CreateQuiz() {
                     })
                 }
                 toast.success(data.message)
-                navigate("/my-quizzes")
+                navigate("/list")
             } else if (data.status == "error")  {
                 toast.error(data.message)
             } else {
@@ -290,7 +284,7 @@ export default function CreateQuiz() {
                                         :
                                         <div className="flex gap-1">
                                         {participants.map((p,id) => (
-                                            <div key={id} className="flex gap-1 px-2 py-1 border border-gray-400 rounded w-fit">
+                                            <div key={id} className="flex gap-1 px-2 py-1 bg-white shadow-sm border-1 border-gray-200 rounded w-fit">
                                                 <Avatar size="30px" fontSize="15px" name={p.option} />
                                                 <p>{p.option}</p>
                                                 <button
