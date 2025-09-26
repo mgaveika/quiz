@@ -39,7 +39,7 @@ export default function QuizHome() {
             .then(data => {
                 if (data.status == "success") {
                     toast.success(data.message)
-                    navigate(`room/${data.data.code}`)
+                    navigate(`/room/${data.data.code}`)
                 } else {
                     toast.error(data.message)
                     navigate("/list")

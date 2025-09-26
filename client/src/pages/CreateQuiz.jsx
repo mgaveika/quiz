@@ -23,6 +23,9 @@ export default function CreateQuiz() {
     const [categories, setCategories] = useState([])
     const [selectedCategory, setSelectedCategory] = useState(categoryOptions[0])
     const [participants, setParticipants] = useState([])
+    const [participantSearch, setParticipantSearch] = useState("")
+    const [searchResults, setSearchResults] = useState([])
+    const [showDropdown, setShowDropdown] = useState(false)
     const navigate = useNavigate()
 
     const handleCategoriesChange = (value) => {
@@ -39,32 +42,41 @@ export default function CreateQuiz() {
         setCategories(prev => prev.filter(c => c !== cat))
     }
 
-    const handleParticipantCheck = () => {
-        const inputData = document.getElementById('participants').value
-        if (inputData !== "") {
-            let checkStatus = false
-            participants.map((part) => {
-                if (part.name === inputData) {
-                    checkStatus = true
-                    toast.error("User has already been added")
-                }
-            })
-            if (!checkStatus) {
-                fetch(`/api/user/${inputData}`, {
+    const handleParticipantSearch = async (searchTerm) => {
+        setParticipantSearch(searchTerm)
+        if (searchTerm.trim().length > 0) {
+            try {
+                const response = await fetch(`/api/user/search/${searchTerm}?limit=5`, {
                     credentials: "include",
-                }).then(res => res.json())
-                .then(data => {
-                    if (data.status == "success") {
-                        if (!checkStatus) {
-                            setParticipants((prev) => [...prev, {option: inputData, user: data.data[0]._id}])
-                            document.getElementById('participants').value = ""
-                        }
-                    } else {
-                        toast.error(data.message)
-                    }
                 })
+                const data = await response.json()
+                if (data.status === "success") {
+                    // Filter out already added participants
+                    const filteredResults = data.data.filter(user => 
+                        !participants.some(p => p.user === user._id)
+                    )
+                    setSearchResults(filteredResults)
+                    setShowDropdown(filteredResults.length > 0)
+                } else {
+                    setSearchResults([])
+                    setShowDropdown(false)
+                }
+            } catch (error) {
+                console.error('Search error:', error)
+                setSearchResults([])
+                setShowDropdown(false)
             }
+        } else {
+            setSearchResults([])
+            setShowDropdown(false)
         }
+    }
+
+    const handleSelectParticipant = (user) => {
+        setParticipants(prev => [...prev, { option: user.username, user: user._id }])
+        setParticipantSearch("")
+        setSearchResults([])
+        setShowDropdown(false)
     }
 
     const handleParticipantDelete = (participantIndex) => {
@@ -261,21 +273,32 @@ export default function CreateQuiz() {
                         </div>
                         {visible &&
                             <>
-                                <div className="flex align-middle w-full">
+                                <div className="relative w-full">
                                     <label htmlFor="participants" className="block text-sm font-medium mb-2">Add participants
                                         <input
                                             id="participants"
                                             className="border border-gray-300 rounded p-2 mb-2 w-full mt-2"
-                                            placeholder="Enter participant name"
+                                            placeholder="Start typing participant name..."
+                                            value={participantSearch}
+                                            onChange={(e) => handleParticipantSearch(e.target.value)}
+                                            onFocus={() => participantSearch.length > 0 && setShowDropdown(searchResults.length > 0)}
+                                            onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                                         />
                                     </label>
-                                    <button
-                                        type="button"
-                                        onClick={handleParticipantCheck}
-                                        className="ml-2 mt-2 hover:text-gray-900 w-5 cursor-pointer"
-                                    >
-                                    <Icons icon="plus" />
-                                    </button>
+                                    {showDropdown && (
+                                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-b shadow-lg z-10 max-h-60 overflow-y-auto">
+                                            {searchResults.map((user) => (
+                                                <div
+                                                    key={user._id}
+                                                    className="p-3 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                                                    onClick={() => handleSelectParticipant(user)}
+                                                >
+                                                    <Avatar size="30px" fontSize="15px" name={user.username} />
+                                                    <span>{user.username}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                                 <p className="text-sm font-medium mb-2">Participant list</p>
                                 <div className="border border-gray-300 rounded p-2 mb-3">

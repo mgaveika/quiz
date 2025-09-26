@@ -2,32 +2,38 @@ module.exports = (io) => {
     io.on('connection', (socket) => {
         socket.on('join-room', async ({ code }) => {
             socket.join(code)
-            let participantsSet = new Set();
+            let participantsMap = new Map();
             await io.in(code).fetchSockets().then((sockets) => {
                 sockets.forEach((socket) => {
                     if (socket.request.userId) {
-                        participantsSet.add({username: socket.request.username, userId: socket.request.userId})
+                        participantsMap.set(socket.request.userId, {
+                            username: socket.request.username, 
+                            userId: socket.request.userId
+                        })
                     }
                 })
             }).catch((err) => {
                 console.error('Error fetching sockets:', err)
             })
-            io.to(code).emit("user-joined", {participants: Array.from(participantsSet)})
+            io.to(code).emit("user-joined", {participants: Array.from(participantsMap.values())})
         })
 
         socket.on('leave-room', async ({ code }) => {
             socket.leave(code)
-                let participantsSet = new Set();
+                let participantsMap = new Map()
                 await io.in(code).fetchSockets().then((sockets) => {
                     sockets.forEach((s) => {
                         if (s.request.userId) {
-                            participantsSet.add({username: s.request.username, userId: s.request.userId})
+                            participantsMap.set(s.request.userId, {
+                                username: s.request.username, 
+                                userId: s.request.userId
+                            })
                         }
                     })
                 }).catch((err) => {
                     console.error('Error fetching sockets:', err)
                 })
-                io.to(code).emit("user-left", {participants: Array.from(participantsSet)})
+                io.to(code).emit("user-left", {participants: Array.from(participantsMap.values())})
         })
 
         socket.on('remove-participant', async ({ code, username }) => {
@@ -42,17 +48,20 @@ module.exports = (io) => {
             }).catch((err) => {
                 console.error('Error removing participant:', err)
             })
-            let participantsSet = new Set()
+            let participantsMap = new Map()
             await io.in(code).fetchSockets().then((sockets) => {
                 sockets.forEach((s) => {
                     if (s.request.userId) {
-                        participantsSet.add(s.request.username)
+                        participantsMap.set(s.request.userId, {
+                            username: s.request.username, 
+                            userId: s.request.userId
+                        })
                     }
                 })
             }).catch((err) => {
                 console.error('Error fetching sockets:', err)
             })
-            io.to(code).emit("user-left", {participants: Array.from(participantsSet)})
+            io.to(code).emit("user-left", {participants: Array.from(participantsMap.values())})
         })
 
         socket.on('disconnect', () => {
@@ -60,17 +69,20 @@ module.exports = (io) => {
             const rooms = Array.from(socket.rooms).filter(room => room !== socket.id)
             rooms.forEach(async (code) => {
                 socket.leave(code)
-                let participantsSet = new Set()
+                let participantsMap = new Map()
                 await io.in(code).fetchSockets().then((sockets) => {
                     sockets.forEach((s) => {
                         if (s.request.userId) {
-                            participantsSet.add(s.request.username)
+                            participantsMap.set(s.request.userId, {
+                                username: s.request.username, 
+                                userId: s.request.userId
+                            })
                         }
                     })
                 }).catch((err) => {
                     console.error('Error fetching sockets:', err)
                 })
-                io.to(code).emit("user-left", { participants: Array.from(participantsSet) })
+                io.to(code).emit("user-left", { participants: Array.from(participantsMap.values()) })
             })
         })
     })

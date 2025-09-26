@@ -1,5 +1,5 @@
 export default function Avatar(props) {
-    const char = props.name[0]
+    const char = props.name?.[0] || 'a'
     const colorsList = {
         a: '#F44336',
         b: '#E91E63',
@@ -30,28 +30,28 @@ export default function Avatar(props) {
     }
     const convertedLetter = char.normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
+    .toLowerCase()
     const color = colorsList[convertedLetter] || "#F44336"
-    const size = props.size
-    const sizeFont = props.fontSize
+    const size = props.size || "20px"
+    const sizeFont = props.fontSize || "10px"
     return (
         <div
-        style={{
-            backgroundColor: color,
-            width: size,
-            height: size,
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontWeight: 'bold',
-            fontSize: sizeFont,
-            userSelect: 'none',
-            ...(props.outline ? { outline: props.outline } : {})
-        }}
-        >
-        {char.toUpperCase()}
-    </div>
+            style={{
+                backgroundColor: color,
+                width: size,
+                height: size,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: sizeFont,
+                userSelect: 'none',
+                ...(props.outline ? { outline: props.outline } : {})
+            }}
+            >
+            {char.toUpperCase()}
+        </div>
     )
 }

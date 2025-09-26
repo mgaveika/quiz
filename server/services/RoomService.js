@@ -39,9 +39,9 @@ class RoomService {
 
     static async getRoomByCode({code}) {
         try {
-            if (typeof code !== 'number' || !Number.isFinite(code)) {
-                throw new Error("Room not found")
-            }
+            // if (typeof code !== 'number' || !Number.isFinite(code)) {
+            //     throw new Error("Room not foundaaaaaaaaaa")
+            // }
             const room = await Room.findOne({ code })
             if (!room) {
                 throw new Error("Room not found")

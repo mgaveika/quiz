@@ -29,7 +29,7 @@ export default function Room() {
             socket.emit("leave-room", {code})
             socket.disconnect()
         }
-        navigate(`/quiz/${roomData.room.quizId}`)
+        navigate(`/list`)
     }
 
     const startGame = () => {

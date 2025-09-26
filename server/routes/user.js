@@ -19,6 +19,17 @@ router.post('/updatePassword', async (req, res) => {
     }
 })
 
+router.get('/search/:query', async (req, res) => {
+    try {
+        const { query } = req.params
+        const { limit = 5 } = req.query
+        const data = await UserService.searchUsers({ query, limit: parseInt(limit) })
+        res.json({ data: data, message: `Found users matching: ${query}`, status: "success" })
+    } catch (err) {
+        res.json({ data: null, message: err.message, status: "error" })
+    }
+})
+
 router.get('/:name', async (req, res) => {
     try {
         const {name} = req.params

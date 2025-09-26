@@ -46,6 +46,20 @@ class AuthService {
         }
     }
 
+    static async searchUsers({query, limit = 5}) {
+        try {
+            const users = await User.find({
+                username: { $regex: query, $options: 'i' }
+            })
+            .select('username _id')
+            .limit(limit)
+            .exec()
+            return users
+        } catch(err) {
+            throw err
+        }
+    }
+
     static async getUserByName({name}) {
         try {
             const user = await User.find({username: name})
