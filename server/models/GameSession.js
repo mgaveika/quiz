@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const ParticipantSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Users',
     required: true
   },
   answer: { // pašreizējā atbilde

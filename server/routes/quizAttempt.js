@@ -1,6 +1,5 @@
 const express = require('express')
 const QuizAttemptService = require('../services/QuizAttemptService')
-const Quiz = require("../models/Quiz");
 
 const router = express.Router()
 

@@ -26,7 +26,7 @@ export default function QuizHome() {
     const handleClick = (action) => {
         if (action === "back") {
             navigate("/list")
-        } else if (action === "host") {
+        } else if (action === "start") {
             setQuizData(null)
             fetch("/api/room/create", {
                 method: "POST",
@@ -45,8 +45,6 @@ export default function QuizHome() {
                     navigate("/list")
                 }
             })
-        } else if (action === "single") {
-
         }
     }
 
@@ -78,15 +76,9 @@ export default function QuizHome() {
                             </button>
                             <button 
                                 onClick={() => handleClick("start")}
-                                className="flex items-center cursor-pointer px-5 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
-                            >
-                                Start Quiz
-                            </button>
-                            <button 
-                                onClick={() => handleClick("host")}
                                 className="flex items-center cursor-pointer px-5 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors"
                             >
-                                Host Live
+                                Start Quiz
                             </button>
                         </div>
                     </div>

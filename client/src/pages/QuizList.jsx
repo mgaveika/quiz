@@ -8,7 +8,6 @@ import categoryOptions from "../utils/Categories.json"
 export default function QuizList() {
     const [privateQuizzes, setPrivateQuizzes] = useState([])
     const [publicQuizzes, setPublicQuizzes] = useState([])
-    const [userAttempts, setUserAttempts] = useState([])
     const [filter, setFilter] = useState([])
     const navigate = useNavigate()
     useEffect(() => {
@@ -20,24 +19,11 @@ export default function QuizList() {
             if (data.status === "success") {
                 setPrivateQuizzes(data.data.privateQuizzes || [])
                 setPublicQuizzes(data.data.publicQuizzes || [])
-                fetch("/api/quiz-attempt", {
-                    credentials: 'include'
-                })
-                .then(res => res.json())
-                .then(data2 => {
-                    setUserAttempts(data2.data || [])
-                })
             } else {
                 toast.error(data.message)
             }
         })
     }, [])
-
-    function getAttemptId(quizId) {
-        if (!Array.isArray(userAttempts)) return null;
-        const attempt = userAttempts.find(a => a.quizId === quizId);
-        return attempt ? attempt._id : null;
-    }
 
     const handleFilterChange = (c) => {
         if (filter.includes(c)) {
@@ -90,14 +76,6 @@ export default function QuizList() {
                                         {q.categories.map(c => (
                                             <div key={c + q.title} className="text-sm rounded-full border-1 border-gray-200 bg-gray-100 px-2">{c}</div>
                                         ))}
-                                        {getAttemptId(q._id) && 
-                                            <button type="button"
-                                                className="text-gray-500 hover:text-gray-900 w-5 h-5 cursor-pointer"
-                                                onClick={() => navigate(`/quiz/${q._id}/results/${getAttemptId(q._id)}`)}
-                                            >
-                                                <Icons icon="history"/>
-                                            </button>
-                                        }
                                         <button type="button" onClick={() => navigate(`/quiz/${q._id}/edit`)}
                                             className="text-gray-500 hover:text-gray-900 w-5 h-5 cursor-pointer"
                                         >

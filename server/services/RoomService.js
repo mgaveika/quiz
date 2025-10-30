@@ -39,9 +39,6 @@ class RoomService {
 
     static async getRoomByCode({code}) {
         try {
-            // if (typeof code !== 'number' || !Number.isFinite(code)) {
-            //     throw new Error("Room not foundaaaaaaaaaa")
-            // }
             const room = await Room.findOne({ code })
             if (!room) {
                 throw new Error("Room not found")
@@ -80,9 +77,6 @@ class RoomService {
 
     static async getSessionByCode({code, userId}) {
         try {
-            if (typeof code !== 'number' || !Number.isFinite(code)) {
-                throw new Error("Room not found")
-            }
             const room = await Room.findOne({ code })
             if (!room) {
                 throw new Error("Room not found")
@@ -99,7 +93,7 @@ class RoomService {
             if (!quiz) {
                 throw new Error("Quiz not found")
             }
-            const quizQuestions = await QuizQuestion.find(room.quizId)
+            const quizQuestions = await QuizQuestion.find({quizId: room.quizId})
             if (!quizQuestions) {
                 throw new Error("Quiz questions not found")
             }

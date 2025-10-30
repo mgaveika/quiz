@@ -2,7 +2,7 @@ module.exports = (io) => {
     io.on('connection', (socket) => {
         socket.on('join-room', async ({ code }) => {
             socket.join(code)
-            let participantsMap = new Map();
+            let participantsMap = new Map()
             await io.in(code).fetchSockets().then((sockets) => {
                 sockets.forEach((socket) => {
                     if (socket.request.userId) {
@@ -62,6 +62,10 @@ module.exports = (io) => {
                 console.error('Error fetching sockets:', err)
             })
             io.to(code).emit("user-left", {participants: Array.from(participantsMap.values())})
+        })
+
+        socket.on('start-game', ({ code }) => {
+            io.to(code).emit("start-game")
         })
 
         socket.on('disconnect', () => {

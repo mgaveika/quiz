@@ -31,17 +31,6 @@ router.get('/', async (req, res) => {
     }
 })
 
-// router.get('/filter/:array', async (req, res) => {
-//     try {
-//         const userId = req.userId
-//         const {array} = req.params
-//         const privateQuizzes = await QuizService.getFilteredQuizzes({userId, array})
-//         res.json({ data: {privateQuizzes, publicQuizzes}, message: "Recieved filtered quizzes.", status: "success" })
-//     } catch (err) {
-//         res.json({ data: null, message: err.message , status: "error" })
-//     }
-// })
-
 router.get('/:id', async (req, res) => {
     try {
         const {id} = req.params

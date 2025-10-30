@@ -46,7 +46,11 @@ export default function Room() {
         .then(data => {
             if (data.status == "success") {
                 toast.success(data.message)
-                navigate(`/room/${code}/live`)
+                // Notify all participants that game has started
+                if (socket) {
+                    socket.emit("start-game", { code })
+                }
+                //navigate(`/room/${code}/live`)
             } else {
                 toast.error(data.message)
                 navigate("/list")
@@ -87,6 +91,10 @@ export default function Room() {
             setParticipants(participants)
         })
 
+        socket.on("start-game", () => {
+            navigate(`/room/${code}/live`)
+        })
+
         socket.on("removed-from-room", () => {
             toast.error("You have been kicked out of a room.")
             navigate(`/quiz/${roomData.room.quizId}`)
@@ -98,6 +106,7 @@ export default function Room() {
                 socket.disconnect()
                 socket.off("user-joined")
                 socket.off("user-left")
+                socket.off("start-game")
                 socket.off("removed-from-room")
             }
         }

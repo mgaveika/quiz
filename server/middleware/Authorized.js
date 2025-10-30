@@ -31,7 +31,7 @@ const authorized = async (req, res, next) => {
                 })
             }
         }
-        req.userId = decoded.id
+        req.userId = decoded.userId
         req.username = decoded.username
         next()
     })
