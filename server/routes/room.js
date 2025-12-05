@@ -48,5 +48,27 @@ router.post('/:code/start', async (req, res) => {
     }
 })
 
+router.get('/:code/status', async (req, res) => {
+    try {
+        const {code} = req.params
+        const userId = req.userId
+        const data = await RoomService.getSessionStatus({code, userId})
+        res.json({ data: data, message: `Room ${code} status received`, status: "success" })
+    } catch (err) {
+        res.json({ data: null, message: err.message, status: "error" })
+    }
+})
+
+router.post('/:code/answer', async (req, res) => {
+    try {
+        const {code} = req.params
+        const userId = req.userId
+        const {questionIndex, selectedAnswers, timeUsed} = req.body
+        const data = await RoomService.submitAnswer({code, userId, questionIndex, selectedAnswers, timeUsed})
+        res.json({ data: data, message: "Answer submitted successfully", status: "success" })
+    } catch (err) {
+        res.json({ data: null, message: err.message, status: "error" })
+    }
+})
 
 module.exports = router

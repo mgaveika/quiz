@@ -8,28 +8,10 @@ export default function QuizRezult() {
     const {attemptId} = useParams()
     const [result, setResult] = useState(null)
     const [stars, setStars] = useState({sum: -1, saved: -1})
-    function renderStars() {
-        let starsArray = []
-        for (let i = 0; i < 5; i++) {
-            starsArray.push(
-                <span
-                    key={i}
-                    className="cursor-pointer"
-                    onClick={() => setStars(prev => ({ ...prev, sum: i, saved: i }))}
-                    onMouseEnter={() => setStars(prev => ({ ...prev, sum: i }))}
-                    onMouseLeave={() => setStars(prev => ({ ...prev, sum: -1 }))}
-                >
-                    <Icons
-                        className={`w-5 h-5 ${(i <= stars.sum || i <= stars.saved) ? "text-yellow-400" : ""}`}
-                        icon="star"
-                    />
-                </span>
-            )
-        }
-        return <div className="flex justify-center text-gray-400">{starsArray}</div>
-    }
-
-    const handleRate = () => {
+    
+    const handleRate = (rating) => {
+        setStars(prev => ({ ...prev, saved: rating }))
+        
         fetch(`/api/quiz-attempt/${attemptId}`, {
             method: "PUT",
             credentials: "include",
@@ -39,88 +21,212 @@ export default function QuizRezult() {
             body: JSON.stringify({
                 questionId: false,
                 answer: false,
-                rating: stars.saved+1
+                rating: rating + 1  // This saves as 1-5 in database
             })
         })
         .then(res => res.json())
         .then(data => {
             if (data.status == "success") {
-                toast.success(data.message);
+                toast.success("Rating saved!");
             } else {
                 toast.error(data.message);
             }
         })
     }
+    
     useEffect(() => {
         fetch(`/api/quiz-attempt/${attemptId}`, {
             credentials: "include"
         }).then(res => res.json())
         .then(data => {
             setResult(data.data)
-            setStars((prev) => ({...prev, saved: data.data.attempt.rating}))
+            // Fix: Convert from 1-5 database value back to 0-4 for UI
+            const dbRating = data.data.attempt.rating
+            const uiRating = dbRating > 0 ? dbRating - 1 : -1
+            setStars((prev) => ({...prev, saved: uiRating}))
         })
     }, [])
+
+    if (result === null) {
+        return (
+            <>
+                <Navigation />
+                <div className="flex items-center justify-center h-screen">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+                </div>
+            </>
+        )
+    }
+
+    const scorePercentage = (result.attempt.score / result.questions.length) * 100
+    const getScoreColor = () => {
+        if (scorePercentage >= 80) return 'text-green-600'
+        if (scorePercentage >= 60) return 'text-yellow-600'
+        return 'text-red-600'
+    }
+
+    const getScoreBgColor = () => {
+        if (scorePercentage >= 80) return 'from-green-500 to-green-600'
+        if (scorePercentage >= 60) return 'from-yellow-500 to-yellow-600'
+        return 'from-red-500 to-red-600'
+    }
 
     return (
         <>
             <Navigation />
-            {result === null ? 
-                <div className="flex items-center justify-center h-screen">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
-                </div>
-            : (
-                <>
-                <div className="max-w-5xl bg-white rounded shadow-sm mx-auto p-5 mt-5 flex flex-col">
-                    <Icons icon="trophy" className="text-white bg-purple-800 w-20 h-20 p-5 mx-auto rounded-full" />
-                    <h2 className="text-2xl font-bold text-center">{result.quiz.title}</h2>
-                    <p className="text-gray-600 text-center mt-5">{result.quiz.description}</p>
-                    <div className="flex flex-col mx-auto w-100">
-                        <div className="flex mt-2">
-                            <p className="text-center font-semibold" style={{ width: `${result.attempt.score/result.questions.length*100}%` }}>{result.attempt.score/result.questions.length*100}%</p>
-                            <p className="text-center font-semibold" style={{ width: `${(result.questions.length-result.attempt.score)/result.questions.length*100}%` }}>{(result.questions.length-result.attempt.score)/result.questions.length*100}%</p>
+            <div className="min-h-screen">
+                <div className="max-w-4xl mx-auto px-4 mt-5">
+                    
+                    {/* Results Header Card - Redesigned */}
+                    <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex-1">
+                                <div className="flex items-center gap-4 mb-3">
+                                    <div className={`w-16 h-16 rounded-full bg-gradient-to-r ${getScoreBgColor()} flex items-center justify-center shadow-md`}>
+                                        <Icons icon="trophy" className="w-8 h-8 text-white" />
+                                    </div>
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-gray-800 mb-1">{result.quiz.title}</h1>
+                                        <p className="text-gray-600 text-sm">{result.quiz.description}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Score Display - More compact */}
+                            <div className="text-right">
+                                <div className="text-lg">
+                                    {result.attempt.score}/{result.questions.length} correct
+                                </div>
+                            </div>
                         </div>
-                        <div
-                            className="h-2 w-full rounded-full"
-                            style={{
-                                background: `linear-gradient(90deg,rgba(11, 184, 11, 1) ${result.attempt.score/result.questions.length*100}%, rgba(184, 11, 11, 1) 100%)`
-                            }}
-                        ></div>
+
+                        {/* Progress Bar - Slimmer */}
+                        <div className="mb-6">
+                            <div className="flex justify-between text-xs font-medium text-gray-600 mb-2">
+                                <span>Progress Overview</span>
+                                <span>{Math.round(scorePercentage)}% completed correctly</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 shadow-inner">
+                                <div 
+                                    className={`h-2 bg-gradient-to-r ${getScoreBgColor()} rounded-full transition-all duration-1000 ease-out`}
+                                    style={{ width: `${scorePercentage}%` }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        {/* Rating Section - Column layout */}
+                        <div className="border-t border-gray-200 pt-6">
+                            <div className="flex flex-col items-center text-center">
+                                <h3 className="text-lg font-semibold text-gray-700 mb-2">Rate this quiz</h3>
+                                <div className="text-sm text-gray-500 mb-4">
+                                    {stars.saved >= 0 ? `Your rating: ${stars.saved + 1}/5 stars` : 'Click stars to rate'}
+                                </div>
+                                <div className="flex gap-1">
+                                    {Array.from({ length: 5 }, (_, i) => (
+                                        <span
+                                            key={i}
+                                            className="cursor-pointer transition-all hover:scale-110"
+                                            onClick={() => handleRate(i)}
+                                            onMouseEnter={() => setStars(prev => ({ ...prev, sum: i }))
+                                            }
+                                            onMouseLeave={() => setStars(prev => ({ ...prev, sum: -1 }))
+                                            }
+                                        >
+                                            <Icons
+                                                className={`w-6 h-6 transition-colors ${(i <= stars.sum || i <= stars.saved) ? "text-yellow-400" : "text-gray-300"}`}
+                                                icon="star"
+                                            />
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                        <span className="mx-auto mt-4 text-gray-400">{stars.saved + 1} out of 5</span>
-                        {renderStars()}
-                        <button onClick={() => handleRate()}className="mx-auto mt-2 items-center w-fit cursor-pointer px-3 py-1 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors">Rate</button>
-                </div>
-                {result.questions.map((question, qid) => (
-                    <div key={qid} className="max-w-5xl bg-white rounded shadow-sm mx-auto gap-y-2 p-5 mt-5 flex flex-col">
-                        <div className="flex justify-between">
-                            <span className="font-bold mb-3" >{question.questionText}</span>
-                            <span className="text-gray-400">{qid + 1} of {result.questions.length}</span>
-                        </div>
-                        {question.options.map((option, oid) => {
+
+                    {/* Question Results */}
+                    <div className="space-y-6">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <div className="w-1 h-6 bg-blue-600 rounded"></div>
+                            Question Review
+                        </h2>
+                        
+                        {result.questions.map((question, qid) => {
                             const answerObj = result.attempt.answers.find(a => a.questionId === question._id)
                             const userAnswer = answerObj ? answerObj.answer : null
-                            const isUserAnswer = Array.isArray(userAnswer) && userAnswer.includes(oid)
-                            const isCorrect = option.correctAnswer
+                            const isQuestionCorrect = question.options.some(opt => 
+                                opt.correctAnswer && Array.isArray(userAnswer) && userAnswer.includes(question.options.indexOf(opt))
+                            )
+
                             return (
-                                <div
-                                    key={oid}
-                                    className={`w-full p-4 cursor-pointer text-left border-2 rounded-xl
-                                    ${isUserAnswer && isCorrect ? "border-green-600 bg-green-50" : 
-                                        isUserAnswer && !isCorrect ? "border-red-600 bg-red-50" : 
-                                        isCorrect ? "border-green-200 bg-green-50" : "border-gray-200"
-                                    }    
-                                    `}
-                                >
-                                    <span className="text-gray-900">
-                                        {option.option}
-                                    </span>
+                                <div key={qid} className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                                    {/* Question Header */}
+                                    <div className="flex items-start justify-between mb-6">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                                    isQuestionCorrect 
+                                                        ? 'bg-green-100 text-green-800' 
+                                                        : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                    {isQuestionCorrect ? 'Correct' : 'Incorrect'}
+                                                </span>
+                                            </div>
+                                            <h3 className="text-lg font-semibold text-gray-800 leading-relaxed">
+                                                {question.questionText}
+                                            </h3>
+                                        </div>
+                                        <div className="text-sm text-gray-500 ml-4">
+                                            {qid + 1} of {result.questions.length}
+                                        </div>
+                                    </div>
+
+                                    {/* Answer Options */}
+                                    <div className="space-y-3">
+                                        {question.options.map((option, oid) => {
+                                            const isUserAnswer = Array.isArray(userAnswer) && userAnswer.includes(oid)
+                                            const isCorrect = option.correctAnswer
+                                            
+                                            let optionStyle = "border-gray-200 bg-gray-50"
+                                            let iconColor = "text-gray-400"
+                                            let icon = null
+                                            
+                                            if (isUserAnswer && isCorrect) {
+                                                optionStyle = "border-green-300 bg-green-50"
+                                                iconColor = "text-green-600"
+                                                icon = "check"
+                                            } else if (isUserAnswer && !isCorrect) {
+                                                optionStyle = "border-red-300 bg-red-50"
+                                                iconColor = "text-red-600"
+                                                icon = "wrong"
+                                            } else if (!isUserAnswer && isCorrect) {
+                                                optionStyle = "border-green-200 bg-green-25 ring-2 ring-green-100"
+                                                iconColor = "text-green-500"
+                                                icon = "check"
+                                            }
+
+                                            return (
+                                                <div
+                                                    key={oid}
+                                                    className={`flex items-center p-4 border-2 rounded-lg transition-all ${optionStyle}`}
+                                                >
+                                                    <div className={`flex items-center justify-center w-6 h-6 rounded-full mr-2 ${iconColor}`}>
+                                                        {icon  &&
+                                                            <Icons icon={icon} className="w-4 h-4" />
+                                                        }
+                                                    </div>
+                                                    <span className="text-gray-800 font-medium flex-1">
+                                                        {option.option}
+                                                    </span>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
                                 </div>
                             )
                         })}
                     </div>
-                ))}
-                </>
-            )}
+                </div>
+            </div>
         </>
     );
 }

@@ -34,7 +34,6 @@ export default function Room() {
 
     const startGame = () => {
         let newParticipantsArr = participants.map(p => ({ user: p.userId }))
-        console.log(newParticipantsArr)
         fetch(`/api/room/${code}/start`, {
             method: "POST",
             credentials: 'include',

@@ -33,7 +33,7 @@ export default function App() {
           <Route path="/quiz/:quizId" element={<QuizHome />} />
           <Route path="/room/:code" element={<Room />} />
           <Route path="/room/:code/live" element={<Play />} />
-          <Route path="/quiz/:quizId/results/:attemptId" element={<QuizRezult />} />
+          <Route path="/quiz/result/:attemptId" element={<QuizRezult />} />
           <Route path="/quiz/:quizId/edit" element={<EditQuiz />} />
         </Route>
       </Routes>
