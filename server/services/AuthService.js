@@ -17,10 +17,10 @@ async function hashPassword({password}) {
 class AuthService {
     static async createToken({userId, username}) {
         await accessTokenSchema.deleteMany({userId: userId})
-        const newToken = jwt.sign({ userId: userId, username: username }, process.env.JWT_SECRET)
+        const newToken = jwt.sign({ userId: userId, username }, process.env.JWT_SECRET)
         let today = moment()
         today.add(7, "days")
-        await accessTokenSchema.create({userId: userId, username: username, token: newToken, expireDate: today})
+        await accessTokenSchema.create({userId: userId, username, token: newToken, expireDate: today})
         return newToken
     }
     static async login({email, password}) {
