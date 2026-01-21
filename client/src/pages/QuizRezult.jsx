@@ -5,13 +5,13 @@ import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 
 export default function QuizRezult() {
-    const {attemptId} = useParams()
+    const { attemptId } = useParams()
     const [result, setResult] = useState(null)
-    const [stars, setStars] = useState({sum: -1, saved: -1})
-    
+    const [stars, setStars] = useState({ sum: -1, saved: -1 })
+
     const handleRate = (rating) => {
         setStars(prev => ({ ...prev, saved: rating }))
-        
+
         fetch(`/api/quiz-attempt/${attemptId}`, {
             method: "PUT",
             credentials: "include",
@@ -21,30 +21,30 @@ export default function QuizRezult() {
             body: JSON.stringify({
                 questionId: false,
                 answer: false,
-                rating: rating + 1  // This saves as 1-5 in database
+                rating: rating + 1
             })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status == "success") {
-                toast.success("Rating saved!");
-            } else {
-                toast.error(data.message);
-            }
-        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status == "success") {
+                    toast.success("Rating saved!");
+                } else {
+                    toast.error(data.message);
+                }
+            })
     }
-    
+
     useEffect(() => {
         fetch(`/api/quiz-attempt/${attemptId}`, {
             credentials: "include"
         }).then(res => res.json())
-        .then(data => {
-            setResult(data.data)
-            // Fix: Convert from 1-5 database value back to 0-4 for UI
-            const dbRating = data.data.attempt.rating
-            const uiRating = dbRating > 0 ? dbRating - 1 : -1
-            setStars((prev) => ({...prev, saved: uiRating}))
-        })
+            .then(data => {
+                setResult(data.data)
+                // Fix: Convert from 1-5 database value back to 0-4 for UI
+                const dbRating = data.data.attempt.rating
+                const uiRating = dbRating > 0 ? dbRating - 1 : -1
+                setStars((prev) => ({ ...prev, saved: uiRating }))
+            })
     }, [])
 
     if (result === null) {
@@ -59,11 +59,6 @@ export default function QuizRezult() {
     }
 
     const scorePercentage = (result.attempt.score / result.questions.length) * 100
-    const getScoreColor = () => {
-        if (scorePercentage >= 80) return 'text-green-600'
-        if (scorePercentage >= 60) return 'text-yellow-600'
-        return 'text-red-600'
-    }
 
     const getScoreBgColor = () => {
         if (scorePercentage >= 80) return 'from-green-500 to-green-600'
@@ -76,8 +71,8 @@ export default function QuizRezult() {
             <Navigation />
             <div className="min-h-screen">
                 <div className="max-w-4xl mx-auto px-4 mt-5">
-                    
-                    {/* Results Header Card - Redesigned */}
+
+                    {/* Results Header Card */}
                     <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex-1">
@@ -91,8 +86,8 @@ export default function QuizRezult() {
                                     </div>
                                 </div>
                             </div>
-                            
-                            {/* Score Display - More compact */}
+
+                            {/* Score Display */}
                             <div className="text-right">
                                 <div className="text-lg">
                                     {result.attempt.score}/{result.questions.length} correct
@@ -100,21 +95,21 @@ export default function QuizRezult() {
                             </div>
                         </div>
 
-                        {/* Progress Bar - Slimmer */}
+                        {/* Progress Bar */}
                         <div className="mb-6">
                             <div className="flex justify-between text-xs font-medium text-gray-600 mb-2">
                                 <span>Progress Overview</span>
                                 <span>{Math.round(scorePercentage)}% completed correctly</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2 shadow-inner">
-                                <div 
+                                <div
                                     className={`h-2 bg-gradient-to-r ${getScoreBgColor()} rounded-full transition-all duration-1000 ease-out`}
                                     style={{ width: `${scorePercentage}%` }}
                                 ></div>
                             </div>
                         </div>
 
-                        {/* Rating Section - Column layout */}
+                        {/* Rating Section */}
                         <div className="border-t border-gray-200 pt-6">
                             <div className="flex flex-col items-center text-center">
                                 <h3 className="text-lg font-semibold text-gray-700 mb-2">Rate this quiz</h3>
@@ -149,13 +144,30 @@ export default function QuizRezult() {
                             <div className="w-1 h-6 bg-blue-600 rounded"></div>
                             Question Review
                         </h2>
-                        
+
                         {result.questions.map((question, qid) => {
                             const answerObj = result.attempt.answers.find(a => a.questionId === question._id)
                             const userAnswer = answerObj ? answerObj.answer : null
-                            const isQuestionCorrect = question.options.some(opt => 
-                                opt.correctAnswer && Array.isArray(userAnswer) && userAnswer.includes(question.options.indexOf(opt))
-                            )
+
+                            // Determine if answer is correct
+                            let isQuestionCorrect = false
+                            if (question.answerType === "single") {
+                                if (typeof userAnswer === 'number') {
+                                    isQuestionCorrect = question.options[userAnswer]?.correctAnswer || false
+                                } else if (Array.isArray(userAnswer) && userAnswer.length === 1) {
+                                    isQuestionCorrect = question.options[userAnswer[0]]?.correctAnswer || false
+                                }
+                            } else if (question.answerType === "multi") {
+                                if (Array.isArray(userAnswer)) {
+                                    const correctIndices = question.options
+                                        .map((opt, idx) => opt.correctAnswer ? idx : null)
+                                        .filter(idx => idx !== null)
+
+                                    isQuestionCorrect = correctIndices.length === userAnswer.length &&
+                                        correctIndices.every(idx => userAnswer.includes(idx)) &&
+                                        userAnswer.every(idx => correctIndices.includes(idx))
+                                }
+                            }
 
                             return (
                                 <div key={qid} className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
@@ -163,11 +175,10 @@ export default function QuizRezult() {
                                     <div className="flex items-start justify-between mb-6">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                                    isQuestionCorrect 
-                                                        ? 'bg-green-100 text-green-800' 
-                                                        : 'bg-red-100 text-red-800'
-                                                }`}>
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${isQuestionCorrect
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'
+                                                    }`}>
                                                     {isQuestionCorrect ? 'Correct' : 'Incorrect'}
                                                 </span>
                                             </div>
@@ -185,11 +196,11 @@ export default function QuizRezult() {
                                         {question.options.map((option, oid) => {
                                             const isUserAnswer = Array.isArray(userAnswer) && userAnswer.includes(oid)
                                             const isCorrect = option.correctAnswer
-                                            
+
                                             let optionStyle = "border-gray-200 bg-gray-50"
                                             let iconColor = "text-gray-400"
                                             let icon = null
-                                            
+
                                             if (isUserAnswer && isCorrect) {
                                                 optionStyle = "border-green-300 bg-green-50"
                                                 iconColor = "text-green-600"
@@ -210,7 +221,7 @@ export default function QuizRezult() {
                                                     className={`flex items-center p-4 border-2 rounded-lg transition-all ${optionStyle}`}
                                                 >
                                                     <div className={`flex items-center justify-center w-6 h-6 rounded-full mr-2 ${iconColor}`}>
-                                                        {icon  &&
+                                                        {icon &&
                                                             <Icons icon={icon} className="w-4 h-4" />
                                                         }
                                                     </div>

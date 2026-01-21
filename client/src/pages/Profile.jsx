@@ -3,28 +3,58 @@ import Navigation from "../components/Navigation.jsx"
 import Avatar from "../components/Avatar.jsx"
 import DeleteAccount from "../components/DeleteAccount.jsx"
 import toast from "react-hot-toast"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import QuizList from "../components/QuizList.jsx"
 
 export default function Profile() {
     const [auth, setAuth] = useState({ isAuthenticated: false, user: null })
     const [activeTab, setActiveTab] = useState("profile");
     const [deleteAccount, setDeleteAccount] = useState(false)
+    const [quizes, setQuizes] = useState([])
+    const [totalPages, setTotalPages] = useState(1)
+    const [totalQuizzes, setTotalQuizzes] = useState(1)
+    const [searchParams, setSearchParams] = useSearchParams()
+    const page = searchParams.get("page") && Number(searchParams.get("page")) ? Number(searchParams.get("page")) : 1
     const navigate = useNavigate()
+
+    const handleTabSwitch = (tab) => {
+        setActiveTab(tab)
+        if (tab !== "quizes") {
+            // Maybe reset page? But keep it simple for now or clear params
+        }
+    }
+
+    useEffect(() => {
+        if (activeTab === "quizes") {
+            fetch(`/api/quizzes/private?page=${page}`, {
+                credentials: 'include'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status == "success") {
+                        setQuizes(data.data.privateQuizzes)
+                        setTotalPages(data.data.totalPages)
+                        setTotalQuizzes(data.data.totalQuizzes)
+                    } else {
+                        toast.error(data.message)
+                    }
+                })
+        }
+    }, [activeTab, page])
 
     function logout() {
         fetch("/api/user/logout", {
             method: "POST",
             credentials: 'include'
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status == "success") {
-                //setAuth({ loading: false, isAuthenticated: false, user: null })
-                navigate("/login")
-            } else {
-                toast.error(data.message)
-            }
-        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status == "success") {
+                    navigate("/login")
+                } else {
+                    toast.error(data.message)
+                }
+            })
     }
 
     async function confirmDeleteAccount() {
@@ -32,15 +62,15 @@ export default function Profile() {
             method: "DELETE",
             credentials: 'include'
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status == "success") {
-                toast.success(data.message)
-                logout()
-            } else {
-                toast.error(data.message)
-            }
-        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status == "success") {
+                    toast.success(data.message)
+                    logout()
+                } else {
+                    toast.error(data.message)
+                }
+            })
     }
 
     async function handleSubmit(event) {
@@ -60,26 +90,26 @@ export default function Profile() {
                 confirmNewPassword
             }),
         }).then(res => res.json())
-        .then(data => {
-            if (data.status == "success") {
-                toast.success(data.message)
-                logout()
-            } else if (data.status == "error")  {
-                toast.error(data.message)
-            } else {
-                toast(data.message)
-            }
-        })
+            .then(data => {
+                if (data.status == "success") {
+                    toast.success(data.message)
+                    logout()
+                } else if (data.status == "error") {
+                    toast.error(data.message)
+                } else {
+                    toast(data.message)
+                }
+            })
     }
 
     useEffect(() => {
         fetch("/api/auth/isAuthenticated", {
             credentials: 'include'
         })
-        .then(res => res.json())
-        .then(data => {
-            setAuth({ isAuthenticated: true, user: data.data.user })
-        })
+            .then(res => res.json())
+            .then(data => {
+                setAuth({ isAuthenticated: true, user: data.data.user })
+            })
     }, [])
     return (
         <main className="min-h-screen">
@@ -88,11 +118,11 @@ export default function Profile() {
                 <div className="flex items-center justify-center h-screen">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
                 </div>
-            ) : <> 
+            ) : <>
                 <Navigation />
                 <div className="max-w-5xl bg-white rounded shadow-sm mx-auto mt-5 flex flex-col items-center relative overflow-hidden">
                     <div className="w-full h-25 bg-linear-65 from-purple-500 to-pink-500 absolute z-0"></div>
-                    <div className="mt-20 z-1"><Avatar size="80px" fontSize="40px" name={auth.user.username} outline="20px solid #ffffff"/></div>
+                    <div className="mt-20 z-1"><Avatar size="80px" fontSize="40px" name={auth.user.username} outline="20px solid #ffffff" /></div>
                     <span className="font-bold text-lg z-1">{auth.user.username}</span>
                     <span className="font-thin text-gray-700">{auth.user.email}</span>
                     <div className="flex gap-6 mt-5 h-15">
@@ -102,7 +132,7 @@ export default function Profile() {
                         </div>
                         <div className="flex flex-col cursor-default items-center px-2 hover:border-b-3 border-blue-700 transform duration-100">
                             <span className="font-bold">Member since</span>
-                            <span className="text-gray-700">{auth.user.createdAt.substring(0,10).replace(/-/g,".")}</span>
+                            <span className="text-gray-700">{auth.user.createdAt.substring(0, 10).replace(/-/g, ".")}</span>
                         </div>
                         <div className="flex flex-col cursor-default items-center px-2 hover:border-b-3 border-blue-700 transform duration-100">
                             <span className="font-bold">Quizes</span>
@@ -113,12 +143,15 @@ export default function Profile() {
                 <div className="flex mt-3 gap-3 max-w-5xl mx-auto mb-5">
                     <div className="flex flex-col w-72 bg-white shadow-sm p-6 rounded h-full">
                         <div className="flex flex-col gap-y-2 flex-grow">
-                            <button onClick={() => setActiveTab("profile")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${ activeTab === "profile" ? "border-r-3 border-blue-700" : "" }`} >
+                            <button onClick={() => handleTabSwitch("profile")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "profile" ? "border-r-3 border-blue-700" : ""}`} >
                                 Profile settings
                             </button>
-                            <button onClick={() => setActiveTab("password")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${ activeTab === "password" ? "border-r-3 border-blue-700" : "" }`} >
+                            <button onClick={() => handleTabSwitch("quizes")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "quizes" ? "border-r-3 border-blue-700" : ""}`} >
+                                My Quizes
+                            </button>
+                            <button onClick={() => handleTabSwitch("password")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "password" ? "border-r-3 border-blue-700" : ""}`} >
                                 Change password
-                             </button>
+                            </button>
                         </div>
                         <button onClick={() => setDeleteAccount(true)} className="bg-red-600 text-white rounded-md cursor-pointer hover:bg-red-700 w-full p-2 mt-20">
                             Delete account
@@ -128,7 +161,7 @@ export default function Profile() {
                         {activeTab === "profile" && (
                             <div>
                                 <h2 className="text-xl font-semibold mb-4">Profile Settings</h2>
-                                <p>Update your profile information here.</p> 
+                                <p>Update your profile information here.</p>
                             </div>
                         )}
                         {activeTab === "password" && (
@@ -141,9 +174,21 @@ export default function Profile() {
                                     <label className="text-sm font-medium mb-2" htmlFor="newPassword">New password</label>
                                     <input type="password" id="newPassword" className="w-full px-3 py-2 mb-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter new password" />
                                     <label className="text-sm font-medium mb-2" htmlFor="confirmNewPassword">Confirm new password</label>
-                                    <input type="password" id="confirmNewPassword" className="w-full px-3 py-2 mb-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Confirm new password"/>
+                                    <input type="password" id="confirmNewPassword" className="w-full px-3 py-2 mb-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Confirm new password" />
                                     <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200">Change password</button>
                                 </form>
+                            </div>
+                        )}
+                        {activeTab === "quizes" && (
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4">My Quizes</h2>
+                                <p>View and manage your created quizes here.</p>
+                                <QuizList
+                                    quizzes={quizes}
+                                    totalPages={totalPages}
+                                    totalQuizzes={totalQuizzes}
+                                    currentPage={page}
+                                />
                             </div>
                         )}
                     </div>

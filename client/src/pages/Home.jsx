@@ -14,14 +14,14 @@ export default function Home() {
         fetch(`/api/room/${code}`, {
             credentials: 'include'
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                navigate(`/room/${code}`)
-            } else {
-                toast.error(data.message)
-            }
-        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    navigate(`/room/${code}`)
+                } else {
+                    toast.error(data.message)
+                }
+            })
     }
 
     return (
@@ -30,10 +30,10 @@ export default function Home() {
             <div className="text-gray-800 flex flex-col">
                 <section className="text-center py-16 px-4">
                     <h2 className="text-4xl md:text-5xl font-extrabold mb-4">
-                    Your Place to Create and Take Quizzes
+                        Your Place to Create and Take Quizzes
                     </h2>
                     <p className="text-lg text-gray-600 mb-8">
-                    Start testing your knowledge or make your own quiz for others to try!
+                        Start testing your knowledge or make your own quiz for others to try!
                     </p>
                     <div className="flex justify-center gap-4">
                         <Link
@@ -46,19 +46,37 @@ export default function Home() {
                             to="/create"
                             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-xl shadow"
                         >
-                            Create a Quiz
+                            Create Quiz
                         </Link>
                     </div>
-                    <div className="max-w-400 mx-auto border-y-1 border-gray-200 bg-gray-50 py-12 rounded-md mt-15">
-                        <p className="mb-1 text-lg font-semibold">Join an Online Quiz Room</p>
-                        <p className="max-w-150 mx-auto">Enter the quiz PIN below to join the fun. Test your knowladge and compete with others in real time!</p>
-                        <div className="w-fit mx-auto text-left mt-5">
-                            <form onSubmit={hangleJoinClick}>
-                                <label className="font-semibold" htmlFor="gamePin">Enter game pin</label>
-                                <div className="flex justify-center gap-3">
-                                    <input onChange={(e) => handleCodeChange(e.target.value)} id="gamePin" type="text" className="bg-white border-1 border-gray-300 px-2 py-1 rounded-md" placeholder="123456"/>
-                                    <button type="submit" className="bg-green-600 rounded-md px-3 py-1 text-white h-fit">Join</button>
+                    <div className="w-full bg-gray-100 mt-5 py-5">
+                        <div className="p-8 bg-white rounded-xl shadow-md max-w-md mx-auto">
+                            <div className="text-center mb-6">
+                                <h3 className="text-2xl font-bold text-gray-800 mb-2">Join a Live Game</h3>
+                                <p className="text-gray-500">Enter the game PIN to jump right in!</p>
+                            </div>
+
+                            <form onSubmit={hangleJoinClick} className="space-y-4">
+                                <div className="relative">
+                                    <input
+                                        onChange={(e) => handleCodeChange(e.target.value.replace(/[^0-9.]/g, ''))}
+                                        value={code}
+                                        type="text"
+                                        className="w-full bg-white border-2 border-gray-100 px-4 py-4 rounded-xl text-center text-2xl font-bold tracking-widest focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-gray-300"
+                                        placeholder="000 000"
+                                        maxLength={6}
+                                    />
                                 </div>
+                                <button
+                                    type="submit"
+                                    disabled={!code}
+                                    className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg ${code
+                                        ? "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+                                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                        }`}
+                                >
+                                    Enter Room
+                                </button>
                             </form>
                         </div>
                     </div>
