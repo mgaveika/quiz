@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import Navigation from "../components/Navigation.jsx"
-import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import toast from "react-hot-toast"
 import Icons from "../components/Icons.jsx"
 import QuizList from "../components/QuizList.jsx"
@@ -10,7 +10,6 @@ export default function PublicQuizzes() {
     const [filter, setFilter] = useState([])
     const [totalPages, setTotalPages] = useState(1)
     const [totalQuizzes, setTotalQuizzes] = useState(0)
-    const navigate = useNavigate()
     const [searchParams, setSearchParams] = useSearchParams()
     const page = searchParams.get("page") && Number(searchParams.get("page")) ? Number(searchParams.get("page")) : 1
 

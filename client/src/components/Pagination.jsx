@@ -43,8 +43,8 @@ export default function Pagination({ currentPage, totalPages, totalQuizzes }) {
     if (totalPages <= 1) return null
 
     const pageNumbers = getPageNumbers()
-    const startRange = (currentPage - 1) * 5 + 1
-    const endRange = Math.min(currentPage * 5, totalQuizzes)
+    const startRange = (currentPage - 1) * 10 + 1
+    const endRange = Math.min(currentPage * 10, totalQuizzes)
 
     return (
         <div className="flex items-center justify-between py-3 border-t border-gray-200 mt-4">
@@ -68,8 +68,7 @@ export default function Pagination({ currentPage, totalPages, totalQuizzes }) {
             <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                 <div>
                     <p className="text-sm text-gray-700">
-                        Showing <span className="font-medium">{startRange}</span> to <span className="font-medium">{endRange}</span> of{' '}
-                        <span className="font-medium">{totalQuizzes}</span> results
+                        Showing <span className="font-medium">{startRange}</span> to <span className="font-medium">{endRange}</span> of <span className="font-medium">{totalQuizzes}</span> results
                     </p>
                 </div>
                 <div>

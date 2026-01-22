@@ -13,20 +13,14 @@ export default function Profile() {
     const [quizes, setQuizes] = useState([])
     const [totalPages, setTotalPages] = useState(1)
     const [totalQuizzes, setTotalQuizzes] = useState(1)
+    const [filter, setFilter] = useState([])
     const [searchParams, setSearchParams] = useSearchParams()
     const page = searchParams.get("page") && Number(searchParams.get("page")) ? Number(searchParams.get("page")) : 1
     const navigate = useNavigate()
 
-    const handleTabSwitch = (tab) => {
-        setActiveTab(tab)
-        if (tab !== "quizes") {
-            // Maybe reset page? But keep it simple for now or clear params
-        }
-    }
-
     useEffect(() => {
         if (activeTab === "quizes") {
-            fetch(`/api/quizzes/private?page=${page}`, {
+            fetch(`/api/quizzes/private?page=${page}&categories=${filter.join(",")}`, {
                 credentials: 'include'
             })
                 .then(res => res.json())
@@ -41,6 +35,18 @@ export default function Profile() {
                 })
         }
     }, [activeTab, page])
+
+    const handleFilterChange = (c) => {
+        setSearchParams({ page: 1 })
+        if (filter.includes(c)) {
+            setFilter(prev => (
+                prev.filter(val => val !== c)
+            ))
+        } else {
+            setFilter(prev => ([...prev, c]))
+        }
+    }
+
 
     function logout() {
         fetch("/api/user/logout", {
@@ -143,13 +149,13 @@ export default function Profile() {
                 <div className="flex mt-3 gap-3 max-w-5xl mx-auto mb-5">
                     <div className="flex flex-col w-72 bg-white shadow-sm p-6 rounded h-full">
                         <div className="flex flex-col gap-y-2 flex-grow">
-                            <button onClick={() => handleTabSwitch("profile")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "profile" ? "border-r-3 border-blue-700" : ""}`} >
+                            <button onClick={() => setActiveTab("profile")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "profile" ? "border-r-3 border-blue-700" : ""}`} >
                                 Profile settings
                             </button>
-                            <button onClick={() => handleTabSwitch("quizes")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "quizes" ? "border-r-3 border-blue-700" : ""}`} >
+                            <button onClick={() => setActiveTab("quizes")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "quizes" ? "border-r-3 border-blue-700" : ""}`} >
                                 My Quizes
                             </button>
-                            <button onClick={() => handleTabSwitch("password")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "password" ? "border-r-3 border-blue-700" : ""}`} >
+                            <button onClick={() => setActiveTab("password")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "password" ? "border-r-3 border-blue-700" : ""}`} >
                                 Change password
                             </button>
                         </div>
@@ -185,6 +191,9 @@ export default function Profile() {
                                 <p>View and manage your created quizes here.</p>
                                 <QuizList
                                     quizzes={quizes}
+                                    showFilter={true}
+                                    selectedFilters={filter}
+                                    onFilterChange={handleFilterChange}
                                     totalPages={totalPages}
                                     totalQuizzes={totalQuizzes}
                                     currentPage={page}

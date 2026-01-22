@@ -23,7 +23,7 @@ router.post('/', async (req, res) => {
 router.get('/private', async (req, res) => {
     try {
         const userId = req.userId
-        const data = await QuizService.getUserQuizzes({ userId })
+        const data = await QuizService.getUserQuizzes({ userId, page: req.query.page, categories: req.query.categories })
         res.json({ data, message: "Recieved all user quizzes.", status: "success" })
     } catch (err) {
         res.json({ data: null, message: err.message, status: "error" })
