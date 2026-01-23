@@ -7,7 +7,7 @@ module.exports = (io) => {
                 sockets.forEach((socket) => {
                     if (socket.request.userId) {
                         participantsMap.set(socket.request.userId, {
-                            username: socket.request.username, 
+                            username: socket.request.username,
                             userId: socket.request.userId
                         })
                     }
@@ -15,25 +15,25 @@ module.exports = (io) => {
             }).catch((err) => {
                 console.error('Error fetching sockets:', err)
             })
-            io.to(code).emit("user-joined", {participants: Array.from(participantsMap.values())})
+            io.to(code).emit("user-joined", { participants: Array.from(participantsMap.values()) })
         })
 
         socket.on('leave-room', async ({ code }) => {
             socket.leave(code)
-                let participantsMap = new Map()
-                await io.in(code).fetchSockets().then((sockets) => {
-                    sockets.forEach((s) => {
-                        if (s.request.userId) {
-                            participantsMap.set(s.request.userId, {
-                                username: s.request.username, 
-                                userId: s.request.userId
-                            })
-                        }
-                    })
-                }).catch((err) => {
-                    console.error('Error fetching sockets:', err)
+            let participantsMap = new Map()
+            await io.in(code).fetchSockets().then((sockets) => {
+                sockets.forEach((s) => {
+                    if (s.request.userId) {
+                        participantsMap.set(s.request.userId, {
+                            username: s.request.username,
+                            userId: s.request.userId
+                        })
+                    }
                 })
-                io.to(code).emit("user-left", {participants: Array.from(participantsMap.values())})
+            }).catch((err) => {
+                console.error('Error fetching sockets:', err)
+            })
+            io.to(code).emit("user-left", { participants: Array.from(participantsMap.values()) })
         })
 
         socket.on('remove-participant', async ({ code, username }) => {
@@ -53,7 +53,7 @@ module.exports = (io) => {
                 sockets.forEach((s) => {
                     if (s.request.userId) {
                         participantsMap.set(s.request.userId, {
-                            username: s.request.username, 
+                            username: s.request.username,
                             userId: s.request.userId
                         })
                     }
@@ -61,7 +61,7 @@ module.exports = (io) => {
             }).catch((err) => {
                 console.error('Error fetching sockets:', err)
             })
-            io.to(code).emit("user-left", {participants: Array.from(participantsMap.values())})
+            io.to(code).emit("user-left", { participants: Array.from(participantsMap.values()) })
         })
 
         socket.on('start-game', ({ code }) => {
@@ -78,7 +78,7 @@ module.exports = (io) => {
                     sockets.forEach((s) => {
                         if (s.request.userId) {
                             participantsMap.set(s.request.userId, {
-                                username: s.request.username, 
+                                username: s.request.username,
                                 userId: s.request.userId
                             })
                         }

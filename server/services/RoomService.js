@@ -321,6 +321,35 @@ class RoomService {
             throw err
         }
     }
+    static async cleanupInactiveRooms() {
+        try {
+            const timeAgo = new Date(Date.now() - 60 * 60 * 1000) // 1h
+
+            const oldSessions = await GameSession.find({
+                updatedAt: { $lt: timeAgo },
+                status: 'in-progress'
+            }).populate('room')
+
+            for (const session of oldSessions) {
+                if (session.room) {
+                    console.log(`Old session cleanup - ${session.room.code}`)
+                    await Room.findByIdAndDelete(session.room._id)
+                }
+                await GameSession.findByIdAndDelete(session._id)
+            }
+
+            const oldRooms = await Room.find({ createdAt: { $lt: timeAgo } })
+            for (const room of oldRooms) {
+                const session = await GameSession.findOne({ room: room._id })
+                if (!session) {
+                    console.log(`Old room cleanup - ${room.code}`)
+                    await Room.findByIdAndDelete(room._id)
+                }
+            }
+        } catch (err) {
+            console.error('Error in cleanupInactiveRooms:', err)
+        }
+    }
 }
 
 module.exports = RoomService

@@ -13,6 +13,8 @@ const { Server } = require("socket.io")
 const server = http.createServer(app)
 const authMiddleware = require("./middleware/Authorized.js")
 
+const RoomService = require("./services/RoomService.js")
+
 const wrap = (middleware) => (socket, next) =>
   middleware(socket.request, {}, next)
 
@@ -26,20 +28,23 @@ const io = new Server(server, {
 io.use(wrap(authMiddleware))
 
 server.listen(socketPort, () => {
-    console.log(`WebSocket is running on port ${socketPort}`)
+  console.log(`WebSocket is running on port ${socketPort}`)
 
 })
 
 require('./socket/roomEvents.js')(io)
 
 mongoose.connect(process.env.MONGO_URI).then(() => {
-    console.log("MongoDB connected successfully.")
+  console.log("MongoDB connected successfully.")
+  setInterval(() => {
+    RoomService.cleanupInactiveRooms()
+  }, 60 * 60 * 1000) // 1h
 }).catch((error) => {
-    console.error("MongoDB connection error:", error)
+  console.error("MongoDB connection error:", error)
 })
 
 app.use(cors({
-    origin: ['http://localhost:5173'],
+  origin: ['http://localhost:5173'],
 }))
 
 app.use(express.json())
@@ -47,5 +52,5 @@ app.use(cookieParser())
 app.use('/api', routes)
 
 app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`)
+  console.log(`Server is running at http://localhost:${port}`)
 })
