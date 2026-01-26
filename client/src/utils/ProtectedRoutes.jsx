@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from "react"
 import { Outlet, Navigate } from "react-router-dom"
-import { userDataContext } from "../utils/AuthContext.jsx"
+import { AuthContext } from "../utils/AuthContext.jsx"
 
 const ProtectedRoutes = () => {
-    const { user } = useContext(userDataContext)
+    const { user } = useContext(AuthContext)
 
     if (!user || !user.auth) return <Navigate to="/login" />
     return <Outlet />

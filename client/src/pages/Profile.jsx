@@ -6,10 +6,10 @@ import toast from "react-hot-toast"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import QuizList from "../components/QuizList.jsx"
 
-import { userDataContext } from "../utils/AuthContext.jsx"
+import { AuthContext } from "../utils/AuthContext.jsx"
 
 export default function Profile() {
-    const { user } = useContext(userDataContext)
+    const { user } = useContext(AuthContext)
     const [activeTab, setActiveTab] = useState("profile");
     const [deleteAccount, setDeleteAccount] = useState(false)
     const [quizes, setQuizes] = useState([])

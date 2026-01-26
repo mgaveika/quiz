@@ -2,10 +2,10 @@ import { useState, useEffect, useContext, useRef } from "react"
 import { Link, useNavigate } from "react-router";
 import Avatar from "../components/Avatar.jsx"
 import Icons from "./Icons.jsx";
-import { userDataContext } from "../utils/AuthContext.jsx"
+import { AuthContext } from "../utils/AuthContext.jsx"
 
 export default function Navigation() {
-    const { user } = useContext(userDataContext)
+    const { user } = useContext(AuthContext)
     const [optionsOpen, setOptionsOpen] = useState(false)
     const dropdownRef = useRef()
     const navigate = useNavigate()

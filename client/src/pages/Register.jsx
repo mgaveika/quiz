@@ -1,11 +1,11 @@
 import { useEffect, useContext } from 'react'
 import { Link, useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
-import { userDataContext } from "../utils/AuthContext.jsx"
+import { AuthContext } from "../utils/AuthContext.jsx"
 
 export default function Register() {
     const navigate = useNavigate()
-    const { user } = useContext(userDataContext)
+    const { user } = useContext(AuthContext)
     async function handleSubmit(event) {
         event.preventDefault()
         const email = event.target.email.value

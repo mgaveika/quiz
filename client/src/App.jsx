@@ -18,12 +18,12 @@ import Room from "./pages/Room.jsx"
 import Play from "./pages/Play.jsx"
 
 import ProtectedRoutes from "./utils/ProtectedRoutes.jsx"
-import AuthContext from "./utils/AuthContext.jsx"
+import { AuthProvider } from "./utils/AuthContext.jsx"
 
 export default function App() {
   return (
     <Router>
-      <AuthContext>
+      <AuthProvider>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
@@ -39,16 +39,14 @@ export default function App() {
             <Route path="/quiz/:quizId/edit" element={<EditQuiz />} />
           </Route>
         </Routes>
-      </AuthContext>
+      </AuthProvider>
     </Router>
   )
 }
 
 createRoot(document.getElementById("root")).render(
-  //<StrictMode>
-  <>
+  <StrictMode>
     <Toaster />
     <App />
-  </>
-  //</StrictMode>
+  </StrictMode>
 )

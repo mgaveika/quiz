@@ -69,8 +69,8 @@ export default function Home() {
                                 </div>
                                 <button
                                     type="submit"
-                                    disabled={!code}
-                                    className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg ${code
+                                    disabled={!code || code.length < 6}
+                                    className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg ${code && code.length === 6
                                         ? "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
                                         : "bg-gray-200 text-gray-400 cursor-not-allowed"
                                         }`}
