@@ -18,25 +18,28 @@ import Room from "./pages/Room.jsx"
 import Play from "./pages/Play.jsx"
 
 import ProtectedRoutes from "./utils/ProtectedRoutes.jsx"
+import AuthContext from "./utils/AuthContext.jsx"
 
 export default function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route element={<ProtectedRoutes />} >
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/list" element={<PublicQuizes />} />
-          <Route path="/create" element={<CreateQuiz />} />
-          <Route path="/quiz/:quizId" element={<QuizHome />} />
-          <Route path="/room/:code" element={<Room />} />
-          <Route path="/room/:code/live" element={<Play />} />
-          <Route path="/quiz/result/:attemptId" element={<QuizRezult />} />
-          <Route path="/quiz/:quizId/edit" element={<EditQuiz />} />
-        </Route>
-      </Routes>
+      <AuthContext>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route element={<ProtectedRoutes />} >
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/list" element={<PublicQuizes />} />
+            <Route path="/create" element={<CreateQuiz />} />
+            <Route path="/quiz/:quizId" element={<QuizHome />} />
+            <Route path="/room/:code" element={<Room />} />
+            <Route path="/room/:code/live" element={<Play />} />
+            <Route path="/quiz/result/:attemptId" element={<QuizRezult />} />
+            <Route path="/quiz/:quizId/edit" element={<EditQuiz />} />
+          </Route>
+        </Routes>
+      </AuthContext>
     </Router>
   )
 }

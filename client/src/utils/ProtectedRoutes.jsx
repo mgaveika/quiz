@@ -1,21 +1,12 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import { Outlet, Navigate } from "react-router-dom"
+import { userDataContext } from "../utils/AuthContext.jsx"
 
 const ProtectedRoutes = () => {
-    const [validated, setValid] = useState(null)
+    const { user } = useContext(userDataContext)
 
-    useEffect(() => {
-        fetch("/api/auth/isAuthenticated", {
-            credentials: 'include'
-        })
-        .then(res => res.json())
-        .then(data => {
-            setValid(data.data?.auth)
-        })
-    }, [])
-
-    if (validated === null) return null
-    return validated ? <Outlet /> : <Navigate to="/login" />
+    if (!user || !user.auth) return <Navigate to="/login" />
+    return <Outlet />
 }
 
 export default ProtectedRoutes

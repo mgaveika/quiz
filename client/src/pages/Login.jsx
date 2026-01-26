@@ -1,9 +1,11 @@
-import { useEffect } from "react"
+import { useEffect, useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
+import { userDataContext } from "../utils/AuthContext.jsx"
 
 export default function Login() {
     const navigate = useNavigate()
+    const { user } = useContext(userDataContext)
     async function handleSubmit(event) {
         event.preventDefault()
         const email = event.target.email.value
@@ -18,31 +20,25 @@ export default function Login() {
                 password
             }),
         }).then(res => res.json())
-        .then(data => {
-            if (data.status == "success") {
-                toast.success(data.message)
-                navigate("/")
-            } else if (data.status == "error")  {
-                toast.error(data.message)
-            } else {
-                toast(data.message)
-            }
-        })
+            .then(data => {
+                if (data.status == "success") {
+                    toast.success(data.message)
+                    navigate("/")
+                } else if (data.status == "error") {
+                    toast.error(data.message)
+                } else {
+                    toast(data.message)
+                }
+            })
     }
     useEffect(() => {
-        fetch("/api/auth/isAuthenticated", {
-            credentials: 'include'
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                navigate("/")
-            }
-        })
-    }, [])
+        if (user && user.auth) {
+            navigate("/")
+        }
+    }, [user])
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
-            <Link to="/"><img src="/quiz.svg" alt="Logo" className="w-14 mb-3"/></Link>
+            <Link to="/"><img src="/quiz.svg" alt="Logo" className="w-14 mb-3" /></Link>
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
                 <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
                 <form onSubmit={handleSubmit} method='post'>

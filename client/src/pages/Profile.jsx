@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useContext } from "react"
 import Navigation from "../components/Navigation.jsx"
 import Avatar from "../components/Avatar.jsx"
 import DeleteAccount from "../components/DeleteAccount.jsx"
@@ -6,8 +6,10 @@ import toast from "react-hot-toast"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import QuizList from "../components/QuizList.jsx"
 
+import { userDataContext } from "../utils/AuthContext.jsx"
+
 export default function Profile() {
-    const [auth, setAuth] = useState({ isAuthenticated: false, user: null })
+    const { user } = useContext(userDataContext)
     const [activeTab, setActiveTab] = useState("profile");
     const [deleteAccount, setDeleteAccount] = useState(false)
     const [quizes, setQuizes] = useState([])
@@ -107,20 +109,10 @@ export default function Profile() {
                 }
             })
     }
-
-    useEffect(() => {
-        fetch("/api/auth/isAuthenticated", {
-            credentials: 'include'
-        })
-            .then(res => res.json())
-            .then(data => {
-                setAuth({ isAuthenticated: true, user: data.data.user })
-            })
-    }, [])
     return (
         <main className="min-h-screen">
             {deleteAccount && <DeleteAccount confirm={confirmDeleteAccount} cancel={() => setDeleteAccount(false)} />}
-            {!(auth.isAuthenticated) ? (
+            {(!user || !user.auth) ? (
                 <div className="flex items-center justify-center h-screen">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
                 </div>
@@ -128,9 +120,9 @@ export default function Profile() {
                 <Navigation />
                 <div className="max-w-5xl bg-white rounded shadow-sm mx-auto mt-5 flex flex-col items-center relative overflow-hidden">
                     <div className="w-full h-25 bg-linear-65 from-purple-500 to-pink-500 absolute z-0"></div>
-                    <div className="mt-20 z-1"><Avatar size="80px" fontSize="40px" name={auth.user.username} outline="20px solid #ffffff" /></div>
-                    <span className="font-bold text-lg z-1">{auth.user.username}</span>
-                    <span className="font-thin text-gray-700">{auth.user.email}</span>
+                    <div className="mt-20 z-1"><Avatar size="80px" fontSize="40px" name={user.user.username} outline="20px solid #ffffff" /></div>
+                    <span className="font-bold text-lg z-1">{user.user.username}</span>
+                    <span className="font-thin text-gray-700">{user.user.email}</span>
                     <div className="flex gap-6 mt-5 h-15">
                         <div className="flex flex-col cursor-default items-center px-2 hover:border-b-3 border-blue-700 transform duration-100">
                             <span className="font-bold">Points</span>
@@ -138,7 +130,7 @@ export default function Profile() {
                         </div>
                         <div className="flex flex-col cursor-default items-center px-2 hover:border-b-3 border-blue-700 transform duration-100">
                             <span className="font-bold">Member since</span>
-                            <span className="text-gray-700">{auth.user.createdAt.substring(0, 10).replace(/-/g, ".")}</span>
+                            <span className="text-gray-700">{user.user.createdAt.substring(0, 10).replace(/-/g, ".")}</span>
                         </div>
                         <div className="flex flex-col cursor-default items-center px-2 hover:border-b-3 border-blue-700 transform duration-100">
                             <span className="font-bold">Quizes</span>

@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useContext, useRef } from "react"
 import { Link, useNavigate } from "react-router";
 import Avatar from "../components/Avatar.jsx"
 import Icons from "./Icons.jsx";
+import { userDataContext } from "../utils/AuthContext.jsx"
 
 export default function Navigation() {
-    const [auth, setAuth] = useState({ isAuthenticated: false, user: null })
+    const { user } = useContext(userDataContext)
     const [optionsOpen, setOptionsOpen] = useState(false)
     const dropdownRef = useRef()
     const navigate = useNavigate()
@@ -17,7 +18,6 @@ export default function Navigation() {
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success") {
-                    //setAuth({ loading: false, isAuthenticated: false, user: null })
                     navigate("/login")
                 }
             })
@@ -33,33 +33,22 @@ export default function Navigation() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [])
 
-    useEffect(() => {
-        fetch("/api/auth/isAuthenticated", {
-            credentials: 'include'
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "success") {
-                    setAuth({ isAuthenticated: true, user: data.data.user })
-                }
-            })
-    }, [])
     return (
         <nav className="sticky top-0 z-50 w-full h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 md:px-8 transition-all duration-300">
             <Link to="/"><h1 className="text-2xl font-bold bg-gradient-to-r from-purple-800 via-pink-900 to-pink-700 inline-block text-transparent bg-clip-text">Quiz</h1></Link>
 
-            {auth.isAuthenticated ? (
+            {user && user.auth ? (
                 <div className="relative" ref={dropdownRef}>
                     <button onClick={() => setOptionsOpen(!optionsOpen)} type="button" className="flex items-center focus:outline-none cursor-pointer p-1 rounded-full hover:bg-gray-100/50 transition-colors" aria-haspopup="true" aria-expanded={optionsOpen} >
                         <div className="ring-2 ring-transparent hover:ring-purple-100 rounded-full transition-all">
-                            <Avatar size="32px" fontSize="14px" name={auth.user.username} />
+                            <Avatar size="32px" fontSize="14px" name={user.user.username} />
                         </div>
                         <Icons icon="dropdown-arrow" className={`ml-2 w-4 h-4 text-gray-500 transform transition-transform duration-300 ${optionsOpen ? "rotate-180" : ""}`} />
                     </button>
 
                     <div className={`absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-xl bg-white shadow-xl ring-1 ring-black/5 transition-all duration-200 ease-out transform ${optionsOpen ? "scale-100 opacity-100 translate-y-0" : "scale-95 opacity-0 -translate-y-2 pointer-events-none"}`} role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabIndex={-1} >
                         <div className="p-2">
-                            <div className="px-3 py-2 text-sm font-medium text-gray-900 border-b border-gray-100 mb-1">{auth.user.username}</div>
+                            <div className="px-3 py-2 text-sm font-medium text-gray-900 border-b border-gray-100 mb-1">{user.user.username}</div>
                             <Link to="/profile">
                                 <button className="flex items-center w-full px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-purple-600 transition-colors cursor-pointer group">
                                     Profile
