@@ -47,6 +47,15 @@ router.get('/isAuthenticated', authorized, async (req, res) => {
     }
 })
 
+router.get('/isAdmin', authorized, async (req, res) => {
+    try {
+        const data = await AuthService.isAdmin({ userId: req.userId })
+        res.json({ data: data, message: "Recieved admin data.", status: "success" })
+    } catch (err) {
+        res.json({ data: null, message: err.message, status: "error" })
+    }
+})
+
 router.post('/logout', authorized, async (req, res) => {
     try {
         const id = req.userId

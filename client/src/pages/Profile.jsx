@@ -11,7 +11,7 @@ import { AuthContext } from "../utils/AuthContext.jsx"
 export default function Profile() {
     const { user } = useContext(AuthContext)
     const [loading, setLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState("profile");
+    const [activeTab, setActiveTab] = useState("quizes");
     const [deleteAccount, setDeleteAccount] = useState(false)
     const [quizes, setQuizes] = useState([])
     const [totalPages, setTotalPages] = useState(1)
@@ -50,7 +50,6 @@ export default function Profile() {
             })
                 .then(res => res.json())
                 .then(data => {
-                    console.log(data.data)
                     if (data.status == "success") {
                         setQuizes(data.data.attemptQuizzes)
                         setTotalPages(data.data.totalPages)
@@ -168,9 +167,6 @@ export default function Profile() {
                 <div className="flex mt-3 gap-3 max-w-5xl mx-auto mb-5">
                     <div className="flex flex-col w-72 bg-white shadow-sm p-6 rounded h-full">
                         <div className="flex flex-col gap-y-2 flex-grow">
-                            <button onClick={() => handleTabSwitch("profile")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "profile" ? "border-r-3 border-blue-700" : ""}`} >
-                                Profile settings
-                            </button>
                             <button onClick={() => handleTabSwitch("quizes")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "quizes" ? "border-r-3 border-blue-700" : ""}`} >
                                 My quizes
                             </button>
@@ -186,12 +182,6 @@ export default function Profile() {
                         </button>
                     </div>
                     <div className="flex-1 bg-white shadow-sm p-8 rounded">
-                        {activeTab === "profile" && (
-                            <div>
-                                <h2 className="text-xl font-semibold mb-4">Profile Settings</h2>
-                                <p>Update your profile information here.</p>
-                            </div>
-                        )}
                         {activeTab === "password" && (
                             <div>
                                 <h2 className="text-xl font-semibold mb-4">Change Password</h2>
@@ -224,6 +214,7 @@ export default function Profile() {
                                         totalPages={totalPages}
                                         totalQuizzes={totalQuizzes}
                                         currentPage={page}
+                                        link={"/quiz/"}
                                     />
                                 )}
                             </div>
@@ -244,6 +235,7 @@ export default function Profile() {
                                         totalQuizzes={totalQuizzes}
                                         currentPage={page}
                                         showCategories={false}
+                                        link={"/quiz/result/"}
                                     />
                                 )}
                             </div>

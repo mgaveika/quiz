@@ -42,7 +42,7 @@ const authorized = async (req, res, next) => {
         }
         let todayDate = moment()
         if (moment(tokenRecord.expireDate).diff(todayDate, "days") < 2) {
-            const newToken = await AuthService.createToken({ userId: tokenRecord.userId, username: tokenRecord.username })
+            const newToken = await AuthService.createToken({ userId: tokenRecord.userId, username: tokenRecord.username, role: tokenRecord.role })
             if (res && res.cookie) {
                 res.cookie("accessCookie", newToken, {
                     httpOnly: true,
@@ -53,6 +53,7 @@ const authorized = async (req, res, next) => {
         }
         req.userId = decoded.userId
         req.username = decoded.username
+        req.role = decoded.role
         req.guest = false
         next()
     })

@@ -17,10 +17,11 @@ async function hashPassword({ password }) {
 class AuthService {
     static async createToken({ userId, username }) {
         await accessTokenSchema.deleteMany({ userId: userId })
-        const newToken = jwt.sign({ userId: userId, username }, process.env.JWT_SECRET)
+        const user = await User.findById(userId)
+        const newToken = jwt.sign({ userId: userId, username: username, role: user.role }, process.env.JWT_SECRET)
         let today = moment()
         today.add(7, "days")
-        await accessTokenSchema.create({ userId: userId, username, token: newToken, expireDate: today })
+        await accessTokenSchema.create({ userId: userId, username: username, token: newToken, expireDate: today })
         return newToken
     }
     static async login({ email, password }) {
@@ -32,7 +33,7 @@ class AuthService {
             if (user.length > 0) {
                 const checkedPass = await checkPassword({ password, hashedPassword: user[0].password })
                 if (checkedPass) {
-                    const token = await this.createToken({ userId: user[0].id, username: user[0].username })
+                    const token = await this.createToken({ userId: user[0].id, username: user[0].username, role: user[0].role })
                     return { token: token, user: user[0] }
                 }
             }
@@ -89,6 +90,19 @@ class AuthService {
                 throw new Error("User not found.")
             }
             return { auth: true, user: { id: user.id, email: user.email, username: user.username, createdAt: user.createdAt } }
+        } catch (err) {
+            throw err
+        }
+    }
+
+
+    static async isAdmin({ userId }) {
+        try {
+            const user = await User.findById(userId)
+            if (!user) {
+                throw new Error("User not found.")
+            }
+            return user.role === "admin"
         } catch (err) {
             throw err
         }

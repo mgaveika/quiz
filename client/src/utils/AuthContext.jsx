@@ -7,7 +7,9 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        fetch('/api/auth/isAuthenticated')
+        fetch('/api/auth/isAuthenticated', {
+            credentials: "include"
+        })
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success") {

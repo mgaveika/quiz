@@ -10,11 +10,11 @@ export default function QuizList({
     showFilter = false,
     selectedFilters = [],
     onFilterChange,
-    showCategories = true
+    showCategories = true,
+    link
 }) {
     return (
-        <div className="w-full bg-white rounded shadow-sm p-5">
-
+        <>
             {showFilter && (
                 <div className="flex gap-2 mb-3 flex-wrap">
                     {categoryOptions.map(c => (
@@ -36,8 +36,8 @@ export default function QuizList({
                     <ul className="flex flex-col space-y-2">
                         {quizzes.map(q => (
                             <li key={q._id} className="bg-white shadow-sm p-3 flex justify-between border-b border-gray-100 last:border-0">
-                                <Link to={`/quiz/${q._id}`} className="font-semibold hover:text-purple-700 transition-colors">{q.title}</Link>
-                                <div className="flex gap-2">
+                                <Link to={`${link}${q._id}`} className="font-semibold hover:text-purple-700 transition-colors">{q.title}</Link>
+                                <div className="flex gap-1">
                                     {showCategories && q.categories.map((c, idx) => (
                                         <div key={idx + c} className="text-sm rounded-full border-1 border-gray-200 bg-gray-100 px-2 text-gray-600">{c}</div>
                                     ))}
@@ -48,6 +48,6 @@ export default function QuizList({
                     <Pagination currentPage={currentPage} totalPages={totalPages} totalQuizzes={totalQuizzes} />
                 </>
             )}
-        </div>
+        </>
     )
 }

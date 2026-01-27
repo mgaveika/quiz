@@ -201,9 +201,9 @@ export default function Room() {
                             </div>
                             <div className="w-full flex mt-5 gap-2">
                                 {isCreator &&
-                                    <button onClick={startGame} className="flex-1 text-white bg-green-700 rounded px-8 py-2">Start game</button>
+                                    <button onClick={startGame} className="flex flex-1 justify-center items-center gap-1 text-white bg-green-700 rounded px-8 py-2 cursor-pointer"><Icons icon="play" className="w-4" />Start game</button>
                                 }
-                                <button onClick={leave} className="flex-1 text-white bg-red-700 rounded px-3 py-1">{isCreator ? "Delete room" : "Leave room"}</button>
+                                <button onClick={leave} className="flex flex-1 justify-center items-center gap-1 bg-white border border-gray-200 hover:bg-gray-100 rounded px-3 py-1 cursor-pointer"><Icons icon="wrong" className="w-4" />{isCreator ? "Delete room" : "Leave room"}</button>
                             </div>
                         </div>
                     </div>

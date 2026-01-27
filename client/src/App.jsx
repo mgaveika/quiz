@@ -17,8 +17,13 @@ import EditQuiz from "./pages/EditQuiz.jsx"
 import Room from "./pages/Room.jsx"
 import Play from "./pages/Play.jsx"
 
+import Main from "./pages/admin/Main.jsx"
+import Quizes from "./pages/admin/Quizes.jsx"
+import Users from "./pages/admin/Users.jsx"
+
 import ProtectedRoutes from "./utils/ProtectedRoutes.jsx"
 import { AuthProvider } from "./utils/AuthContext.jsx"
+import AdminRoutes from "./utils/AdminRoutes.jsx"
 
 export default function App() {
   return (
@@ -37,6 +42,11 @@ export default function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/create" element={<CreateQuiz />} />
             <Route path="/quiz/:quizId/edit" element={<EditQuiz />} />
+            <Route element={<AdminRoutes />} >
+              <Route path="/admin" element={<Main />} />
+              <Route path="/admin/quizes" element={<Quizes />} />
+              <Route path="/admin/users" element={<Users />} />
+            </Route>
           </Route>
         </Routes>
       </AuthProvider>

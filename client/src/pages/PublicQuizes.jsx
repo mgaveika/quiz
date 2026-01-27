@@ -59,6 +59,7 @@ export default function PublicQuizzes() {
                     totalPages={totalPages}
                     totalQuizzes={totalQuizzes}
                     currentPage={page}
+                    link={"/quiz/"}
                 />
             </div>
         </main>

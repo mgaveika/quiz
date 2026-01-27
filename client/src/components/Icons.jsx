@@ -57,7 +57,7 @@ export default function Icons(props) {
         )
     } else if (props.icon === "wrong") {
         return (
-            <svg className={`${props.className}`} fill="currentColor" viewBox="0 0 200 200" id="Layer_1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><title></title><path d="M114,100l49-49a9.9,9.9,0,0,0-14-14L100,86,51,37A9.9,9.9,0,0,0,37,51l49,49L37,149a9.9,9.9,0,0,0,14,14l49-49,49,49a9.9,9.9,0,0,0,14-14Z"></path></g></svg>
+            <svg className={`${props.className}`} fill="currentColor" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><title></title><path d="M114,100l49-49a9.9,9.9,0,0,0-14-14L100,86,51,37A9.9,9.9,0,0,0,37,51l49,49L37,149a9.9,9.9,0,0,0,14,14l49-49,49,49a9.9,9.9,0,0,0,14-14Z"></path></g></svg>
         )
     } else if (props.icon === "people") {
         return (
@@ -142,6 +142,79 @@ export default function Icons(props) {
                     d="M16.5585 16H7.44152C6.58066 16 5.81638 15.4491 5.54415 14.6325L3.70711 9.12132C3.44617 8.3385 4.26195 7.63098 5 8L5.71067 8.35533C6.48064 8.74032 7.41059 8.58941 8.01931 7.98069L10.5858 5.41421C11.3668 4.63317 12.6332 4.63316 13.4142 5.41421L15.9807 7.98069C16.5894 8.58941 17.5194 8.74032 18.2893 8.35533L19 8C19.7381 7.63098 20.5538 8.3385 20.2929 9.12132L18.4558 14.6325C18.1836 15.4491 17.4193 16 16.5585 16Z"
                     stroke="currentColor"
                     strokeWidth="2"
+                    strokeLinejoin="round"
+                />
+            </svg>
+        )
+    } else if (props.icon === "play") {
+        return (
+            <svg
+                className={`${props.className}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    d="M20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L7.59662 21.6145C5.53435 22.736 3 21.2763 3 18.9671L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                />
+            </svg>
+        )
+    } else if (props.icon === "quiz") {
+        return (
+            <svg
+                className={`${props.className}`}
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+            >
+                <g stroke="currentColor" strokeWidth={1.91} strokeMiterlimit={10}>
+                    <path d="M12,4.36V20.59a1.92,1.92,0,0,1-1.91,1.91,1.93,1.93,0,0,1-1.91-1.91v0a2.45,2.45,0,0,1-.48,0,3.35,3.35,0,0,1-3.34-3.34,3.19,3.19,0,0,1,.08-.7A4.29,4.29,0,0,1,3.6,8.79,3.24,3.24,0,0,1,3.41,7.7,3.34,3.34,0,0,1,6.27,4.4v0a2.87,2.87,0,0,1,5.73,0Z" />
+                    <path d="M6.75,11.05a3.35,3.35,0,0,1,0-6.69" />
+                    <path d="M8.18,13.91h0A3.82,3.82,0,0,1,12,17.73h0" />
+                    <path d="M9.14,7.23h0A2.86,2.86,0,0,0,12,4.36h0" />
+                    <path d="M12,4.36V20.59a1.92,1.92,0,0,0,1.91,1.91,1.93,1.93,0,0,0,1.91-1.91v0a2.45,2.45,0,0,0,.48,0,3.35,3.35,0,0,0,3.34-3.34,3.19,3.19,0,0,0-.08-.7,4.29,4.29,0,0,0,.84-7.76,3.24,3.24,0,0,0,.19-1.09,3.34,3.34,0,0,0-2.86-3.3v0a2.87,2.87,0,0,0-5.73,0Z" />
+                    <path d="M17.25,11.05a3.35,3.35,0,0,0,0-6.69" />
+                    <path d="M15.82,13.91h0A3.82,3.82,0,0,0,12,17.73h0" />
+                    <path d="M14.86,7.23h0A2.86,2.86,0,0,1,12,4.36h0" />
+                </g>
+            </svg>
+        )
+    } else if (props.icon === "dashboard") {
+        return (
+            <svg
+                className={`${props.className}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    d="M3 3H10V10H3V3Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+                <path
+                    d="M14 3H21V10H14V3Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+                <path
+                    d="M14 14H21V21H14V14Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+                <path
+                    d="M3 14H10V21H3V14Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
                     strokeLinejoin="round"
                 />
             </svg>
