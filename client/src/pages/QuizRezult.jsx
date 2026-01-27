@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import Icons from "../components/Icons"
 import Navigation from "../components/Navigation"
 import { useEffect, useState } from "react"
@@ -34,16 +34,21 @@ export default function QuizRezult() {
             })
     }
 
+    const navigate = useNavigate()
     useEffect(() => {
         fetch(`/api/quiz-attempt/${attemptId}`, {
             credentials: "include"
         }).then(res => res.json())
             .then(data => {
-                setResult(data.data)
-                // Fix: Convert from 1-5 database value back to 0-4 for UI
-                const dbRating = data.data.attempt.rating
-                const uiRating = dbRating > 0 ? dbRating - 1 : -1
-                setStars((prev) => ({ ...prev, saved: uiRating }))
+                if (data.status == "success") {
+                    setResult(data.data)
+                    const dbRating = data.data.attempt.rating
+                    const uiRating = dbRating > 0 ? dbRating - 1 : -1
+                    setStars((prev) => ({ ...prev, saved: uiRating }))
+                } else {
+                    toast.error(data.message);
+                    navigate("/list")
+                }
             })
     }, [])
 

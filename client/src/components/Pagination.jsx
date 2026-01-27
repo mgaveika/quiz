@@ -3,7 +3,6 @@ import Icons from "./Icons"
 
 export default function Pagination({ currentPage, totalPages, totalQuizzes }) {
     const [searchParams] = useSearchParams()
-
     const getPageUrl = (pageNumber) => {
         const newParams = new URLSearchParams(searchParams)
         newParams.set("page", pageNumber)

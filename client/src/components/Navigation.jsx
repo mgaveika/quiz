@@ -1,27 +1,14 @@
 import { useState, useEffect, useContext, useRef } from "react"
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import Avatar from "../components/Avatar.jsx"
 import Icons from "./Icons.jsx";
 import { AuthContext } from "../utils/AuthContext.jsx"
 
 export default function Navigation() {
-    const { user } = useContext(AuthContext)
+    const { user, logout } = useContext(AuthContext)
+
     const [optionsOpen, setOptionsOpen] = useState(false)
     const dropdownRef = useRef()
-    const navigate = useNavigate()
-
-    function logout() {
-        fetch("/api/auth/logout", {
-            method: "POST",
-            credentials: 'include'
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "success") {
-                    navigate("/login")
-                }
-            })
-    }
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -63,7 +50,7 @@ export default function Navigation() {
             ) : (
                 <div className="flex items-center space-x-4">
                     <Link to="/login" className="text-gray-600 font-medium hover:text-purple-600 transition-colors">Login</Link>
-                    <Link to="/register" className="bg-gray-900 text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">Register</Link>
+                    <Link to="/register" className="bg-gray-900 text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 hover:shadow-lg">Register</Link>
                 </div>
             )}
         </nav>

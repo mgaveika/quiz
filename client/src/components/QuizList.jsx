@@ -9,7 +9,8 @@ export default function QuizList({
     currentPage,
     showFilter = false,
     selectedFilters = [],
-    onFilterChange
+    onFilterChange,
+    showCategories = true
 }) {
     return (
         <div className="w-full bg-white rounded shadow-sm p-5">
@@ -28,7 +29,7 @@ export default function QuizList({
                 </div>
             )}
 
-            {quizzes.length === 0 ? (
+            {quizzes && quizzes.length === 0 ? (
                 <div className="text-center">No quizzes found.</div>
             ) : (
                 <>
@@ -37,7 +38,7 @@ export default function QuizList({
                             <li key={q._id} className="bg-white shadow-sm p-3 flex justify-between border-b border-gray-100 last:border-0">
                                 <Link to={`/quiz/${q._id}`} className="font-semibold hover:text-purple-700 transition-colors">{q.title}</Link>
                                 <div className="flex gap-2">
-                                    {q.categories.map((c, idx) => (
+                                    {showCategories && q.categories.map((c, idx) => (
                                         <div key={idx + c} className="text-sm rounded-full border-1 border-gray-200 bg-gray-100 px-2 text-gray-600">{c}</div>
                                     ))}
                                 </div>

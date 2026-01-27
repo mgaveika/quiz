@@ -5,15 +5,16 @@ const RoomSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    guest: {
+        type: String,
+    },
     host: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Users',
-        required: true
     },
     quizId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Quiz',
-        required: true
     }
 }, { timestamps: true })
 

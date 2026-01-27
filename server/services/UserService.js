@@ -12,7 +12,7 @@ async function checkPassword(password, hashedPassword) {
 }
 
 class AuthService {
-    static async updatePassword({currentPassword, newPassword, confirmNewPassword, id}) {
+    static async updatePassword({ currentPassword, newPassword, confirmNewPassword, id }) {
         try {
             if (!currentPassword || !newPassword || !confirmNewPassword) {
                 throw new Error("All fields are required!")
@@ -34,40 +34,40 @@ class AuthService {
             throw err
         }
     }
-    static async deleteAccount({id}) {
+    static async deleteAccount({ id }) {
         try {
             const user = await User.findById(id)
             if (!user) {
                 throw new Error("User not found.")
             }
             return await User.deleteOne({ _id: id })
-        } catch(err) {
+        } catch (err) {
             throw err
         }
     }
 
-    static async searchUsers({query, limit = 5}) {
+    static async searchUsers({ query, limit = 5 }) {
         try {
             const users = await User.find({
                 username: { $regex: query, $options: 'i' }
             })
-            .select('username _id')
-            .limit(limit)
-            .exec()
+                .select('username _id')
+                .limit(limit)
+                .exec()
             return users
-        } catch(err) {
+        } catch (err) {
             throw err
         }
     }
 
-    static async getUserByName({name}) {
+    static async getUserByName({ name }) {
         try {
-            const user = await User.find({username: name})
+            const user = await User.find({ username: name })
             if (user.length === 0) {
                 throw new Error("User not found.")
             }
             return user
-        } catch(err) {
+        } catch (err) {
             throw err
         }
     }

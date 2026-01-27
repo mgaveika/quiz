@@ -23,15 +23,21 @@ class RoomService {
         }
     }
 
-    static async createRoom({ quizId, userId }) {
+    static async createRoom({ quizId, userId, guest }) {
         try {
             const newCode = await this.generateRoomCode()
-            const room = await Room.create(
-                {
-                    code: newCode,
-                    host: userId,
-                    quizId
-                })
+            const data = {
+                code: newCode,
+                quizId
+            }
+
+            if (guest) {
+                data.guest = userId
+            } else {
+                data.host = userId
+            }
+
+            const room = await Room.create(data)
             return room
         } catch (err) {
             throw err
@@ -45,14 +51,17 @@ class RoomService {
                 throw new Error("Room not found")
             }
             const session = await GameSession.findOne({ room })
-            const hostUsername = await Users.findById(room.host)
-            return { room, hostUsername: hostUsername.username, active: session ? true : false }
+            if (room.host) {
+                const hostUsername = await Users.findById(room.host)
+                return { room, hostUsername: hostUsername.username, active: session ? true : false }
+            }
+            return { room, hostUsername: room.guest, active: session ? true : false }
         } catch (err) {
             throw err
         }
     }
 
-    static async submitAnswer({ code, userId, questionIndex, selectedAnswers, timeUsed }) {
+    static async submitAnswer({ code, userId, guest, questionIndex, selectedAnswers, timeUsed }) {
         try {
             const room = await Room.findOne({ code })
             if (!room) {
@@ -63,8 +72,8 @@ class RoomService {
             if (!session) {
                 throw new Error("Game session not found")
             }
-
-            const participantIndex = session.participants.findIndex(p => String(p.user) === String(userId))
+            const userField = guest ? 'guest' : 'user'
+            const participantIndex = session.participants.findIndex(p => String(p[userField]) === String(userId))
             if (participantIndex === -1) {
                 throw new Error("Access denied")
             }
@@ -91,17 +100,18 @@ class RoomService {
 
             // Create or find quiz attempt
             const QuizAttempt = require("../models/QuizAttempt")
-            let attempt = await QuizAttempt.findOne({
+            const attemptUserField = guest ? 'guest' : 'user'
+
+            var attempt = await QuizAttempt.findOne({
                 quizId: room.quizId,
-                user: userId
+                [attemptUserField]: userId
             }).sort({ createdAt: -1 })
 
-            // If no recent attempt, create new one
-            const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000)
-            if (!attempt || attempt.createdAt < tenMinutesAgo) {
+            if (!attempt) {
                 attempt = await QuizAttemptService.createQuizAttempt({
                     quizId: room.quizId,
-                    userId: userId
+                    userId,
+                    guest
                 })
             }
 
@@ -113,8 +123,8 @@ class RoomService {
             })
 
             // Calculate if answer is correct and points
-            let isCorrect = false
-            let points = 0
+            var isCorrect = false
+            var points = 0
 
             if (currentQuestionData.answerType === "single") {
                 const selectedOption = currentQuestionData.options[selectedAnswers[0]]
@@ -186,7 +196,7 @@ class RoomService {
         }
     }
 
-    static async getSessionStatus({ code, userId }) {
+    static async getSessionStatus({ code, userId, guest }) {
         try {
             const room = await Room.findOne({ code })
             if (!room) {
@@ -198,7 +208,8 @@ class RoomService {
                 throw new Error("Game session not found")
             }
 
-            const isParticipant = session.participants.some(p => String(p.user) === String(userId))
+            const userField = guest ? 'guest' : 'user'
+            const isParticipant = session.participants.some(p => String(p[userField]) === String(userId))
             if (!isParticipant) {
                 throw new Error("Access denied")
             }
@@ -246,21 +257,32 @@ class RoomService {
         }
     }
 
-    static async startRoom({ code, userId, settings, participants }) {
+    static async startRoom({ code, userId, guest, settings, participants }) {
         try {
             const room = await Room.findOne({ code })
             if (!room) {
                 throw Error("Room not found")
             }
-            if (room.host.toString() !== userId) {
+
+            const userField = guest ? 'guest' : 'host'
+
+            if (!room[userField] || room[userField].toString() !== userId) {
                 throw Error("Access denied")
             }
+
+            const newParticipantsArray = participants.map(({ user }) => {
+                const id = String(user);
+                return id.includes('guest_')
+                    ? { guest: id }
+                    : { user: id };
+            });
+
             const session = await GameSession.create({
                 room,
                 settings,
-                participants,
+                participants: newParticipantsArray,
                 startedAt: new Date(),
-                questionStartTime: new Date() // Set initial question start time
+                questionStartTime: new Date()
             })
             if (!session) {
                 throw Error("Failed creating game session")
@@ -286,7 +308,7 @@ class RoomService {
         }
     }
 
-    static async getSessionByCode({ code, userId }) {
+    static async getSessionByCode({ code, userId, guest }) {
         try {
             const room = await Room.findOne({ code })
             if (!room) {
@@ -296,7 +318,8 @@ class RoomService {
             if (!session) {
                 throw new Error("Game session not found")
             }
-            const isParticipant = session.participants.some(p => String(p.user) === String(userId))
+            const userField = guest ? 'guest' : 'user'
+            const isParticipant = session.participants.some(p => String(p[userField]) === String(userId))
             if (!isParticipant) {
                 throw new Error("Access denied")
             }
@@ -309,10 +332,13 @@ class RoomService {
                 userId: userId
             }
 
+            const isCreator = (room.host && userId === room.host.toString()) ||
+                (room.guest && userId === room.guest)
+
             return {
                 session: sessionWithUserId,
                 host: room.host,
-                creator: userId === room.host.toString(),
+                creator: isCreator,
                 quiz,
                 quizQuestions,
                 userId: userId
@@ -335,7 +361,7 @@ class RoomService {
                     console.log(`Old session cleanup - ${session.room.code}`)
                     await Room.findByIdAndDelete(session.room._id)
                 }
-                await GameSession.findByIdAndDelete(session._id)
+                await session.remove()
             }
 
             const oldRooms = await Room.find({ createdAt: { $lt: timeAgo } })

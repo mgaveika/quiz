@@ -2,10 +2,30 @@ const moment = require("moment")
 const jwt = require("jsonwebtoken")
 const accessTokenSchema = require("../models/AccessTokens")
 const AuthService = require("../services/AuthService")
+const crypto = require("crypto")
 
 const authorized = async (req, res, next) => {
     const token = req?.cookies?.["accessCookie"] || req?.rawHeaders?.[21]?.split("accessCookie=")[1]
     if (!token) {
+        if (req.allowGuest) {
+            const guestToken = req?.cookies?.["guestAccessCookie"] || req?.rawHeaders?.[21]?.split("guestAccessCookie=")[1]
+            if (guestToken) {
+                req.userId = guestToken
+                req.username = guestToken
+            } else {
+                const newGuestToken = 'guest_' + crypto.randomUUID()
+                req.userId = newGuestToken
+                req.username = newGuestToken
+                res.cookie("guestAccessCookie", newGuestToken, {
+                    httpOnly: true,
+                    sameSite: "strict",
+                    maxAge: 1000 * 60 * 60 * 24 * 1 // 1d
+                })
+            }
+            req.guest = true
+            next()
+            return
+        }
         return res && res.json ? res.json({ auth: false, message: "No token provided.", status: "error" }) : next(new Error("No token provided."))
     }
     const tokenRecord = await accessTokenSchema.findOne({ token: token })
@@ -33,6 +53,7 @@ const authorized = async (req, res, next) => {
         }
         req.userId = decoded.userId
         req.username = decoded.username
+        req.guest = false
         next()
     })
 }

@@ -10,6 +10,7 @@ import { AuthContext } from "../utils/AuthContext.jsx"
 
 export default function Profile() {
     const { user } = useContext(AuthContext)
+    const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState("profile");
     const [deleteAccount, setDeleteAccount] = useState(false)
     const [quizes, setQuizes] = useState([])
@@ -19,6 +20,12 @@ export default function Profile() {
     const [searchParams, setSearchParams] = useSearchParams()
     const page = searchParams.get("page") && Number(searchParams.get("page")) ? Number(searchParams.get("page")) : 1
     const navigate = useNavigate()
+
+    const handleTabSwitch = (tab) => {
+        if (activeTab === tab || loading) return
+        setLoading(true)
+        setActiveTab(tab)
+    }
 
     useEffect(() => {
         if (activeTab === "quizes") {
@@ -31,12 +38,32 @@ export default function Profile() {
                         setQuizes(data.data.privateQuizzes)
                         setTotalPages(data.data.totalPages)
                         setTotalQuizzes(data.data.totalQuizzes)
+                        setLoading(false)
                     } else {
                         toast.error(data.message)
                     }
                 })
+        } else if (activeTab === "history") {
+            fetch(`/api/quiz-attempt?page=${page}`, {
+                method: "GET",
+                credentials: 'include'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data.data)
+                    if (data.status == "success") {
+                        setQuizes(data.data.attemptQuizzes)
+                        setTotalPages(data.data.totalPages)
+                        setTotalQuizzes(data.data.totalQuizzes)
+                        setLoading(false)
+                    } else {
+                        toast.error(data.message)
+                    }
+                })
+        } else {
+            setLoading(false)
         }
-    }, [activeTab, page])
+    }, [activeTab, page, filter])
 
     const handleFilterChange = (c) => {
         setSearchParams({ page: 1 })
@@ -141,13 +168,16 @@ export default function Profile() {
                 <div className="flex mt-3 gap-3 max-w-5xl mx-auto mb-5">
                     <div className="flex flex-col w-72 bg-white shadow-sm p-6 rounded h-full">
                         <div className="flex flex-col gap-y-2 flex-grow">
-                            <button onClick={() => setActiveTab("profile")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "profile" ? "border-r-3 border-blue-700" : ""}`} >
+                            <button onClick={() => handleTabSwitch("profile")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "profile" ? "border-r-3 border-blue-700" : ""}`} >
                                 Profile settings
                             </button>
-                            <button onClick={() => setActiveTab("quizes")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "quizes" ? "border-r-3 border-blue-700" : ""}`} >
-                                My Quizes
+                            <button onClick={() => handleTabSwitch("quizes")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "quizes" ? "border-r-3 border-blue-700" : ""}`} >
+                                My quizes
                             </button>
-                            <button onClick={() => setActiveTab("password")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "password" ? "border-r-3 border-blue-700" : ""}`} >
+                            <button onClick={() => handleTabSwitch("history")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "history" ? "border-r-3 border-blue-700" : ""}`} >
+                                History
+                            </button>
+                            <button onClick={() => handleTabSwitch("password")} className={`w-full text-left p-2 cursor-pointer hover:border-r-3 border-blue-700 ${activeTab === "password" ? "border-r-3 border-blue-700" : ""}`} >
                                 Change password
                             </button>
                         </div>
@@ -180,16 +210,42 @@ export default function Profile() {
                         {activeTab === "quizes" && (
                             <div>
                                 <h2 className="text-xl font-semibold mb-4">My Quizes</h2>
-                                <p>View and manage your created quizes here.</p>
-                                <QuizList
-                                    quizzes={quizes}
-                                    showFilter={true}
-                                    selectedFilters={filter}
-                                    onFilterChange={handleFilterChange}
-                                    totalPages={totalPages}
-                                    totalQuizzes={totalQuizzes}
-                                    currentPage={page}
-                                />
+                                <p>View your created quizes here.</p>
+                                {loading ? (
+                                    <div className="flex items-center justify-center z-10 transition-opacity mt-5">
+                                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+                                    </div>
+                                ) : (
+                                    <QuizList
+                                        quizzes={quizes}
+                                        showFilter={true}
+                                        selectedFilters={filter}
+                                        onFilterChange={handleFilterChange}
+                                        totalPages={totalPages}
+                                        totalQuizzes={totalQuizzes}
+                                        currentPage={page}
+                                    />
+                                )}
+                            </div>
+                        )}
+                        {activeTab === "history" && (
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4">Quiz history</h2>
+                                <p>View your quiz history here.</p>
+                                {loading ? (
+                                    <div className="flex items-center justify-center z-10 transition-opacity mt-5">
+                                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+                                    </div>
+                                ) : (
+                                    <QuizList
+                                        quizzes={quizes}
+                                        showFilter={false}
+                                        totalPages={totalPages}
+                                        totalQuizzes={totalQuizzes}
+                                        currentPage={page}
+                                        showCategories={false}
+                                    />
+                                )}
                             </div>
                         )}
                     </div>

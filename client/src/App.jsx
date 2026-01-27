@@ -28,14 +28,14 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/list" element={<PublicQuizes />} />
+          <Route path="/quiz/:quizId" element={<QuizHome />} />
+          <Route path="/room/:code" element={<Room />} />
+          <Route path="/room/:code/live" element={<Play />} />
+          <Route path="/quiz/result/:attemptId" element={<QuizRezult />} />
           <Route element={<ProtectedRoutes />} >
             <Route path="/profile" element={<Profile />} />
-            <Route path="/list" element={<PublicQuizes />} />
             <Route path="/create" element={<CreateQuiz />} />
-            <Route path="/quiz/:quizId" element={<QuizHome />} />
-            <Route path="/room/:code" element={<Room />} />
-            <Route path="/room/:code/live" element={<Play />} />
-            <Route path="/quiz/result/:attemptId" element={<QuizRezult />} />
             <Route path="/quiz/:quizId/edit" element={<EditQuiz />} />
           </Route>
         </Routes>
@@ -45,8 +45,10 @@ export default function App() {
 }
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  // <StrictMode>
+  <>
     <Toaster />
     <App />
-  </StrictMode>
+  </>
+  // </StrictMode>
 )

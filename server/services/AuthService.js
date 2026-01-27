@@ -33,7 +33,7 @@ class AuthService {
                 const checkedPass = await checkPassword({ password, hashedPassword: user[0].password })
                 if (checkedPass) {
                     const token = await this.createToken({ userId: user[0].id, username: user[0].username })
-                    return { token: token }
+                    return { token: token, user: user[0] }
                 }
             }
             throw new Error("Invalid email or password.")

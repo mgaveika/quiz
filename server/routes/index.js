@@ -7,15 +7,18 @@ const quizQuestion = require("./quizQuestions")
 const quizAttempt = require("./quizAttempt")
 const room = require("./room")
 const authorized = require("../middleware/Authorized")
-
+const guestMiddleware = (req, res, next) => {
+    req.allowGuest = true
+    next()
+}
 const router = express.Router()
 
 router
     .use("/auth", auth)
     .use("/user", authorized, user)
-    .use("/quizzes", authorized, quiz)
-    .use("/quiz-questions", authorized, quizQuestion)
-    .use("/quiz-attempt", authorized, quizAttempt)
-    .use("/room", authorized, room)
+    .use("/quizzes", guestMiddleware, authorized, quiz)
+    .use("/quiz-questions", guestMiddleware, authorized, quizQuestion)
+    .use("/quiz-attempt", guestMiddleware, authorized, quizAttempt)
+    .use("/room", guestMiddleware, authorized, room)
 
 module.exports = router

@@ -2,6 +2,7 @@ import { useEffect, useContext } from 'react'
 import { Link, useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 import { AuthContext } from "../utils/AuthContext.jsx"
+import Navigation from "../components/Navigation"
 
 export default function Register() {
     const navigate = useNavigate()
@@ -41,60 +42,63 @@ export default function Register() {
         }
     }, [user])
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
-            <Link to="/"><img src="/quiz.svg" alt="Logo" className="w-14 mb-3" /></Link>
-            <div className="bg-white p-8 rounded-lg shadow-md w-96">
-                <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
-                <form onSubmit={handleSubmit} method='post'>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium mb-2" htmlFor="email">Email</label>
-                        <input type="email"
-                            id="email"
-                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter your email"
-                            autoComplete="email"
-                        />
+        <>
+            <Navigation />
+            <div className="flex flex-col items-center justify-center min-h-screen">
+                <Link to="/"><img src="/quiz.svg" alt="Logo" className="w-14 mb-3" /></Link>
+                <div className="bg-white p-8 rounded-lg shadow-md w-96">
+                    <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
+                    <form onSubmit={handleSubmit} method='post'>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-2" htmlFor="email">Email</label>
+                            <input type="email"
+                                id="email"
+                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter your email"
+                                autoComplete="email"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-2" htmlFor="username">Username</label>
+                            <input
+                                type="text"
+                                id="username"
+                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Choose a username"
+                                autoComplete="username"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-2" htmlFor="password">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter your password"
+                            />
+                        </div>
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium mb-2" htmlFor="confirmPassword">Confirm Password</label>
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Confirm your password"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200"
+                        >
+                            Register
+                        </button>
+                    </form>
+                    <div className="mt-3">
+                        <span className="text-gray-500">Already have an account?</span>
+                        <Link to="/login" className="ml-2 text-blue-500">Sign in</Link>
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium mb-2" htmlFor="username">Username</label>
-                        <input
-                            type="text"
-                            id="username"
-                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Choose a username"
-                            autoComplete="username"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium mb-2" htmlFor="password">Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter your password"
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium mb-2" htmlFor="confirmPassword">Confirm Password</label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Confirm your password"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200"
-                    >
-                        Register
-                    </button>
-                </form>
-                <div className="mt-3">
-                    <span className="text-gray-500">Already have an account?</span>
-                    <Link to="/login" className="ml-2 text-blue-500">Sign in</Link>
                 </div>
             </div>
-        </div>
+        </>
     )
 }

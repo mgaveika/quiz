@@ -4,7 +4,9 @@ const ParticipantSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Users',
-    required: true
+  },
+  guest: {
+    type: String,
   },
   answer: { // pašreizējā atbilde
     type: String,

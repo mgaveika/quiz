@@ -18,10 +18,12 @@ const quizAttemptSchema = new mongoose.Schema({
         ref: 'Quiz',
         required: true
     },
+    guest: {
+        type: String,
+    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Users',
-        required: true
     },
     answers: {
         type: [answerSchema],

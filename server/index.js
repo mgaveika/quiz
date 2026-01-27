@@ -12,8 +12,13 @@ const http = require('http')
 const { Server } = require("socket.io")
 const server = http.createServer(app)
 const authMiddleware = require("./middleware/Authorized.js")
+const guestMiddleware = (req, res, next) => {
+  req.allowGuest = true
+  next()
+}
 
 const RoomService = require("./services/RoomService.js")
+const QuizAttemptService = require("./services/QuizAttemptService.js")
 
 const wrap = (middleware) => (socket, next) =>
   middleware(socket.request, {}, next)
@@ -25,6 +30,7 @@ const io = new Server(server, {
     credentials: true
   },
 })
+io.use(wrap(guestMiddleware))
 io.use(wrap(authMiddleware))
 
 server.listen(socketPort, () => {
@@ -38,6 +44,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
   console.log("MongoDB connected successfully.")
   setInterval(() => {
     RoomService.cleanupInactiveRooms()
+    QuizAttemptService.cleanupGuestAttempts()
   }, 60 * 60 * 1000) // 1h
 }).catch((error) => {
   console.error("MongoDB connection error:", error)

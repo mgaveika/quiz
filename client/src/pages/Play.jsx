@@ -13,23 +13,23 @@ export default function Play() {
     const [playersAnswered, setPlayersAnswered] = useState(0)
     const [totalPlayers, setTotalPlayers] = useState(0)
     const [userAnswerForCurrentQuestion, setUserAnswerForCurrentQuestion] = useState(null) // Track user's answer for current question
-    const {code} = useParams()
+    const { code } = useParams()
     const navigate = useNavigate()
-    
+
     // Function to check if user has already answered current question
     const checkIfAnswered = (sessionData) => {
         if (!sessionData || !sessionData.session) return false
-        
+
         const currentQuestionId = sessionData.quizQuestions[sessionData.session.currentQuestion]?._id
         if (!currentQuestionId) return false
-        
+
         // Check if user has answered this specific question in the session
         const currentParticipant = sessionData.session.participants?.find(p => p.user === sessionData.userId)
         if (currentParticipant) {
-            const answerForCurrentQ = currentParticipant.answersHistory?.find(ah => 
+            const answerForCurrentQ = currentParticipant.answersHistory?.find(ah =>
                 ah.questionId && ah.questionId.toString() === currentQuestionId.toString()
             )
-            
+
             if (answerForCurrentQ) {
                 try {
                     const parsedAnswer = JSON.parse(answerForCurrentQ.answer)
@@ -41,29 +41,29 @@ export default function Play() {
                 }
             }
         }
-        
+
         setUserAnswerForCurrentQuestion(null)
         setSelectedAnswers([])
         return false
     }
-    
+
     useEffect(() => {
         fetch(`/api/room/${code}/session`, {
             credentials: 'include'
         }).then(res => res.json())
-        .then(data => {
-            if (data.status == "success") {
-                setSessionData(data.data)
-                setTimeLeft(data.data.session.settings?.timePerQuestion || 30)
-                
-                // Check if user has already answered current question
-                const alreadyAnswered = checkIfAnswered(data.data)
-                setHasAnswered(alreadyAnswered)
-            } else {
-                toast.error(data.message)
-                navigate("/list")
-            }
-        })
+            .then(data => {
+                if (data.status == "success") {
+                    setSessionData(data.data)
+                    setTimeLeft(data.data.session.settings?.timePerQuestion || 30)
+
+                    // Check if user has already answered current question
+                    const alreadyAnswered = checkIfAnswered(data.data)
+                    setHasAnswered(alreadyAnswered)
+                } else {
+                    toast.error(data.message)
+                    navigate("/list")
+                }
+            })
     }, [])
 
     // Timer countdown
@@ -89,77 +89,78 @@ export default function Play() {
 
         const pollInterval = setInterval(async () => {
             try {
-                const response = await fetch(`/api/room/${code}/status`, {
+                fetch(`/api/room/${code}/status`, {
                     credentials: 'include'
-                })
-                const data = await response.json()
-                
-                if (data.status === "success") {
-                    const { session, playersAnswered: answered, totalPlayers: total } = data.data
-                    
-                    setPlayersAnswered(answered)
-                    setTotalPlayers(total)
-                    
-                    // Sync timer with server only if user hasn't answered
-                    if (!hasAnswered && session.remainingTime !== undefined) {
-                        setTimeLeft(session.remainingTime)
-                    }
-                    
-                    // Check if quiz is completed
-                    if (session.status === "completed") {
-                        // Get user's latest attempt and redirect to results
-                        try {
-                            const attemptResponse = await fetch(`/api/quiz-attempt/`, {
-                                credentials: 'include'
-                            })
-                            const attemptData = await attemptResponse.json()
-                            
-                            if (attemptData.status === "success") {
-                                const quizAttempts = attemptData.data.filter(attempt => 
-                                    attempt.quizId.toString() === sessionData.quiz._id.toString()
-                                )
-                                
-                                if (quizAttempts.length > 0) {
-                                    const latestAttempt = quizAttempts.sort((a, b) => 
-                                        new Date(b.createdAt) - new Date(a.createdAt)
-                                    )[0]
-                                    navigate(`/quiz/result/${latestAttempt._id}`)
-                                } else {
+                }).then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            const { session, playersAnswered: answered, totalPlayers: total } = data.data
+
+                            setPlayersAnswered(answered)
+                            setTotalPlayers(total)
+
+                            // Sync timer with server only if user hasn't answered
+                            if (!hasAnswered && session.remainingTime !== undefined) {
+                                setTimeLeft(session.remainingTime)
+                            }
+
+                            // Check if quiz is completed
+                            if (session.status === "completed") {
+                                // Get user's latest attempt and redirect to results
+                                try {
+                                    fetch(`/api/quiz-attempt/`, {
+                                        credentials: 'include'
+                                    }).then(res => res.json())
+                                        .then(data => {
+                                            if (data.status === "success") {
+                                                const quizAttempts = data.data.filter(attempt =>
+                                                    attempt.quizId.toString() === sessionData.quiz._id.toString()
+                                                )
+
+                                                if (quizAttempts.length > 0) {
+                                                    const latestAttempt = quizAttempts.sort((a, b) =>
+                                                        new Date(b.createdAt) - new Date(a.createdAt)
+                                                    )[0]
+                                                    navigate(`/quiz/result/${latestAttempt._id}`)
+                                                } else {
+                                                    navigate("/list")
+                                                }
+                                            } else {
+                                                navigate("/list")
+                                            }
+                                        })
+                                } catch (error) {
+                                    console.error('Error fetching attempts:', error)
                                     navigate("/list")
                                 }
-                            } else {
-                                navigate("/list")
+                                return
                             }
-                        } catch (error) {
-                            console.error('Error fetching attempts:', error)
-                            navigate("/list")
-                        }
-                        return
-                    }
-                    
-                    // Check if question changed
-                    if (session.currentQuestion !== sessionData.session.currentQuestion) {
-                        const sessionResponse = await fetch(`/api/room/${code}/session`, {
-                            credentials: 'include'
-                        })
-                        const newSessionData = await sessionResponse.json()
-                        
-                        if (newSessionData.status === "success") {
-                            setSessionData(newSessionData.data)
-                            
-                            // Check if user has already answered the new question
-                            const alreadyAnswered = checkIfAnswered(newSessionData.data)
-                            setHasAnswered(alreadyAnswered)
-                            
-                            if (!alreadyAnswered) {
-                                setSelectedAnswers([])
-                                setTimeLeft(newSessionData.data.session.settings?.timePerQuestion || 30)
+
+                            // Check if question changed
+                            if (session.currentQuestion !== sessionData.session.currentQuestion) {
+                                fetch(`/api/room/${code}/session`, {
+                                    credentials: 'include'
+                                }).then(res => res.json())
+                                    .then(data => {
+                                        if (data.status === "success") {
+                                            setSessionData(data.data)
+
+                                            // Check if user has already answered the new question
+                                            const alreadyAnswered = checkIfAnswered(data.data)
+                                            setHasAnswered(alreadyAnswered)
+
+                                            if (!alreadyAnswered) {
+                                                setSelectedAnswers([])
+                                                setTimeLeft(data.data.session.settings?.timePerQuestion || 30)
+                                            }
+
+                                            toast.success("Moving to next question...")
+                                        }
+                                    })
                             }
-                            
-                            toast.success("Moving to next question...")
                         }
-                    }
-                }
+                    })
+
             } catch (error) {
                 console.error('Polling error:', error)
             }
@@ -170,9 +171,9 @@ export default function Play() {
 
     const handleAnswerSelect = (optionIndex) => {
         if (hasAnswered) return
-        
+
         const currentQuestion = sessionData.quizQuestions[sessionData.session.currentQuestion]
-        
+
         if (currentQuestion.answerType === "single") {
             setSelectedAnswers([optionIndex])
         } else {
@@ -188,11 +189,11 @@ export default function Play() {
 
     const handleSubmitAnswer = async (isAutoSubmit = false) => {
         if (isSubmitting || hasAnswered) return
-        
+
         setIsSubmitting(true)
-        
-        try {            
-            const response = await fetch(`/api/room/${code}/answer`, {
+
+        try {
+            fetch(`/api/room/${code}/answer`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -203,28 +204,26 @@ export default function Play() {
                     selectedAnswers: selectedAnswers,
                     timeUsed: (sessionData.session.settings?.timePerQuestion || 30) - timeLeft
                 })
-            })
-            
-            const data = await response.json()            
-            if (data.status === "success") {
-                setHasAnswered(true)
-                setUserAnswerForCurrentQuestion(selectedAnswers)
-                
-                if (isAutoSubmit) {
-                    toast.error("Time's up!")
-                } else {
-                    toast.success("Answer submitted!")
-                }
-                setPlayersAnswered(data.data.playersAnswered)
-                
-            } else {
-                console.error('Submit answer failed:', data.message)
-                toast.error(data.message)
-            }
+            }).then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        setHasAnswered(true)
+                        setUserAnswerForCurrentQuestion(selectedAnswers)
+
+                        if (isAutoSubmit) {
+                            toast.error("Time's up!")
+                        } else {
+                            toast.success("Answer submitted!")
+                        }
+                        setPlayersAnswered(data.data.playersAnswered)
+                        setIsSubmitting(false)
+                    } else {
+                        console.error('Submit answer failed:', data.message)
+                        toast.error(data.message)
+                    }
+                })
         } catch (error) {
             toast.error(error.message)
-        } finally {
-            setIsSubmitting(false)
         }
     }
 
@@ -269,10 +268,10 @@ export default function Play() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {/* Progress Bar */}
                             <div className="w-full bg-gray-200 rounded-full h-3">
-                                <div 
+                                <div
                                     className="bg-blue-600 h-3 rounded-full transition-all duration-300"
                                     style={{ width: `${((sessionData.session.currentQuestion + 1) / sessionData.quizQuestions.length) * 100}%` }}
                                 ></div>
@@ -295,29 +294,26 @@ export default function Play() {
                                 {sessionData.quizQuestions[sessionData.session.currentQuestion].options.map((option, key) => {
                                     const selected = isSelected(key)
                                     const currentQuestion = sessionData.quizQuestions[sessionData.session.currentQuestion]
-                                    
+
                                     return (
-                                        <button 
-                                            key={key} 
+                                        <button
+                                            key={key}
                                             onClick={() => handleAnswerSelect(key)}
                                             disabled={hasAnswered}
-                                            className={`w-full p-4 text-left rounded-lg border-2 transition-all hover:shadow-md disabled:cursor-not-allowed ${
-                                                selected 
-                                                    ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                            } ${hasAnswered ? 'opacity-75' : ''}`}
+                                            className={`w-full p-4 text-left rounded-lg border-2 transition-all hover:shadow-md disabled:cursor-not-allowed ${selected
+                                                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                } ${hasAnswered ? 'opacity-75' : ''}`}
                                         >
                                             <div className="flex items-center">
                                                 {currentQuestion.answerType === "single" ? (
-                                                    <div className={`w-4 h-4 rounded-full border-2 mr-4 flex items-center justify-center ${
-                                                        selected ? 'border-blue-500 bg-blue-100' : 'border-gray-300'
-                                                    }`}>
+                                                    <div className={`w-4 h-4 rounded-full border-2 mr-4 flex items-center justify-center ${selected ? 'border-blue-500 bg-blue-100' : 'border-gray-300'
+                                                        }`}>
                                                         {selected && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
                                                     </div>
                                                 ) : (
-                                                    <div className={`w-6 h-6 rounded border-2 mr-4 flex items-center justify-center ${
-                                                        selected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
-                                                    }`}>
+                                                    <div className={`w-6 h-6 rounded border-2 mr-4 flex items-center justify-center ${selected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                                                        }`}>
                                                         {selected && <Icons icon="check" className="w-4 h-4 text-white" />}
                                                     </div>
                                                 )}
@@ -331,8 +327,8 @@ export default function Play() {
                             {/* Answer Type Indicator */}
                             <div className="mt-6 flex items-center text-sm text-gray-500">
                                 <Icons icon="info" className="w-4 h-4 mr-2" />
-                                <span>Select {sessionData.quizQuestions[sessionData.session.currentQuestion].answerType === "single" 
-                                ? "one answer" : "multiple answers"}</span>
+                                <span>Select {sessionData.quizQuestions[sessionData.session.currentQuestion].answerType === "single"
+                                    ? "one answer" : "multiple answers"}</span>
                             </div>
 
                             {/* Submission Status */}
@@ -351,14 +347,13 @@ export default function Play() {
 
                         {/* Action Buttons */}
                         <div className="flex justify-end items-center">
-                            <button 
-                                onClick={() => handleSubmitAnswer(false)}
+                            <button
+                                onClick={() => { handleSubmitAnswer(false) }}
                                 disabled={selectedAnswers.length === 0 || hasAnswered || isSubmitting}
-                                className={`px-8 py-3 rounded-lg font-semibold shadow-md transition-colors ${
-                                    selectedAnswers.length > 0 && !hasAnswered && !isSubmitting
-                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                }`}
+                                className={`px-8 py-3 rounded-lg font-semibold shadow-md transition-colors ${selectedAnswers.length > 0 && !hasAnswered && !isSubmitting
+                                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
                             >
                                 {isSubmitting ? 'Submitting...' : hasAnswered ? 'Submitted' : 'Submit Answer'}
                             </button>
