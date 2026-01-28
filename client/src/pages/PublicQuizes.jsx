@@ -10,11 +10,12 @@ export default function PublicQuizzes() {
     const [filter, setFilter] = useState([])
     const [totalPages, setTotalPages] = useState(1)
     const [totalQuizzes, setTotalQuizzes] = useState(0)
+    const [search, setSearch] = useState("")
     const [searchParams, setSearchParams] = useSearchParams()
     const page = searchParams.get("page") && Number(searchParams.get("page")) ? Number(searchParams.get("page")) : 1
 
     useEffect(() => {
-        fetch(`/api/quizzes?page=${page}&categories=${filter.join(",")}`, {
+        fetch(`/api/quizzes?page=${page}&categories=${filter.join(",")}&search=${search}`, {
             credentials: 'include'
         })
             .then(res => res.json())
@@ -27,7 +28,7 @@ export default function PublicQuizzes() {
                     toast.error(data.message)
                 }
             })
-    }, [page, filter])
+    }, [page, filter, search])
 
     const handleFilterChange = (c) => {
         setSearchParams({ page: 1 })
@@ -38,6 +39,11 @@ export default function PublicQuizzes() {
         } else {
             setFilter(prev => ([...prev, c]))
         }
+    }
+
+    const handleSearch = (searchValue) => {
+        setSearchParams({ page: 1 })
+        setSearch(searchValue)
     }
 
     return (
@@ -56,6 +62,7 @@ export default function PublicQuizzes() {
                     showFilter={true}
                     selectedFilters={filter}
                     onFilterChange={handleFilterChange}
+                    onSearchChange={handleSearch}
                     totalPages={totalPages}
                     totalQuizzes={totalQuizzes}
                     currentPage={page}

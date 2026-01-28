@@ -17,6 +17,7 @@ export default function Profile() {
     const [totalPages, setTotalPages] = useState(1)
     const [totalQuizzes, setTotalQuizzes] = useState(1)
     const [filter, setFilter] = useState([])
+    const [search, setSearch] = useState("")
     const [searchParams, setSearchParams] = useSearchParams()
     const page = searchParams.get("page") && Number(searchParams.get("page")) ? Number(searchParams.get("page")) : 1
     const navigate = useNavigate()
@@ -29,7 +30,7 @@ export default function Profile() {
 
     useEffect(() => {
         if (activeTab === "quizes") {
-            fetch(`/api/quizzes/private?page=${page}&categories=${filter.join(",")}`, {
+            fetch(`/api/quizzes/private?page=${page}&categories=${filter.join(",")}&search=${search}`, {
                 credentials: 'include'
             })
                 .then(res => res.json())
@@ -62,7 +63,7 @@ export default function Profile() {
         } else {
             setLoading(false)
         }
-    }, [activeTab, page, filter])
+    }, [activeTab, page, search])
 
     const handleFilterChange = (c) => {
         setSearchParams({ page: 1 })
@@ -75,6 +76,10 @@ export default function Profile() {
         }
     }
 
+    const handleSearch = (searchValue) => {
+        setSearchParams({ page: 1 })
+        setSearch(searchValue)
+    }
 
     function logout() {
         fetch("/api/user/logout", {
@@ -211,6 +216,7 @@ export default function Profile() {
                                         showFilter={true}
                                         selectedFilters={filter}
                                         onFilterChange={handleFilterChange}
+                                        onSearchChange={handleSearch}
                                         totalPages={totalPages}
                                         totalQuizzes={totalQuizzes}
                                         currentPage={page}

@@ -3,6 +3,8 @@ import Navigation from '../../components/Navigation'
 import AdminNavigation from './AdminNavigation'
 import { useSearchParams } from "react-router-dom"
 import Pagination from '../../components/Pagination'
+import Icons from '../../components/Icons'
+import categoryOptions from "../../utils/Categories.json"
 
 export default function Quizes() {
     const [loading, setLoading] = useState(true)
@@ -11,10 +13,12 @@ export default function Quizes() {
     const [totalQuizes, setTotalQuizes] = useState(0)
     const [searchParams, setSearchParams] = useSearchParams()
     const page = searchParams.get("page") && Number(searchParams.get("page")) ? Number(searchParams.get("page")) : 1
+    const [search, setSearch] = useState("")
+    const [filter, setFilter] = useState([])
 
-    useEffect(() => {
+    const updateInfoFromDatabase = () => {
         setLoading(true)
-        fetch(`/api/admin/quizzes?page=${page}`, {
+        fetch(`/api/admin/quizzes?page=${page}&categories=${filter.join(",")}&search=${search}`, {
             credentials: "include"
         }).then(res => res.json())
             .then(data => {
@@ -23,7 +27,26 @@ export default function Quizes() {
                 setTotalQuizes(data.data.totalQuizzes)
                 setLoading(false)
             })
-    }, [page])
+    }
+
+    useEffect(() => {
+        updateInfoFromDatabase()
+    }, [page, filter])
+
+    const handleSearch = () => {
+        setSearchParams({ page: 1 })
+        updateInfoFromDatabase()
+    }
+    const handleFilterChange = (c) => {
+        setSearchParams({ page: 1 })
+        if (filter.includes(c)) {
+            setFilter(prev => (
+                prev.filter(val => val !== c)
+            ))
+        } else {
+            setFilter(prev => ([...prev, c]))
+        }
+    }
     return (
         <div className='flex flex-col h-screen'>
             <Navigation />
@@ -31,6 +54,23 @@ export default function Quizes() {
                 <AdminNavigation />
                 <div className='flex-1 overflow-y-auto'>
                     <div className="w-full bg-white rounded p-5">
+                        <div className="flex gap-2 mb-3">
+                            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search" className="w-full bg-white border-1 border-gray-200 rounded-full px-4 py-1 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all" />
+                            <button onClick={handleSearch} className="flex items-center bg-white border border-gray-200 hover:bg-gray-100 rounded-lg px-2 cursor-pointer">
+                                <Icons icon="search" className="w-5" />
+                            </button>
+                        </div>
+                        <div className="flex gap-2 mb-3 flex-wrap">
+                            {categoryOptions.map(c => (
+                                <button
+                                    onClick={() => handleFilterChange(c)}
+                                    key={c}
+                                    className={`border-1 ${filter.includes(c) ? "bg-gray-200 border-purple-700" : "bg-gray-100 border-gray-200"} border-gray-200 hover:bg-gray-200 transform duration-300 px-2 py-1 rounded-full cursor-pointer`}
+                                >
+                                    {c}
+                                </button>
+                            ))}
+                        </div>
                         {loading ? (
                             <div className="flex items-center justify-center h-screen">
                                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>

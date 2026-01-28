@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import Pagination from './Pagination.jsx'
 import categoryOptions from "../utils/Categories.json"
+import Icons from './Icons.jsx'
+import { useState } from 'react'
 
 export default function QuizList({
     quizzes,
@@ -9,16 +11,21 @@ export default function QuizList({
     currentPage,
     showFilter = false,
     showSearch = true,
+    onSearchChange,
     selectedFilters = [],
     onFilterChange,
     showCategories = true,
     link
 }) {
+    const [search, setSearch] = useState("")
     return (
         <>
             {showSearch && (
                 <div className="flex gap-2 mb-3">
-                    <input type="text" placeholder="Search" className="w-full bg-white border-1 border-gray-200 rounded-full px-4 py-1 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all" />
+                    <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search" className="w-full bg-white border-1 border-gray-200 rounded-full px-4 py-1 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all" />
+                    <button onClick={(e) => { onSearchChange(search) }} className="flex items-center bg-white border border-gray-200 hover:bg-gray-100 rounded-lg px-2 cursor-pointer">
+                        <Icons icon="search" className="w-5" />
+                    </button>
                 </div>
             )}
             {showFilter && (

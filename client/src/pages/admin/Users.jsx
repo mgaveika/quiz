@@ -7,6 +7,7 @@ import Avatar from '../../components/Avatar'
 import { toast } from 'react-hot-toast'
 import Icons from '../../components/Icons'
 import DeleteAccount from '../../components/DeleteAccount'
+import Roles from '../../utils/Roles.json'
 
 export default function Users() {
     const [loading, setLoading] = useState(true)
@@ -14,11 +15,17 @@ export default function Users() {
     const [totalPages, setTotalPages] = useState(0)
     const [totalUsers, setTotalUsers] = useState(0)
     const [deleteAccount, setDeleteAccount] = useState(false)
+    const [search, setSearch] = useState("")
+    const [role, setRole] = useState("")
     const [searchParams, setSearchParams] = useSearchParams()
     const page = searchParams.get("page") && Number(searchParams.get("page")) ? Number(searchParams.get("page")) : 1
 
     useEffect(() => {
-        fetch(`/api/admin/users?page=${page}`, {
+        updateInfoFromDB()
+    }, [page, role])
+
+    const updateInfoFromDB = () => {
+        fetch(`/api/admin/users?page=${page}&role=${role}&search=${search}`, {
             credentials: "include"
         }).then(res => res.json())
             .then(data => {
@@ -27,7 +34,7 @@ export default function Users() {
                 setTotalUsers(data.data.totalUsers)
                 setLoading(false)
             })
-    }, [page])
+    }
 
     const handleUserLogout = (userId) => {
         fetch(`/api/admin/logout/${userId}`, {
@@ -61,7 +68,7 @@ export default function Users() {
             })
     }
 
-    const handleRoleChange = (userId, role) => {
+    const handleUserRoleChange = (userId, role) => {
         fetch(`/api/admin/updateRole/${userId}`, {
             method: "POST",
             credentials: "include",
@@ -79,6 +86,15 @@ export default function Users() {
                 }
             })
     }
+    const handleSearchRoleChange = (role) => {
+        setSearchParams({ page: 1 })
+        setRole(role)
+    }
+
+    const handleSearch = () => {
+        setSearchParams({ page: 1 })
+        updateInfoFromDB()
+    }
     return (
         <div className='flex flex-col h-screen'>
             {deleteAccount && <DeleteAccount confirm={confirmDeleteAccount} cancel={() => setDeleteAccount(false)} />}
@@ -87,6 +103,18 @@ export default function Users() {
                 <AdminNavigation />
                 <div className='flex-1 overflow-y-auto'>
                     <div className="w-full bg-white rounded p-5">
+                        <div className="flex gap-2 mb-3">
+                            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search" className="w-full bg-white border-1 border-gray-200 rounded-full px-4 py-1 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all" />
+                            <button onClick={handleSearch} className="flex items-center bg-white border border-gray-200 hover:bg-gray-100 rounded-lg px-2 cursor-pointer">
+                                <Icons icon="search" className="w-5" />
+                            </button>
+                            <select value={role} onChange={(e) => handleSearchRoleChange(e.target.value)} className="border px-1 border-gray-300 rounded">
+                                <option key="All" value="All">All</option>
+                                {Roles.map(role => (
+                                    <option key={role} value={role}>{role}</option>
+                                ))}
+                            </select>
+                        </div>
                         {loading ? (
                             <div className="flex items-center justify-center h-screen">
                                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
@@ -106,10 +134,10 @@ export default function Users() {
                                                             <select
                                                                 id={"roles" + u._id}
                                                                 value={u.role}
-                                                                onChange={e => handleRoleChange(u._id, e.target.value)}
+                                                                onChange={e => handleUserRoleChange(u._id, e.target.value)}
                                                                 className="border px-1 border-gray-300 rounded"
                                                             >
-                                                                {['user', 'admin'].map(role => (
+                                                                {Roles.map(role => (
                                                                     <option key={role + u._id} value={role}>{role}</option>
                                                                 ))}
                                                             </select>

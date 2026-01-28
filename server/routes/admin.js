@@ -16,8 +16,8 @@ router.get('/dashboard', async (req, res) => {
 
 router.get('/users', async (req, res) => {
     try {
-        const { page } = req.query
-        const data = await AdminService.getUsers({ page })
+        const { page, role, search } = req.query
+        const data = await AdminService.getUsers({ page, role, search })
         res.json({ data: data, message: "Recieved users data.", status: "success" })
     } catch (err) {
         res.json({ data: null, message: err.message, status: "error" })
@@ -26,8 +26,8 @@ router.get('/users', async (req, res) => {
 
 router.get('/quizzes', async (req, res) => {
     try {
-        const { page } = req.query
-        const data = await AdminService.getQuizzes({ page })
+        const { page, categories, search } = req.query
+        const data = await AdminService.getQuizzes({ page, categories, search })
         res.json({ data: data, message: "Recieved quizzes data.", status: "success" })
     } catch (err) {
         res.json({ data: null, message: err.message, status: "error" })

@@ -14,15 +14,22 @@ class AdminService {
         return { totalQuizes, totalAttempts, registeredUsers, totalQuestions }
     }
 
-    static async getUsers({ page }) {
+    static async getUsers({ page, role, search }) {
         const limit = 10
         if (!page || page < 1 || !Number(page)) {
             page = 1
         } else {
             page = Number(page)
         }
-        const users = await User.find().skip((page - 1) * limit).limit(limit)
-        const totalUsers = await User.countDocuments()
+        const query = {}
+        if (role && role !== "All") {
+            query.role = role;
+        }
+        if (search && search.length > 0) {
+            query.username = { $regex: search, $options: 'i' };
+        }
+        const users = await User.find(query).skip((page - 1) * limit).limit(limit)
+        const totalUsers = await User.countDocuments(query)
         const usersInfo = await Promise.all(
             users.map(async (user) => {
                 const token = await AccessTokens.findOne({ userId: user._id })
@@ -33,21 +40,30 @@ class AdminService {
         return { usersInfo, totalPages: Math.ceil(totalUsers / limit), totalUsers }
     }
 
-    static async getQuizzes({ page }) {
+    static async getQuizzes({ page, categories, search }) {
         const limit = 10
         if (!page || page < 1 || !Number(page)) {
             page = 1
         } else {
             page = Number(page)
         }
-        const quizzes = await Quiz.find().skip((page - 1) * limit).limit(limit)
-        const totalQuizzes = await Quiz.countDocuments()
+        const categoryArray = categories ? categories.split(",").map(c => c.trim()) : []
+        const query = {}
+        if (categoryArray.length > 0) {
+            query.categories = { $in: categoryArray };
+        }
+        if (search && search.length > 0) {
+            query.title = { $regex: search, $options: 'i' };
+        }
+        const quizzes = await Quiz.find(query).skip((page - 1) * limit).limit(limit)
+        const totalQuizzes = await Quiz.countDocuments(query)
         const quizInfo = await Promise.all(
             quizzes.map(async (quiz) => {
                 const totalQuestions = await QuizQuestion.countDocuments({ quizId: quiz._id })
                 return { ...quiz.toObject(), totalQuestions }
             })
         )
+
 
         return { quizInfo, totalPages: Math.ceil(totalQuizzes / limit), totalQuizzes }
     }

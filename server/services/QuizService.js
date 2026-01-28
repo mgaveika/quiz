@@ -24,7 +24,7 @@ class QuizService {
         }
     }
 
-    static async getUserQuizzes({ userId, page, categories }) {
+    static async getUserQuizzes({ userId, page, categories, search }) {
         try {
             const limit = 10
             if (!page || page < 1 || !Number(page)) {
@@ -39,6 +39,9 @@ class QuizService {
             if (categoryArray.length > 0) {
                 query.categories = { $in: categoryArray };
             }
+            if (search && search.length > 0) {
+                query.title = { $regex: search, $options: 'i' };
+            }
             const privateQuizzes = await Quiz.find(query).limit(limit).skip((page - 1) * limit)
             const quizzesCount = await Quiz.countDocuments(query)
             return { privateQuizzes, totalPages: Math.ceil(quizzesCount / limit), totalQuizzes: quizzesCount }
@@ -47,7 +50,7 @@ class QuizService {
         }
     }
 
-    static async getPublicQuizzes({ userId, page, categories }) {
+    static async getPublicQuizzes({ userId, page, categories, search }) {
         try {
             const limit = 10
             if (!page || page < 1 || !Number(page)) {
@@ -65,6 +68,9 @@ class QuizService {
 
             if (categoryArray.length > 0) {
                 query.categories = { $in: categoryArray };
+            }
+            if (search && search.length > 0) {
+                query.title = { $regex: search, $options: 'i' };
             }
             const publicQuizzes = await Quiz.find(query).limit(limit).skip((page - 1) * limit)
             const quizzesCount = await Quiz.countDocuments(query)
