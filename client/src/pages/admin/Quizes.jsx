@@ -13,11 +13,12 @@ export default function Quizes() {
     const page = searchParams.get("page") && Number(searchParams.get("page")) ? Number(searchParams.get("page")) : 1
 
     useEffect(() => {
+        setLoading(true)
         fetch(`/api/admin/quizzes?page=${page}`, {
             credentials: "include"
         }).then(res => res.json())
             .then(data => {
-                setQuizes(data.data.quizzes)
+                setQuizes(data.data.quizInfo)
                 setTotalPages(data.data.totalPages)
                 setTotalQuizes(data.data.totalQuizzes)
                 setLoading(false)
@@ -40,12 +41,19 @@ export default function Quizes() {
                             <>
                                 <ul className="flex flex-col gap-1">
                                     {quizes.map(q => (
-                                        <li key={q._id} className="bg-white p-3 flex items-center border border-gray-100 last:border-0">
-                                            <div className="font-semibold hover:text-purple-700 transition-colors">{q.title}</div>
+                                        <li key={q._id} className="bg-white p-3 flex flex-col border border-gray-100 last:border-0">
+                                            <div className="flex justify-between items-center w-full">
+                                                <div className="font-semibold hover:text-purple-700 transition-colors">{q.title}
+                                                    <span className="text-sm rounded-full border-1 border-gray-200 px-2 text-gray-600 ml-2">{q.totalQuestions}</span>
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    {q.categories.map((c, idx) => (
+                                                        <span key={idx + c} className="text-sm rounded-full border-1 border-gray-200 bg-gray-100 px-2 text-gray-600">{c}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
                                             <div className="flex gap-1">
-                                                {q.categories.map((c, idx) => (
-                                                    <div key={idx + c} className="text-sm rounded-full border-1 border-gray-200 bg-gray-100 px-2 text-gray-600">{c}</div>
-                                                ))}
+
                                             </div>
                                         </li>
                                     ))}

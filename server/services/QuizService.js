@@ -101,7 +101,7 @@ class QuizService {
                 throw new Error("Quiz questions not found")
             }
             const user = await User.findById(quiz.creator)
-            const username = user ? user.username : "N/A"
+            const username = user ? user.username : "Unknown"
 
             if (String(quiz.creator) === userId) {
                 return { quiz, quizQuestions, username, creator: true }

@@ -2,6 +2,7 @@ const User = require("../models/Users")
 const Quiz = require("../models/Quiz")
 const QuizAttempt = require("../models/QuizAttempt")
 const QuizQuestion = require("../models/QuizQuestion")
+const AccessTokens = require("../models/AccessTokens")
 
 
 class AdminService {
@@ -22,8 +23,14 @@ class AdminService {
         }
         const users = await User.find().skip((page - 1) * limit).limit(limit)
         const totalUsers = await User.countDocuments()
+        const usersInfo = await Promise.all(
+            users.map(async (user) => {
+                const token = await AccessTokens.findOne({ userId: user._id })
+                return { ...user.toObject(), isLoggedIn: !!token }
+            })
+        )
 
-        return { users, totalPages: Math.ceil(totalUsers / limit), totalUsers }
+        return { usersInfo, totalPages: Math.ceil(totalUsers / limit), totalUsers }
     }
 
     static async getQuizzes({ page }) {
@@ -35,8 +42,19 @@ class AdminService {
         }
         const quizzes = await Quiz.find().skip((page - 1) * limit).limit(limit)
         const totalQuizzes = await Quiz.countDocuments()
+        const quizInfo = await Promise.all(
+            quizzes.map(async (quiz) => {
+                const totalQuestions = await QuizQuestion.countDocuments({ quizId: quiz._id })
+                return { ...quiz.toObject(), totalQuestions }
+            })
+        )
 
-        return { quizzes, totalPages: Math.ceil(totalQuizzes / limit), totalQuizzes }
+        return { quizInfo, totalPages: Math.ceil(totalQuizzes / limit), totalQuizzes }
+    }
+
+    static async updateRole({ userId, role }) {
+        const user = await User.findByIdAndUpdate(userId, { role }, { new: true })
+        return user
     }
 }
 

@@ -8,6 +8,7 @@ export default function QuizList({
     totalPages,
     currentPage,
     showFilter = false,
+    showSearch = true,
     selectedFilters = [],
     onFilterChange,
     showCategories = true,
@@ -15,13 +16,18 @@ export default function QuizList({
 }) {
     return (
         <>
+            {showSearch && (
+                <div className="flex gap-2 mb-3">
+                    <input type="text" placeholder="Search" className="w-full bg-white border-1 border-gray-200 rounded-full px-4 py-1 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all" />
+                </div>
+            )}
             {showFilter && (
                 <div className="flex gap-2 mb-3 flex-wrap">
                     {categoryOptions.map(c => (
                         <button
                             onClick={() => onFilterChange && onFilterChange(c)}
                             key={c}
-                            className={`border-1 ${selectedFilters.includes(c) ? "bg-gray-200 border-purple-700" : "bg-gray-100 border-gray-200"} border-gray-200 hover:bg-gray-200 transform duration-300 px-2 py-1 rounded-full`}
+                            className={`border-1 ${selectedFilters.includes(c) ? "bg-gray-200 border-purple-700" : "bg-gray-100 border-gray-200"} border-gray-200 hover:bg-gray-200 transform duration-300 px-2 py-1 rounded-full cursor-pointer`}
                         >
                             {c}
                         </button>

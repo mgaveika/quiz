@@ -5,7 +5,7 @@ import Icons from "./Icons.jsx";
 import { AuthContext } from "../utils/AuthContext.jsx"
 
 export default function Navigation() {
-    const { user, logout } = useContext(AuthContext)
+    const { user, logout, isAdmin } = useContext(AuthContext)
 
     const [optionsOpen, setOptionsOpen] = useState(false)
     const dropdownRef = useRef()
@@ -41,6 +41,11 @@ export default function Navigation() {
                                     Profile
                                 </button>
                             </Link>
+                            {isAdmin && <Link to="/admin">
+                                <button className="flex items-center w-full px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-purple-600 transition-colors cursor-pointer group">
+                                    Admin panel
+                                </button>
+                            </Link>}
                             <button onClick={logout} className="flex items-center w-full px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer mt-1">
                                 Log out
                             </button>

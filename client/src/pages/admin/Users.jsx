@@ -4,12 +4,16 @@ import AdminNavigation from './AdminNavigation'
 import { useSearchParams } from "react-router-dom"
 import Pagination from '../../components/Pagination'
 import Avatar from '../../components/Avatar'
+import { toast } from 'react-hot-toast'
+import Icons from '../../components/Icons'
+import DeleteAccount from '../../components/DeleteAccount'
 
 export default function Users() {
     const [loading, setLoading] = useState(true)
     const [users, setUsers] = useState([])
     const [totalPages, setTotalPages] = useState(0)
     const [totalUsers, setTotalUsers] = useState(0)
+    const [deleteAccount, setDeleteAccount] = useState(false)
     const [searchParams, setSearchParams] = useSearchParams()
     const page = searchParams.get("page") && Number(searchParams.get("page")) ? Number(searchParams.get("page")) : 1
 
@@ -18,14 +22,66 @@ export default function Users() {
             credentials: "include"
         }).then(res => res.json())
             .then(data => {
-                setUsers(data.data.users)
+                setUsers(data.data.usersInfo)
                 setTotalPages(data.data.totalPages)
                 setTotalUsers(data.data.totalUsers)
                 setLoading(false)
             })
     }, [page])
+
+    const handleUserLogout = (userId) => {
+        fetch(`/api/admin/logout/${userId}`, {
+            method: "POST",
+            credentials: "include"
+        }).then(res => res.json())
+            .then(data => {
+                console.log(data)
+                if (data.status === "success") {
+                    toast.success(data.message)
+                    setUsers(users.map(u => u._id === userId ? { ...u, isLoggedIn: false } : u))
+                } else {
+                    toast.error(data.message)
+                }
+            })
+    }
+
+    async function confirmDeleteAccount() {
+        fetch(`/api/admin/deleteUser/${deleteAccount}`, {
+            method: "DELETE",
+            credentials: "include"
+        }).then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    toast.success(data.message)
+                    setUsers(users.filter(u => u._id !== deleteAccount))
+                    setDeleteAccount(false)
+                } else {
+                    toast.error(data.message)
+                }
+            })
+    }
+
+    const handleRoleChange = (userId, role) => {
+        fetch(`/api/admin/updateRole/${userId}`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ role })
+        }).then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    toast.success(data.message)
+                    setUsers(users.map(u => u._id === userId ? { ...u, role } : u))
+                } else {
+                    toast.error(data.message)
+                }
+            })
+    }
     return (
         <div className='flex flex-col h-screen'>
+            {deleteAccount && <DeleteAccount confirm={confirmDeleteAccount} cancel={() => setDeleteAccount(false)} />}
             <Navigation />
             <div className='flex flex-1 overflow-hidden'>
                 <AdminNavigation />
@@ -41,14 +97,36 @@ export default function Users() {
                             <>
                                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {users.map(u => (
-                                        <li key={u._id} className="bg-white p-3 gap-2 border border-gray-100 last:border-0">
-                                            <div className="flex items-center gap-2">
-                                                <Avatar size="30px" fontSize="15px" name={u.username} />
-                                                <div className="font-semibold hover:text-purple-700 transition-colors">{u.username}</div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <button className="bg-blue-500 text-white px-2 py-1 rounded">Edit</button>
-                                                <button className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                                        <li key={u._id} className="bg-white p-3 gap-2 border border-gray-100">
+                                            <div className="flex justify-between items-center">
+                                                <div className='flex gap-2'>
+                                                    <Avatar size="40px" fontSize="15px" name={u.username} />
+                                                    <div className="flex flex-col">
+                                                        <div className="font-semibold flex items-center justify-between gap-2">{u.username}
+                                                            <select
+                                                                id={"roles" + u._id}
+                                                                value={u.role}
+                                                                onChange={e => handleRoleChange(u._id, e.target.value)}
+                                                                className="border px-1 border-gray-300 rounded"
+                                                            >
+                                                                {['user', 'admin'].map(role => (
+                                                                    <option key={role + u._id} value={role}>{role}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                        <span className="text-sm text-gray-600">{u.email}</span>
+                                                    </div>
+                                                </div>
+                                                <div className='flex gap-2'>
+                                                    {u.isLoggedIn && (
+                                                        <div className="flex items-center gap-2">
+                                                            <button onClick={() => handleUserLogout(u._id)} className="bg-white p-1 border border-gray-200 hover:border-gray-300 transition-colors rounded-md cursor-pointer"><Icons icon="exit" className="w-5" /></button>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex items-center gap-2">
+                                                        <button onClick={() => setDeleteAccount(u._id)} className="bg-red-50 p-1 border border-red-100 hover:border-red-2W00 transition-colors rounded-md cursor-pointer"><Icons icon="bin" className="w-5" /></button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </li>
                                     ))}

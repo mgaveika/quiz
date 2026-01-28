@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
 const User = require('../models/Users')
+const accessTokenSchema = require('../models/AccessTokens')
 
 async function hashPassword(password) {
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -40,7 +41,9 @@ class AuthService {
             if (!user) {
                 throw new Error("User not found.")
             }
-            return await User.deleteOne({ _id: id })
+            await User.deleteOne({ _id: id })
+            await accessTokenSchema.findOneAndDelete({ userId: id })
+            return
         } catch (err) {
             throw err
         }

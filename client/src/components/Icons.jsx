@@ -169,7 +169,7 @@ export default function Icons(props) {
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
             >
-                <g stroke="currentColor" strokeWidth={1.91} strokeMiterlimit={10}>
+                <g stroke="currentColor" strokeWidth={1.5} strokeMiterlimit={10}>
                     <path d="M12,4.36V20.59a1.92,1.92,0,0,1-1.91,1.91,1.93,1.93,0,0,1-1.91-1.91v0a2.45,2.45,0,0,1-.48,0,3.35,3.35,0,0,1-3.34-3.34,3.19,3.19,0,0,1,.08-.7A4.29,4.29,0,0,1,3.6,8.79,3.24,3.24,0,0,1,3.41,7.7,3.34,3.34,0,0,1,6.27,4.4v0a2.87,2.87,0,0,1,5.73,0Z" />
                     <path d="M6.75,11.05a3.35,3.35,0,0,1,0-6.69" />
                     <path d="M8.18,13.91h0A3.82,3.82,0,0,1,12,17.73h0" />
@@ -219,6 +219,29 @@ export default function Icons(props) {
                 />
             </svg>
         )
+    } else if (props.icon === "exit") {
+        return (
+            <svg
+                className={`${props.className}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    d="M14 7.63636V4.5C14 4.22386 13.7761 4 13.5 4H4.5C4.22386 4 4 4.22386 4 4.5V19.5C4 19.7761 4.22386 20 4.5 20H13.5C13.7761 20 14 19.7761 14 19.5V16.3636"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+                <path
+                    d="M10 12H21M21 12L18.0004 8.5M21 12L18 15.5"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+            </svg>)
     } else {
         return (
             <span>Unknown icon</span>

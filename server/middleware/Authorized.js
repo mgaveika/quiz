@@ -1,6 +1,7 @@
 const moment = require("moment")
 const jwt = require("jsonwebtoken")
 const accessTokenSchema = require("../models/AccessTokens")
+const userSchema = require("../models/Users")
 const AuthService = require("../services/AuthService")
 const crypto = require("crypto")
 
@@ -41,8 +42,9 @@ const authorized = async (req, res, next) => {
             return res && res.json ? res.json({ auth: false, message: "Invalid token.", status: "error" }) : next(err)
         }
         let todayDate = moment()
-        if (moment(tokenRecord.expireDate).diff(todayDate, "days") < 2) {
-            const newToken = await AuthService.createToken({ userId: tokenRecord.userId, username: tokenRecord.username, role: tokenRecord.role })
+        const user = await userSchema.findOne({ _id: tokenRecord.userId })
+        if (moment(tokenRecord.expireDate).diff(todayDate, "days") < 2 || user.role !== tokenRecord.role) {
+            const newToken = await AuthService.createToken({ userId: tokenRecord.userId, username: tokenRecord.username, role: user.role })
             if (res && res.cookie) {
                 res.cookie("accessCookie", newToken, {
                     httpOnly: true,
