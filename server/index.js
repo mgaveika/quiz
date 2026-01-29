@@ -6,7 +6,7 @@ const app = express()
 const port = process.env.PORT
 const routes = require('./routes')
 const cookieParser = require('cookie-parser')
-
+const morganMiddleware = require('./middleware/Morgan.js')
 const socketPort = 8080
 const http = require('http')
 const { Server } = require("socket.io")
@@ -55,6 +55,7 @@ app.use(cors({
 }))
 
 app.use(express.json())
+app.use(morganMiddleware)
 app.use(cookieParser())
 app.use('/api', routes)
 

@@ -6,7 +6,7 @@ import Navigation from "../components/Navigation"
 
 export default function Login() {
     const navigate = useNavigate()
-    const { user, setUser } = useContext(AuthContext)
+    const { user, setUser, loading } = useContext(AuthContext)
     async function handleSubmit(event) {
         event.preventDefault()
         const email = event.target.email.value
@@ -38,6 +38,14 @@ export default function Login() {
             navigate("/")
         }
     }, [user])
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+            </div>
+        )
+    }
     return (
         <>
             <Navigation />
@@ -76,6 +84,7 @@ export default function Login() {
                         <span className="text-gray-500">Don't have an account?</span>
                         <Link to="/register" className="ml-2 text-blue-500">Sign up</Link>
                     </div>
+                    <div className="mt-3 text-center text-blue-500"><Link to="/forgot-password">Forgot password?</Link></div>
                 </div>
             </div>
         </>

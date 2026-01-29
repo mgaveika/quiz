@@ -6,9 +6,7 @@ import toast from "react-hot-toast"
 export default function Home() {
     const [code, setCode] = useState("")
     const navigate = useNavigate()
-    const handleCodeChange = (p) => {
-        setCode(p)
-    }
+
     const hangleJoinClick = (event) => {
         event.preventDefault()
         fetch(`/api/room/${code}`, {
@@ -59,7 +57,7 @@ export default function Home() {
                             <form onSubmit={hangleJoinClick} className="space-y-4">
                                 <div className="relative">
                                     <input
-                                        onChange={(e) => handleCodeChange(e.target.value.replace(/[^0-9.]/g, ''))}
+                                        onChange={(e) => setCode(e.target.value.replace(/[^0-9.]/g, ''))}
                                         value={code}
                                         type="text"
                                         className="w-full bg-white border-2 border-gray-100 px-4 py-4 rounded-xl text-center text-2xl font-bold tracking-widest focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-gray-300"

@@ -9,11 +9,11 @@ import io from "socket.io-client"
 
 let socket
 
-export default function Room() {
+export default function GameRoom() {
     const [roomData, setRoomData] = useState(null)
     const [isCreator, setIsCreator] = useState(false)
     const [participants, setParticipants] = useState([])
-    const [settings, setSettings] = useState({ timePerQuestion: 30, allowSpectators: false, privateRoom: false })
+    const [settings, setSettings] = useState({ timePerQuestion: 30, wordLength: 5 })
 
     const { code } = useParams()
     const navigate = useNavigate()
@@ -40,16 +40,14 @@ export default function Room() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ settings, participants: newParticipantsArr })
+            body: JSON.stringify({ settings, participants: newParticipantsArr, gameType: roomData.room.gameType })
         }).then(res => res.json())
             .then(data => {
                 if (data.status == "success") {
                     toast.success(data.message)
-                    // Notify all participants that game has started
                     if (socket) {
                         socket.emit("start-game", { code })
                     }
-                    //navigate(`/room/${code}/live`)
                 } else {
                     toast.error(data.message)
                     navigate("/list")
@@ -122,7 +120,7 @@ export default function Room() {
                 <div className="text-gray-700 shadow-md max-w-3xl mx-auto mt-2">
                     <div className="flex justify-between items-center bg-purple-600 px-5 py-2 rounded-t-md">
                         <div className="h-fit w-fit">
-                            <h1 className="text-2xl font-bold text-white">Quiz Room</h1>
+                            <h1 className="text-2xl font-bold text-white">Game Room</h1>
                             <div className="flex items-center gap-2">
                                 <Icons icon="people" className="w-4 text-white" />
                                 <h2 className="text-lg text-white">{participants.length} participants waiting</h2>
@@ -137,7 +135,7 @@ export default function Room() {
                         </div>
                     </div>
                     <div className="w-full p-3 bg-white">
-                        {isCreator &&
+                        {isCreator && roomData.room.gameType == "quiz" &&
                             <div className="bg-gray-100 border border-gray-200 hover:border-gray-300 rounded p-5 w-full mx-auto mt-2 flex flex-col justify-center">
                                 <div className="flex items-center gap-2">
                                     <Icons icon="clock" className="w-6 text-purple-600" />
@@ -162,6 +160,57 @@ export default function Room() {
                                 <p className="text-center text-sm text-gray-500">Set the time limit for each question</p>
                             </div>
                         }
+                        {isCreator && roomData.room.gameType == "wordle" &&
+                            <div className="bg-gray-100 border border-gray-200 hover:border-gray-300 rounded p-5 w-full mx-auto mt-2 flex gap-5 justify-between">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <Icons icon="clock" className="w-6 text-purple-600" />
+                                        <label htmlFor="time-limit" className="block mb-2 font-bold mt-1">Time to enter a word</label>
+                                    </div>
+                                    <input
+                                        id="time-limit"
+                                        type="number"
+                                        min={1}
+                                        max={120}
+                                        value={settings.timePerQuestion}
+                                        onChange={e => setSettings(prev => ({ ...prev, timePerQuestion: e.target.value }))}
+                                        onBlur={e => {
+                                            let num = Number(e.target.value)
+                                            num = Math.floor(num)
+                                            if (num > e.target.max) num = e.target.max
+                                            if (num < e.target.min || isNaN(num)) num = 1
+                                            setSettings(prev => ({ ...prev, timePerQuestion: num }))
+                                        }}
+                                        className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all"
+                                    />
+                                    <p className="text-center text-sm text-gray-500">Set the time limit for each word to be entered</p>
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <Icons icon="wordlength" className="w-6 text-purple-600 transform rotate-90" />
+                                        <label htmlFor="word-length" className="block mb-2 font-bold mt-1">Word length</label>
+                                    </div>
+                                    <input
+                                        id="word-length"
+                                        type="number"
+                                        min={3}
+                                        max={20}
+                                        value={settings.wordLength}
+                                        onChange={e => setSettings(prev => ({ ...prev, wordLength: e.target.value }))}
+                                        onBlur={e => {
+                                            let num = Number(e.target.value)
+                                            num = Math.floor(num)
+                                            if (num > e.target.max) num = e.target.max
+                                            if (num < e.target.min || isNaN(num)) num = 1
+                                            setSettings(prev => ({ ...prev, wordLength: num }))
+                                        }}
+                                        className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all"
+                                    />
+                                    <p className="text-center text-sm text-gray-500">Set the length of the word to be guessed</p>
+                                </div>
+                            </div>
+                        }
+
                         <div className="w-full p-4 bg-gray-100 border border-gray-200 hover:border-gray-300 shadow-sm rounded mt-3">
                             <div className="flex items-center gap-4">
                                 <div className="relative">
@@ -171,7 +220,7 @@ export default function Room() {
                                     </div>
                                 </div>
                                 <div className="">
-                                    <p className="text-sm text-gray-500 bg-purple-200 text-gray-600 font-semibold px-2 py-1 rounded-full w-fit">Quiz Host</p>
+                                    <p className="text-sm text-gray-500 bg-purple-200 text-gray-600 font-semibold px-2 py-1 rounded-full w-fit">Game Host</p>
                                     <p className="text-xl font-semibold ">{roomData.hostUsername}</p>
                                 </div>
                             </div>
@@ -195,7 +244,8 @@ export default function Room() {
                                                 >
                                                     <Icons icon="bin" className="w-5 my-auto" />
                                                 </button>}
-                                            </div>}
+                                            </div>
+                                        }
                                     </>
                                 )}
                             </div>

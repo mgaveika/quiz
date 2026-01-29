@@ -42,7 +42,6 @@ export default function Users() {
             credentials: "include"
         }).then(res => res.json())
             .then(data => {
-                console.log(data)
                 if (data.status === "success") {
                     toast.success(data.message)
                     setUsers(users.map(u => u._id === userId ? { ...u, isLoggedIn: false } : u))

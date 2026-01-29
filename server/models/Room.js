@@ -12,6 +12,10 @@ const RoomSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Users',
     },
+    gameType: {
+        type: String,
+        required: true
+    },
     quizId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Quiz',

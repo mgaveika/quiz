@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom"
-import Icons from "../components/Icons"
-import Navigation from "../components/Navigation"
+import Icons from "../../components/Icons"
+import Navigation from "../../components/Navigation"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 

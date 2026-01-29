@@ -7,8 +7,8 @@ router.post('/create', async (req, res) => {
     try {
         const userId = req.userId
         const guest = req.guest || false
-        const { quizId } = req.body
-        const data = await RoomService.createRoom({ quizId, userId, guest })
+        const { quizId, gameType } = req.body
+        const data = await RoomService.createRoom({ quizId, userId, guest, gameType })
         res.json({ data: data, message: "Room created", status: "success" })
     } catch (err) {
         res.json({ data: null, message: err.message, status: "error" })
@@ -46,8 +46,8 @@ router.post('/:code/start', async (req, res) => {
         const { code } = req.params
         const userId = req.userId
         const guest = req.guest || false
-        const { settings, participants } = req.body
-        const data = await RoomService.startRoom({ code, userId, guest, settings, participants })
+        const { settings, participants, gameType } = req.body
+        const data = await RoomService.startRoom({ code, userId, guest, settings, participants, gameType })
         res.json({ data: data, message: `Room ${code} started`, status: "success" })
     } catch (err) {
         res.json({ data: null, message: err.message, status: "error" })

@@ -31,9 +31,7 @@ const authorized = async (req, res, next) => {
     }
     const tokenRecord = await accessTokenSchema.findOne({ token: token })
     if (!tokenRecord) {
-        if (res && res.clearCookie) {
-            res.clearCookie("accessCookie")
-        }
+        res.clearCookie("accessCookie")
         return res && res.json ? res.json({ auth: false, message: "No valid token record.", status: "error" }) : next(new Error("No valid token record."))
     }
 
@@ -44,7 +42,7 @@ const authorized = async (req, res, next) => {
         let todayDate = moment()
         const user = await userSchema.findOne({ _id: tokenRecord.userId })
         if (moment(tokenRecord.expireDate).diff(todayDate, "days") < 2 || user.role !== tokenRecord.role) {
-            const newToken = await AuthService.createToken({ userId: tokenRecord.userId, username: tokenRecord.username, role: user.role })
+            const newToken = await AuthService.createToken({ userId: tokenRecord.userId, username: tokenRecord.username })
             if (res && res.cookie) {
                 res.cookie("accessCookie", newToken, {
                     httpOnly: true,

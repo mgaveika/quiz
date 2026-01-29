@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import Navigation from "../components/Navigation"
+import Navigation from "../../components/Navigation"
 import toast from "react-hot-toast"
-import Avatar from "../components/Avatar"
+import Avatar from "../../components/Avatar"
 
 export default function QuizHome() {
     const [quizData, setQuizData] = useState(null)
@@ -36,7 +36,7 @@ export default function QuizHome() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ quizId })
+                body: JSON.stringify({ quizId, gameType: "quiz" })
             }).then(res => res.json())
                 .then(data => {
                     if (data.status == "success") {

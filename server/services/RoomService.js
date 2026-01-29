@@ -23,12 +23,13 @@ class RoomService {
         }
     }
 
-    static async createRoom({ quizId, userId, guest }) {
+    static async createRoom({ quizId, userId, guest, gameType }) {
         try {
             const newCode = await this.generateRoomCode()
             const data = {
                 code: newCode,
-                quizId
+                quizId,
+                gameType
             }
 
             if (guest) {
@@ -236,6 +237,25 @@ class RoomService {
             const elapsedTime = Math.floor((Date.now() - new Date(questionStartTime).getTime()) / 1000)
             const remainingTime = Math.max(0, timePerQuestion - elapsedTime)
 
+            // Auto-advance if time is up and game is stuck (with 5s grace period)
+            if (elapsedTime > timePerQuestion + 5 && session.status === 'in-progress') {
+                if (session.currentQuestion >= quizQuestions.length - 1) {
+                    await GameSession.findByIdAndUpdate(session._id, {
+                        status: "completed",
+                        endedAt: new Date()
+                    })
+                    setTimeout(async () => {
+                        await RoomService.cleanupRoom({ code })
+                    }, 30000)
+                } else {
+                    await GameSession.findByIdAndUpdate(session._id, {
+                        currentQuestion: session.currentQuestion + 1,
+                        questionStartTime: new Date()
+                    })
+                }
+                return this.getSessionStatus({ code, userId, guest })
+            }
+
             const playersAnswered = session.participants.filter(p => {
                 return p.answersHistory.some(ah =>
                     ah.questionId && ah.questionId.toString() === currentQuestionData._id.toString()
@@ -257,8 +277,13 @@ class RoomService {
         }
     }
 
-    static async startRoom({ code, userId, guest, settings, participants }) {
+    static async startRoom({ code, userId, guest, settings, participants, gameType }) {
         try {
+            const query = {}
+            if (gameType == "quiz") {
+                query.startedAt = new Date()
+                query.questionStartTime = new Date()
+            }
             const room = await Room.findOne({ code })
             if (!room) {
                 throw Error("Room not found")
@@ -281,8 +306,8 @@ class RoomService {
                 room,
                 settings,
                 participants: newParticipantsArray,
-                startedAt: new Date(),
-                questionStartTime: new Date()
+                gameType,
+                ...query
             })
             if (!session) {
                 throw Error("Failed creating game session")

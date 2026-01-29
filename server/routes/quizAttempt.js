@@ -47,5 +47,21 @@ router.get('/:id', async (req, res) => {
     }
 })
 
+router.get('/quiz/:quizId', async (req, res) => {
+    try {
+        const { quizId } = req.params
+        const guest = req.guest || false
+        const userId = req.userId
+        const data = await QuizAttemptService.getAttemptByQuizId({ quizId, userId, guest })
+        if (data) {
+            res.json({ data: data, message: "Latest attempt received.", status: "success" })
+        } else {
+            res.json({ data: null, message: "No attempt found.", status: "error" })
+        }
+    } catch (err) {
+        res.json({ data: null, message: err.message, status: "error" })
+    }
+})
+
 
 module.exports = router

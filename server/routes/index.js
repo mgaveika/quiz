@@ -17,7 +17,7 @@ const guestMiddleware = (req, res, next) => {
 const router = express.Router()
 
 router
-    .use("/auth", auth)
+    .use("/auth", guestMiddleware, auth)
     .use("/user", authorized, user)
     .use("/quizzes", guestMiddleware, authorized, quiz)
     .use("/quiz-questions", guestMiddleware, authorized, quizQuestion)

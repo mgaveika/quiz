@@ -63,19 +63,19 @@ const GameSessionSchema = new mongoose.Schema({
   endedAt: {
     type: Date
   },
+  gameType: {
+    type: String,
+    required: true
+  },
   settings: {
     timePerQuestion: { // sekundēs
       type: Number,
       default: 30
     },
-    allowSpectators: {
-      type: Boolean,
-      default: true
-    },
-    privateRoom: {
-      type: Boolean,
-      default: true
-    },
+    timeForWordle: { // sekundēs
+      type: Number,
+      default: 180
+    }
   },
 }, { timestamps: true })
 

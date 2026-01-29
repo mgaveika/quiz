@@ -6,7 +6,7 @@ import Navigation from "../components/Navigation"
 
 export default function Register() {
     const navigate = useNavigate()
-    const { user } = useContext(AuthContext)
+    const { user, loading } = useContext(AuthContext)
     async function handleSubmit(event) {
         event.preventDefault()
         const email = event.target.email.value
@@ -41,6 +41,14 @@ export default function Register() {
             navigate("/")
         }
     }, [user])
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+            </div>
+        )
+    }
     return (
         <>
             <Navigation />

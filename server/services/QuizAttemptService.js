@@ -172,6 +172,20 @@ class QuizAttemptService {
         }
     }
 
+    static async getAttemptByQuizId({ quizId, userId, guest }) {
+        try {
+            const userField = guest ? 'guest' : 'user'
+            const attempt = await QuizAttempt.findOne({
+                quizId,
+                [userField]: userId
+            }).sort({ createdAt: -1 })
+
+            return attempt
+        } catch (err) {
+            throw err
+        }
+    }
+
     static async cleanupGuestAttempts() {
         try {
             const timeAgo = new Date(Date.now() - 24 * 60 * 60 * 1000) // 24h
