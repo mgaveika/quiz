@@ -17,48 +17,48 @@ const guestMiddleware = (req, res, next) => {
   next()
 }
 
-const RoomService = require("./services/RoomService.js")
-const QuizAttemptService = require("./services/QuizAttemptService.js")
+// Load models
+require('./models/attempts/Models.js')
+require('./models/sessions/Models.js')
 
 const wrap = (middleware) => (socket, next) =>
   middleware(socket.request, {}, next)
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3303",
+    origin: ["http://localhost:5173", "http://localhost:3300", "http://localhost:3303"],
     methods: ["GET", "POST"],
     credentials: true
   },
 })
+
+io.use(wrap(cookieParser()))
 io.use(wrap(guestMiddleware))
 io.use(wrap(authMiddleware))
-
-server.listen(socketPort, () => {
-  console.log(`WebSocket is running on port ${socketPort}`)
-
-})
 
 require('./socket/roomEvents.js')(io)
 
 mongoose.connect(process.env.MONGO_URI).then(() => {
   console.log("MongoDB connected successfully.")
-  setInterval(() => {
-    RoomService.cleanupInactiveRooms()
-    QuizAttemptService.cleanupGuestAttempts()
-  }, 60 * 60 * 1000) // 1h
 }).catch((error) => {
   console.error("MongoDB connection error:", error)
 })
 
 app.use(cors({
-  origin: ['http://localhost:5173'],
+  origin: ["http://localhost:5173", "http://localhost:3300", "http://localhost:3303"],
+  credentials: true
 }))
 
 app.use(express.json())
+app.use((req, res, next) => {
+  req.io = io
+  next()
+})
 app.use(morganMiddleware)
 app.use(cookieParser())
 app.use('/api', routes)
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`)
+const finalPort = process.env.PORT || 3000
+server.listen(finalPort, () => {
+  console.log(`Server is running at http://localhost:${finalPort}`)
 })

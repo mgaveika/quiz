@@ -1,8 +1,8 @@
 import { useEffect, useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
-import { AuthContext } from "../utils/AuthContext.jsx"
-import Navigation from "../components/Navigation"
+import { AuthContext } from "../../utils/AuthContext.jsx"
+import Navigation from "../../components/Navigation.jsx"
 
 export default function Login() {
     const navigate = useNavigate()

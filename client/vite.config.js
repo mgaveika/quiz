@@ -18,6 +18,10 @@ export default defineConfig({
         secure: false,
         ws: true,
       },
+      '/socket.io': {
+        target: 'ws://localhost:3000',
+        ws: true,
+      },
     },
     cors: false,
   }

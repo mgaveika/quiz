@@ -12,31 +12,29 @@ export default function QuizRezult() {
     const handleRate = (rating) => {
         setStars(prev => ({ ...prev, saved: rating }))
 
-        fetch(`/api/quiz-attempt/${attemptId}`, {
+        fetch(`/api/gameAttempt/${attemptId}`, {
             method: "PUT",
             credentials: "include",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                questionId: false,
-                answer: false,
                 rating: rating + 1
             })
         })
             .then(res => res.json())
             .then(data => {
                 if (data.status == "success") {
-                    toast.success("Rating saved!");
+                    toast.success("Rating saved!")
                 } else {
-                    toast.error(data.message);
+                    toast.error(data.message)
                 }
             })
     }
 
     const navigate = useNavigate()
     useEffect(() => {
-        fetch(`/api/quiz-attempt/${attemptId}`, {
+        fetch(`/api/gameAttempt/id/${attemptId}`, {
             credentials: "include"
         }).then(res => res.json())
             .then(data => {
@@ -46,7 +44,7 @@ export default function QuizRezult() {
                     const uiRating = dbRating > 0 ? dbRating - 1 : -1
                     setStars((prev) => ({ ...prev, saved: uiRating }))
                 } else {
-                    toast.error(data.message);
+                    toast.error(data.message)
                     navigate("/list")
                 }
             })
@@ -244,5 +242,5 @@ export default function QuizRezult() {
                 </div>
             </div>
         </>
-    );
+    )
 }

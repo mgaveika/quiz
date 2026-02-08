@@ -1,5 +1,5 @@
-import Navigation from "../components/Navigation.jsx"
-import QuizForm from "../components/QuizForm.jsx"
+import Navigation from "../../components/Navigation.jsx"
+import QuizForm from "../../components/QuizForm.jsx"
 
 export default function CreateQuiz() {
     return (

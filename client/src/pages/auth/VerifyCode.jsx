@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import Navigation from '../components/Navigation'
+import Navigation from '../../components/Navigation'
 import { toast } from 'react-hot-toast'
 
 export default function VerifyPasswordCode() {

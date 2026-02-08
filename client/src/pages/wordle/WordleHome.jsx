@@ -8,7 +8,7 @@ export default function WordleHome() {
     const navigate = useNavigate()
     const handleClick = () => {
         setLoading(true)
-        fetch("/api/room/create", {
+        fetch("/api/gameSession/create", {
             method: "POST",
             credentials: 'include',
             headers: {
@@ -19,7 +19,7 @@ export default function WordleHome() {
             .then(data => {
                 if (data.status == "success") {
                     toast.success(data.message)
-                    navigate(`/room/${data.data.code}`)
+                    navigate(`/room/${data.data.roomCode}`)
                 } else {
                     toast.error(data.message)
                     navigate("/wordle")

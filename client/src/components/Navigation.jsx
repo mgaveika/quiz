@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useRef } from "react"
-import { Link } from "react-router";
+import { Link } from "react-router"
 import Avatar from "../components/Avatar.jsx"
-import Icons from "./Icons.jsx";
+import Icons from "./Icons.jsx"
 import { AuthContext } from "../utils/AuthContext.jsx"
 
 export default function Navigation() {
@@ -13,11 +13,11 @@ export default function Navigation() {
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setOptionsOpen(false);
+                setOptionsOpen(false)
             }
         }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
     }, [])
 
     return (
@@ -65,5 +65,5 @@ export default function Navigation() {
                 )}
             </>}
         </nav>
-    );
+    )
 }

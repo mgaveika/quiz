@@ -37,10 +37,10 @@ class QuizService {
                 creator: userId
             }
             if (categoryArray.length > 0) {
-                query.categories = { $in: categoryArray };
+                query.categories = { $in: categoryArray }
             }
             if (search && search.length > 0) {
-                query.title = { $regex: search, $options: 'i' };
+                query.title = { $regex: search, $options: 'i' }
             }
             const privateQuizzes = await Quiz.find(query).limit(limit).skip((page - 1) * limit)
             const quizzesCount = await Quiz.countDocuments(query)
@@ -64,13 +64,13 @@ class QuizService {
                     { visibility: true },
                     { participants: { user: userId } }
                 ]
-            };
+            }
 
             if (categoryArray.length > 0) {
-                query.categories = { $in: categoryArray };
+                query.categories = { $in: categoryArray }
             }
             if (search && search.length > 0) {
-                query.title = { $regex: search, $options: 'i' };
+                query.title = { $regex: search, $options: 'i' }
             }
             const publicQuizzes = await Quiz.find(query).limit(limit).skip((page - 1) * limit)
             const quizzesCount = await Quiz.countDocuments(query)

@@ -1,9 +1,10 @@
 module.exports = (io) => {
     io.on('connection', (socket) => {
         socket.on('join-room', async ({ code }) => {
-            socket.join(code)
+            const roomCode = String(code)
+            socket.join(roomCode)
             let participantsMap = new Map()
-            await io.in(code).fetchSockets().then((sockets) => {
+            await io.in(roomCode).fetchSockets().then((sockets) => {
                 sockets.forEach((socket) => {
                     if (socket.request.userId) {
                         participantsMap.set(socket.request.userId, {
@@ -15,7 +16,7 @@ module.exports = (io) => {
             }).catch((err) => {
                 console.error('Error fetching sockets:', err)
             })
-            io.to(code).emit("user-joined", { participants: Array.from(participantsMap.values()) })
+            io.to(roomCode).emit("user-joined", { participants: Array.from(participantsMap.values()) })
         })
 
         socket.on('leave-room', async ({ code }) => {
@@ -66,6 +67,16 @@ module.exports = (io) => {
 
         socket.on('start-game', ({ code }) => {
             io.to(code).emit("start-game")
+        })
+        socket.on('delete-room', ({ code }) => {
+            io.to(code).emit("room-deleted")
+        })
+        socket.on('update-settings', ({ code, settings }) => {
+            socket.to(code).emit("settings-updated", { settings })
+        })
+
+        socket.on('game-progress', ({ code, userId, username, progress }) => {
+            socket.to(code).emit('game-progress', { userId, username, progress })
         })
 
         socket.on('disconnect', () => {

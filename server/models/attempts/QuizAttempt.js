@@ -1,4 +1,5 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose')
+const GameAttemptSchema = require('./Main')
 
 const answerSchema = new mongoose.Schema({
     questionId: {
@@ -12,18 +13,11 @@ const answerSchema = new mongoose.Schema({
     }
 }, { _id: false })
 
-const quizAttemptSchema = new mongoose.Schema({
+const QuizAttemptSchema = new mongoose.Schema({
     quizId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Quiz',
         required: true
-    },
-    guest: {
-        type: String,
-    },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users',
     },
     answers: {
         type: [answerSchema],
@@ -37,6 +31,6 @@ const quizAttemptSchema = new mongoose.Schema({
         type: Number,
         default: -1
     }
-}, { timestamps: true })
+})
 
-module.exports = mongoose.model('QuizAttempt', quizAttemptSchema)
+module.exports = GameAttemptSchema.discriminator('quiz', QuizAttemptSchema)

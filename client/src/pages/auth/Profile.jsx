@@ -1,17 +1,17 @@
 import { useEffect, useState, useContext } from "react"
-import Navigation from "../components/Navigation.jsx"
-import Avatar from "../components/Avatar.jsx"
-import DeleteAccount from "../components/DeleteAccount.jsx"
+import Navigation from "../../components/Navigation.jsx"
+import Avatar from "../../components/Avatar.jsx"
+import DeleteAccount from "../../components/DeleteAccount.jsx"
 import toast from "react-hot-toast"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import QuizList from "../components/QuizList.jsx"
+import QuizList from "../../components/QuizList.jsx"
 
-import { AuthContext } from "../utils/AuthContext.jsx"
+import { AuthContext } from "../../utils/AuthContext.jsx"
 
 export default function Profile() {
     const { user } = useContext(AuthContext)
     const [loading, setLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState("quizes");
+    const [activeTab, setActiveTab] = useState("quizes")
     const [deleteAccount, setDeleteAccount] = useState(false)
     const [quizes, setQuizes] = useState([])
     const [totalPages, setTotalPages] = useState(1)

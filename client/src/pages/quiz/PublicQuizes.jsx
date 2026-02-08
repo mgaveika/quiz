@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
-import Navigation from "../components/Navigation.jsx"
+import Navigation from "../../components/Navigation.jsx"
 import { Link, useSearchParams } from "react-router-dom"
 import toast from "react-hot-toast"
-import Icons from "../components/Icons.jsx"
-import QuizList from "../components/QuizList.jsx"
+import Icons from "../../components/Icons.jsx"
+import QuizList from "../../components/QuizList.jsx"
 
 export default function PublicQuizzes() {
     const [publicQuizzes, setPublicQuizzes] = useState([])

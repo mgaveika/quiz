@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import Navigation from "../components/Navigation"
+import Navigation from "../../components/Navigation"
 import toast from "react-hot-toast"
-import Icons from "../components/Icons"
-import Avatar from "../components/Avatar"
+import Icons from "../../components/Icons"
+import Avatar from "../../components/Avatar"
 
 import io from "socket.io-client"
 
@@ -13,69 +13,88 @@ export default function GameRoom() {
     const [roomData, setRoomData] = useState(null)
     const [isCreator, setIsCreator] = useState(false)
     const [participants, setParticipants] = useState([])
-    const [settings, setSettings] = useState({ timePerQuestion: 30, wordLength: 5 })
+    const [settings, setSettings] = useState({})
+    const [host, setHost] = useState("")
 
     const { code } = useParams()
     const navigate = useNavigate()
 
     const removeParticipant = (username) => {
         if (socket) {
-            socket.emit("remove-participant", { code, username });
+            socket.emit("remove-participant", { code, username })
         }
     }
 
     const leave = () => {
-        if (socket) {
-            socket.emit("leave-room", { code })
-            socket.disconnect()
+        if (isCreator) {
+            fetch(`/api/gameSession/${code}`, {
+                method: "DELETE",
+                credentials: 'include'
+            }).then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        if (socket) {
+                            socket.emit("delete-room", { code })
+                            socket.disconnect()
+                        }
+                        navigate(`/`)
+                    } else {
+                        toast.error(data.message)
+                    }
+                })
+        } else {
+            if (socket) {
+                socket.emit("leave-room", { code })
+                socket.disconnect()
+            }
+            navigate(`/`)
         }
-        navigate(`/list`)
     }
 
     const startGame = () => {
-        let newParticipantsArr = participants.map(p => ({ user: p.userId }))
-        fetch(`/api/room/${code}/start`, {
+        fetch(`/api/gameSession/${code}/start`, {
             method: "POST",
             credentials: 'include',
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ settings, participants: newParticipantsArr, gameType: roomData.room.gameType })
+            body: JSON.stringify({ settings, participants })
         }).then(res => res.json())
             .then(data => {
-                if (data.status == "success") {
+                if (data.status === "success") {
                     toast.success(data.message)
                     if (socket) {
                         socket.emit("start-game", { code })
                     }
                 } else {
                     toast.error(data.message)
-                    navigate("/list")
                 }
             })
     }
 
     useEffect(() => {
-        socket = io.connect("ws://localhost:8080", {
+        socket = io({
             withCredentials: true,
             transports: ["websocket"]
         })
 
-        fetch(`/api/room/${code}`, {
+        fetch(`/api/gameSession/${code}`, {
             credentials: 'include'
         }).then(res => res.json())
             .then(data => {
                 if (data.status == "success") {
-                    if (data.data.data.active) {
-                        navigate(`/room/${data.data.data.room.code}/live`)
+                    const session = data.data.session
+                    if (session.status === "in-progress") {
+                        navigate(`/room/${session.roomCode}/live`)
                     } else {
-                        setIsCreator(data.data.creator)
-                        setRoomData(data.data.data)
+                        setHost(data.data.hostName)
+                        setRoomData(session)
+                        setSettings(session.gameData?.settings || {})
+                        setIsCreator(data.data.isCreator)
                         socket.emit("join-room", { code })
                     }
                 } else {
-                    toast.error(data.message)
-                    navigate("/list")
+                    navigate("/")
                 }
             })
 
@@ -92,10 +111,20 @@ export default function GameRoom() {
             navigate(`/room/${code}/live`)
         })
 
+        socket.on("room-deleted", () => {
+            toast.error("Room has been deleted.")
+            navigate("/")
+        })
+
+        socket.on("settings-updated", ({ settings }) => {
+            setSettings(settings)
+        })
+
         socket.on("removed-from-room", () => {
             toast.error("You have been kicked out of a room.")
-            navigate(`/quiz/${roomData.room.quizId}`)
-        });
+            const backPath = roomData?.gameType === "quiz" ? `/quiz/${roomData.gameData.quizId._id}` : "/wordle"
+            navigate(backPath)
+        })
 
         return () => {
             if (socket) {
@@ -104,10 +133,20 @@ export default function GameRoom() {
                 socket.off("user-joined")
                 socket.off("user-left")
                 socket.off("start-game")
+                socket.off("room-deleted")
+                socket.off("settings-updated")
                 socket.off("removed-from-room")
             }
         }
     }, [])
+
+    const roomTitle = useMemo(() => {
+        if (!roomData) return "Game Room"
+        if (roomData.gameType === "quiz" && roomData.gameData?.quizId?.title) {
+            return roomData.gameData.quizId.title
+        }
+        return "Game Room"
+    }, [roomData])
 
     return (
         <>
@@ -120,7 +159,7 @@ export default function GameRoom() {
                 <div className="text-gray-700 shadow-md max-w-3xl mx-auto mt-2">
                     <div className="flex justify-between items-center bg-purple-600 px-5 py-2 rounded-t-md">
                         <div className="h-fit w-fit">
-                            <h1 className="text-2xl font-bold text-white">Game Room</h1>
+                            <h1 className="text-2xl font-bold text-white">{roomTitle}</h1>
                             <div className="flex items-center gap-2">
                                 <Icons icon="people" className="w-4 text-white" />
                                 <h2 className="text-lg text-white">{participants.length} participants waiting</h2>
@@ -130,12 +169,12 @@ export default function GameRoom() {
                             <Icons icon="share" className="w-6 text-white" />
                             <div className="ml-3 text-white">
                                 <h2 className="text-sm">Game Pin:</h2>
-                                <p className="text-3xl">{roomData.room.code}</p>
+                                <p className="text-3xl">{roomData.roomCode}</p>
                             </div>
                         </div>
                     </div>
                     <div className="w-full p-3 bg-white">
-                        {isCreator && roomData.room.gameType == "quiz" &&
+                        {isCreator && roomData.gameType == "quiz" &&
                             <div className="bg-gray-100 border border-gray-200 hover:border-gray-300 rounded p-5 w-full mx-auto mt-2 flex flex-col justify-center">
                                 <div className="flex items-center gap-2">
                                     <Icons icon="clock" className="w-6 text-purple-600" />
@@ -146,45 +185,26 @@ export default function GameRoom() {
                                     type="number"
                                     min={1}
                                     max={120}
-                                    value={settings.timePerQuestion}
+                                    value={settings.timePerQuestion || 30}
                                     onChange={e => setSettings(prev => ({ ...prev, timePerQuestion: e.target.value }))}
                                     onBlur={e => {
                                         let num = Number(e.target.value)
                                         num = Math.floor(num)
                                         if (num > e.target.max) num = e.target.max
                                         if (num < e.target.min || isNaN(num)) num = 1
-                                        setSettings(prev => ({ ...prev, timePerQuestion: num }))
+                                        const newSettings = { ...settings, timePerQuestion: num }
+                                        setSettings(newSettings)
+                                        if (socket) {
+                                            socket.emit("update-settings", { code, settings: newSettings })
+                                        }
                                     }}
-                                    className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all"
+                                    className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all flash-input"
                                 />
                                 <p className="text-center text-sm text-gray-500">Set the time limit for each question</p>
                             </div>
                         }
-                        {isCreator && roomData.room.gameType == "wordle" &&
+                        {isCreator && roomData.gameType == "wordle" &&
                             <div className="bg-gray-100 border border-gray-200 hover:border-gray-300 rounded p-5 w-full mx-auto mt-2 flex gap-5 justify-between">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <Icons icon="clock" className="w-6 text-purple-600" />
-                                        <label htmlFor="time-limit" className="block mb-2 font-bold mt-1">Time to enter a word</label>
-                                    </div>
-                                    <input
-                                        id="time-limit"
-                                        type="number"
-                                        min={1}
-                                        max={120}
-                                        value={settings.timePerQuestion}
-                                        onChange={e => setSettings(prev => ({ ...prev, timePerQuestion: e.target.value }))}
-                                        onBlur={e => {
-                                            let num = Number(e.target.value)
-                                            num = Math.floor(num)
-                                            if (num > e.target.max) num = e.target.max
-                                            if (num < e.target.min || isNaN(num)) num = 1
-                                            setSettings(prev => ({ ...prev, timePerQuestion: num }))
-                                        }}
-                                        className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all"
-                                    />
-                                    <p className="text-center text-sm text-gray-500">Set the time limit for each word to be entered</p>
-                                </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
                                         <Icons icon="wordlength" className="w-6 text-purple-600 transform rotate-90" />
@@ -195,18 +215,49 @@ export default function GameRoom() {
                                         type="number"
                                         min={3}
                                         max={20}
-                                        value={settings.wordLength}
+                                        value={settings.wordLength || 5}
                                         onChange={e => setSettings(prev => ({ ...prev, wordLength: e.target.value }))}
                                         onBlur={e => {
                                             let num = Number(e.target.value)
                                             num = Math.floor(num)
                                             if (num > e.target.max) num = e.target.max
                                             if (num < e.target.min || isNaN(num)) num = 1
-                                            setSettings(prev => ({ ...prev, wordLength: num }))
+                                            const newSettings = { ...settings, wordLength: num }
+                                            setSettings(newSettings)
+                                            if (socket) {
+                                                socket.emit("update-settings", { code, settings: newSettings })
+                                            }
                                         }}
-                                        className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all"
+                                        className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all flash-input"
                                     />
-                                    <p className="text-center text-sm text-gray-500">Set the length of the word to be guessed</p>
+                                    <p className="text-center text-sm text-gray-500">Length of the word to be guessed</p>
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <Icons icon="attempt" className="w-6 text-purple-600" />
+                                        <label htmlFor="wordle-attempts" className="block mb-2 font-bold mt-1">Attempts</label>
+                                    </div>
+                                    <input
+                                        id="wordle-attempts"
+                                        type="number"
+                                        min={1}
+                                        max={10}
+                                        value={settings.wordleAttempts || 6}
+                                        onChange={e => setSettings(prev => ({ ...prev, wordleAttempts: e.target.value }))}
+                                        onBlur={e => {
+                                            let num = Number(e.target.value)
+                                            num = Math.floor(num)
+                                            if (num > e.target.max) num = e.target.max
+                                            if (num < e.target.min || isNaN(num)) num = 1
+                                            const newSettings = { ...settings, wordleAttempts: num }
+                                            setSettings(newSettings)
+                                            if (socket) {
+                                                socket.emit("update-settings", { code, settings: newSettings })
+                                            }
+                                        }}
+                                        className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all flash-input"
+                                    />
+                                    <p className="text-center text-sm text-gray-500">Number of attempts for each word</p>
                                 </div>
                             </div>
                         }
@@ -214,40 +265,40 @@ export default function GameRoom() {
                         <div className="w-full p-4 bg-gray-100 border border-gray-200 hover:border-gray-300 shadow-sm rounded mt-3">
                             <div className="flex items-center gap-4">
                                 <div className="relative">
-                                    <Avatar size="60px" fontSize="25px" name={roomData.hostUsername} />
+                                    <Avatar size="60px" fontSize="25px" name={host} />
                                     <div className="absolute right-0 top-0 w-5 h-5 rounded-full bg-purple-500 flex justify-center">
                                         <Icons icon="crown" className="w-4 text-white" />
                                     </div>
                                 </div>
                                 <div className="">
                                     <p className="text-sm text-gray-500 bg-purple-200 text-gray-600 font-semibold px-2 py-1 rounded-full w-fit">Game Host</p>
-                                    <p className="text-xl font-semibold ">{roomData.hostUsername}</p>
+                                    <p className="text-xl font-semibold ">{host}</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="w-full max-w-200 shadow-sm rounded mt-3">
+                        <div className="w-full max-w-200 rounded mt-3">
                             <div className="flex justify-between items-center">
                                 <p className="font-semibold mb-2">Participants</p>
                                 <p className="text-sm text-gray-500">{participants.length} players</p>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {participants.map(p =>
-                                    <>
-                                        {p.username !== roomData.hostUsername &&
-                                            <div key={p.userId} className="flex items-center gap-2 bg-gray-50 rounded-lg p-4 transition-all duration-200 border border-gray-200 hover:border-gray-300">
-                                                <Avatar size="50px" fontSize="15px" name={p.username} />
-                                                <p className="text-clip overflow-hidden flex-1">{p.username}</p>
-                                                {isCreator && <button
+                                {participants.map(p => (
+                                    p.username !== host && (
+                                        <div key={p.userId} className="flex items-center gap-2 bg-gray-50 rounded-lg p-4 transition-all duration-200 border border-gray-200 hover:border-gray-300">
+                                            <Avatar size="50px" fontSize="15px" name={p.username} />
+                                            <p className="text-clip overflow-hidden flex-1">{p.username}</p>
+                                            {isCreator && (
+                                                <button
                                                     type="button"
-                                                    onClick={() => removeParticipant(p)}
+                                                    onClick={() => removeParticipant(p.username)}
                                                     className="ml-2 bg-red-100 text-red-500 hover:bg-red-200 hover:text-red-700 p-1 rounded-md cursor-pointer"
                                                 >
                                                     <Icons icon="bin" className="w-5 my-auto" />
-                                                </button>}
-                                            </div>
-                                        }
-                                    </>
-                                )}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )
+                                ))}
                             </div>
                             <div className="w-full flex mt-5 gap-2">
                                 {isCreator &&

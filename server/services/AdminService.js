@@ -1,6 +1,5 @@
 const User = require("../models/Users")
 const Quiz = require("../models/Quiz")
-const QuizAttempt = require("../models/QuizAttempt")
 const QuizQuestion = require("../models/QuizQuestion")
 const AccessTokens = require("../models/AccessTokens")
 
@@ -8,7 +7,7 @@ const AccessTokens = require("../models/AccessTokens")
 class AdminService {
     static async getDashboardData() {
         const totalQuizes = await Quiz.countDocuments()
-        const totalAttempts = await QuizAttempt.countDocuments()
+        const totalAttempts = 0
         const registeredUsers = await User.countDocuments()
         const totalQuestions = await QuizQuestion.countDocuments()
         return { totalQuizes, totalAttempts, registeredUsers, totalQuestions }
@@ -23,10 +22,10 @@ class AdminService {
         }
         const query = {}
         if (role && role !== "All") {
-            query.role = role;
+            query.role = role
         }
         if (search && search.length > 0) {
-            query.username = { $regex: search, $options: 'i' };
+            query.username = { $regex: search, $options: 'i' }
         }
         const users = await User.find(query).skip((page - 1) * limit).limit(limit)
         const totalUsers = await User.countDocuments(query)
@@ -50,10 +49,10 @@ class AdminService {
         const categoryArray = categories ? categories.split(",").map(c => c.trim()) : []
         const query = {}
         if (categoryArray.length > 0) {
-            query.categories = { $in: categoryArray };
+            query.categories = { $in: categoryArray }
         }
         if (search && search.length > 0) {
-            query.title = { $regex: search, $options: 'i' };
+            query.title = { $regex: search, $options: 'i' }
         }
         const quizzes = await Quiz.find(query).skip((page - 1) * limit).limit(limit)
         const totalQuizzes = await Quiz.countDocuments(query)

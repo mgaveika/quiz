@@ -45,7 +45,16 @@ class AuthService {
                 const checkedPass = await checkPassword({ password, hashedPassword: user[0].password })
                 if (checkedPass) {
                     const token = await this.createToken({ userId: user[0].id, username: user[0].username, role: user[0].role })
-                    return { token: token, user: user[0] }
+                    return {
+                        token: token,
+                        user: {
+                            id: user[0].id,
+                            email: user[0].email,
+                            username: user[0].username,
+                            createdAt: user[0].createdAt,
+                            role: user[0].role
+                        }
+                    }
                 }
             }
             throw new Error("Invalid email or password.")
@@ -100,12 +109,12 @@ class AuthService {
             client
                 .send({
                     from: sender,
-                    to: [{ email: "marisgaveika2@gmail.com" }],
+                    to: [{ email: lowerCaseEmail }],
                     subject: "Password recovery code",
                     text: `Your password recovery code is: ${code}`,
                     category: "Password recovery",
                 })
-                .then(console.log, console.error);
+                .then(console.log, console.error)
             const mailToken = jwt.sign({ guestId, email: lowerCaseEmail }, process.env.JWT_SECRET)
             await forgotPasswordSchema.create({
                 guest: guestId,
@@ -192,23 +201,12 @@ class AuthService {
             if (!user) {
                 throw new Error("User not found.")
             }
-            return { auth: true, user: { id: user.id, email: user.email, username: user.username, createdAt: user.createdAt } }
+            return { auth: true, user: { id: user.id, email: user.email, username: user.username, createdAt: user.createdAt, role: user.role } }
         } catch (err) {
             throw err
         }
     }
 
-    static async isAdmin({ userId }) {
-        try {
-            const user = await User.findById(userId)
-            if (!user) {
-                throw new Error("User not found.")
-            }
-            return user.role === "admin"
-        } catch (err) {
-            throw err
-        }
-    }
 }
 
 module.exports = AuthService

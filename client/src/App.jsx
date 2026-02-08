@@ -1,25 +1,26 @@
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast"
 import { BrowserRouter as Router, Routes, Route } from "react-router"
 
 import "./index.css"
 // Guest routes
-import Register from "./pages/Register.jsx"
-import Login from "./pages/Login.jsx"
+import Register from "./pages/auth/Register.jsx"
+import Login from "./pages/auth/Login.jsx"
 import Home from "./pages/Home.jsx"
-import PublicQuizes from "./pages/PublicQuizes.jsx"
+import PublicQuizes from "./pages/quiz/PublicQuizes.jsx"
 import QuizHome from "./pages/quiz/QuizHome.jsx"
 import QuizRezult from "./pages/quiz/QuizRezult.jsx"
-import GameRoom from "./pages/GameRoom.jsx"
-import Play from "./pages/Play.jsx"
-import ForgotPassword from "./pages/ForgotPassword.jsx"
-import VerifyCode from "./pages/VerifyCode.jsx"
+import GameRoom from "./pages/rooms/GameRoom.jsx"
+import Play from "./pages/rooms/Play.jsx"
+import ForgotPassword from "./pages/auth/ForgotPassword.jsx"
+import VerifyCode from "./pages/auth/VerifyCode.jsx"
 import WordleHome from "./pages/wordle/WordleHome.jsx"
+import WordleResult from "./pages/wordle/WordleResult.jsx"
 //Logged user routes
-import Profile from "./pages/Profile.jsx"
-import CreateQuiz from "./pages/CreateQuiz.jsx"
-import EditQuiz from "./pages/EditQuiz.jsx"
+import Profile from "./pages/auth/Profile.jsx"
+import CreateQuiz from "./pages/quiz/CreateQuiz.jsx"
+import EditQuiz from "./pages/quiz/EditQuiz.jsx"
 //Admin routes
 import Main from "./pages/admin/Main.jsx"
 import Quizes from "./pages/admin/Quizes.jsx"
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/quiz/:quizId" element={<QuizHome />} />
           <Route path="/room/:code" element={<GameRoom />} />
           <Route path="/room/:code/live" element={<Play />} />
+          <Route path="/wordle/result/:attemptId" element={<WordleResult />} />
           <Route path="/quiz/result/:attemptId" element={<QuizRezult />} />
           <Route path="/wordle" element={<WordleHome />} />
           <Route element={<ProtectedRoutes />} >

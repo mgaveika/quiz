@@ -29,19 +29,18 @@ export default function QuizHome() {
         } else if (action === "edit") {
             navigate(`/quiz/${quizId}/edit`)
         } else if (action === "start") {
-            setQuizData(null)
-            fetch("/api/room/create", {
+            fetch("/api/gameSession/create", {
                 method: "POST",
                 credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ quizId, gameType: "quiz" })
+                body: JSON.stringify({ gameType: "quiz", quizId })
             }).then(res => res.json())
                 .then(data => {
                     if (data.status == "success") {
                         toast.success(data.message)
-                        navigate(`/room/${data.data.code}`)
+                        navigate(`/room/${data.data.roomCode}`)
                     } else {
                         toast.error(data.message)
                         navigate("/list")

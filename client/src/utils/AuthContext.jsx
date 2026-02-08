@@ -1,14 +1,16 @@
-import { createContext, useState, useEffect } from 'react'
+import { createContext, useState, useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 
 export const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
-    const [isAdmin, setIsAdmin] = useState(false)
     const [loading, setLoading] = useState(true)
     const location = useLocation()
 
+    const isAdmin = useMemo(() => {
+        return user?.user?.role === "admin"
+    }, [user])
 
     useEffect(() => {
         fetch('/api/auth/isAuthenticated', {
@@ -18,18 +20,14 @@ export function AuthProvider({ children }) {
             .then(data => {
                 if (data.status === "success") {
                     setUser(data.data)
-                    fetch("/api/auth/isAdmin", {
-                        credentials: "include"
-                    })
-                        .then(res => res.json())
-                        .then(data => {
-                            setIsAdmin(data.data || false)
-                            setLoading(false)
-                        })
                 } else {
                     setUser(null)
-                    setLoading(false)
                 }
+                setLoading(false)
+            })
+            .catch(() => {
+                setUser(null)
+                setLoading(false)
             })
     }, [location.pathname])
 
@@ -43,7 +41,6 @@ export function AuthProvider({ children }) {
             .then(data => {
                 if (data.status === "success") {
                     setUser(null)
-                    setIsAdmin(false)
                 }
                 setLoading(false)
             })

@@ -296,6 +296,32 @@ export default function Icons(props) {
                 />
             </svg>
         )
+    } else if (props.icon === "attempt") {
+        return (
+            <svg
+                className={props.className}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                {/* Bulb */}
+                <path
+                    d="M12 2C9.243 2 7 4.243 7 7c0 2.637 2 5 2 5v2h6v-2s2-2.363 2-5c0-2.757-2.243-5-5-5z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+                {/* Base */}
+                <path
+                    d="M10 19h4v2h-4v-2z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+            </svg>
+        )
     } else {
         return (
             <span>Unknown icon</span>

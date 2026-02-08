@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from 'react'
-import Navigation from '../components/Navigation'
-import { AuthContext } from '../utils/AuthContext'
+import Navigation from '../../components/Navigation'
+import { AuthContext } from '../../utils/AuthContext'
 import { useNavigate } from 'react-router-dom'
 
 export default function ForgotPassword() {

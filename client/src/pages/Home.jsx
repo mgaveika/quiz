@@ -9,17 +9,7 @@ export default function Home() {
 
     const hangleJoinClick = (event) => {
         event.preventDefault()
-        fetch(`/api/room/${code}`, {
-            credentials: 'include'
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "success") {
-                    navigate(`/room/${code}`)
-                } else {
-                    toast.error(data.message)
-                }
-            })
+        navigate(`/room/${code}`)
     }
 
     return (
