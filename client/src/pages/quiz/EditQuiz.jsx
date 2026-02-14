@@ -16,6 +16,11 @@ export default function EditQuiz() {
         }).then(res => res.json())
             .then(data => {
                 if (data.status == "success") {
+                    if (!data.data.creator) {
+                        toast.error("You're not allowed to edit this quiz!")
+                        navigate("/list")
+                        return
+                    }
                     setQuizData({
                         _id: quizId,
                         title: data.data.quiz.title,
@@ -35,17 +40,17 @@ export default function EditQuiz() {
 
     if (loading) {
         return (
-            <main className="min-h-screen">
+            <main className="min-h-screen bg-slate-50">
                 <Navigation />
                 <div className="flex items-center justify-center h-screen">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
                 </div>
             </main>
         )
     }
 
     return (
-        <main className="min-h-screen">
+        <main className="min-h-screen bg-slate-50 pb-12">
             <Navigation />
             {quizData && <QuizForm quiz={quizData} isEdit={true} />}
         </main>

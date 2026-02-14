@@ -1,6 +1,7 @@
 const QuizAttempt = require('../../models/attempts/QuizAttempt')
 const QuizQuestion = require('../../models/QuizQuestion')
 const GameSession = require('../../models/sessions/Main')
+const Quiz = require('../../models/Quiz')
 
 class QuizService {
     static async createAttempt({ userId, guest, sessionId, extraData }) {
@@ -168,6 +169,45 @@ class QuizService {
             attempt,
             questions
         }
+    }
+
+    static async getUserHistory({ userId, guest, page = 1, search }) {
+        const limit = 12
+        const skip = (page - 1) * limit
+        const query = { [guest ? 'guest' : 'user']: userId, gameType: 'quiz' }
+
+        if (search) {
+            const matchingQuizzes = await Quiz.find({ title: { $regex: search, $options: 'i' } }).select('_id')
+            query.quizId = { $in: matchingQuizzes.map(q => q._id) }
+        }
+
+        const totalQuizzes = await QuizAttempt.countDocuments(query)
+        const totalPages = Math.ceil(totalQuizzes / limit)
+
+        const attempts = await QuizAttempt.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate({
+                path: 'quizId',
+                populate: { path: 'creator', select: 'username' }
+            })
+            .lean()
+
+        const attemptQuizzes = attempts.map(a => {
+            if (!a.quizId) return null
+            const q = a.quizId
+            return {
+                ...q,
+                _id: a._id,
+                actualQuizId: q._id,
+                categories: q.categories || [],
+                score: a.score,
+                date: a.createdAt
+            }
+        }).filter(q => q !== null)
+
+        return { attemptQuizzes, totalPages, totalQuizzes }
     }
 
     static async getAnsweredCount(session, questionId) {

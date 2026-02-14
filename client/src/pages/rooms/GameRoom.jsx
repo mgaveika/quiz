@@ -149,167 +149,204 @@ export default function GameRoom() {
     }, [roomData])
 
     return (
-        <>
+        <div className="min-h-screen bg-white">
             <Navigation />
             {!roomData ? (
-                <div className="flex items-center justify-center h-screen">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+                <div className="flex items-center justify-center h-[calc(100vh-64px)]">
+                    <div className="animate-pulse flex flex-col items-center gap-4">
+                        <div className="w-12 h-12 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center">
+                            <div className="w-6 h-6 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                        </div>
+                        <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Entering Room...</p>
+                    </div>
                 </div>
             ) : (
-                <div className="text-gray-700 shadow-md max-w-3xl mx-auto mt-2">
-                    <div className="flex justify-between items-center bg-purple-600 px-5 py-2 rounded-t-md">
-                        <div className="h-fit w-fit">
-                            <h1 className="text-2xl font-bold text-white">{roomTitle}</h1>
-                            <div className="flex items-center gap-2">
-                                <Icons icon="people" className="w-4 text-white" />
-                                <h2 className="text-lg text-white">{participants.length} participants waiting</h2>
-                            </div>
-                        </div>
-                        <div className="flex bg-purple-700 rounded shadow-sm text-xl font-bold border border-purple-800 w-fit px-5 py-3">
-                            <Icons icon="share" className="w-6 text-white" />
-                            <div className="ml-3 text-white">
-                                <h2 className="text-sm">Game Pin:</h2>
-                                <p className="text-3xl">{roomData.roomCode}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="w-full p-3 bg-white">
-                        {isCreator && roomData.gameType == "quiz" &&
-                            <div className="bg-gray-100 border border-gray-200 hover:border-gray-300 rounded p-5 w-full mx-auto mt-2 flex flex-col justify-center">
-                                <div className="flex items-center gap-2">
-                                    <Icons icon="clock" className="w-6 text-purple-600" />
-                                    <label htmlFor="time-limit" className="block mb-2 font-bold mt-1">Question duration</label>
+                <main className="max-w-6xl mx-auto px-6 py-12">
+                    <div className="flex flex-col lg:flex-row gap-12">
+                        {/* Left Column: Room Info & Participants */}
+                        <div className="flex-1 space-y-10">
+                            <header className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                                        {roomData.gameType} Lobby
+                                    </span>
+                                    <div className="h-px flex-1 bg-slate-100"></div>
                                 </div>
-                                <input
-                                    id="time-limit"
-                                    type="number"
-                                    min={1}
-                                    max={120}
-                                    value={settings.timePerQuestion || 30}
-                                    onChange={e => setSettings(prev => ({ ...prev, timePerQuestion: e.target.value }))}
-                                    onBlur={e => {
-                                        let num = Number(e.target.value)
-                                        num = Math.floor(num)
-                                        if (num > e.target.max) num = e.target.max
-                                        if (num < e.target.min || isNaN(num)) num = 1
-                                        const newSettings = { ...settings, timePerQuestion: num }
-                                        setSettings(newSettings)
-                                        if (socket) {
-                                            socket.emit("update-settings", { code, settings: newSettings })
-                                        }
-                                    }}
-                                    className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all flash-input"
-                                />
-                                <p className="text-center text-sm text-gray-500">Set the time limit for each question</p>
-                            </div>
-                        }
-                        {isCreator && roomData.gameType == "wordle" &&
-                            <div className="bg-gray-100 border border-gray-200 hover:border-gray-300 rounded p-5 w-full mx-auto mt-2 flex gap-5 justify-between">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <Icons icon="wordlength" className="w-6 text-purple-600 transform rotate-90" />
-                                        <label htmlFor="word-length" className="block mb-2 font-bold mt-1">Word length</label>
-                                    </div>
-                                    <input
-                                        id="word-length"
-                                        type="number"
-                                        min={3}
-                                        max={20}
-                                        value={settings.wordLength || 5}
-                                        onChange={e => setSettings(prev => ({ ...prev, wordLength: e.target.value }))}
-                                        onBlur={e => {
-                                            let num = Number(e.target.value)
-                                            num = Math.floor(num)
-                                            if (num > e.target.max) num = e.target.max
-                                            if (num < e.target.min || isNaN(num)) num = 1
-                                            const newSettings = { ...settings, wordLength: num }
-                                            setSettings(newSettings)
-                                            if (socket) {
-                                                socket.emit("update-settings", { code, settings: newSettings })
-                                            }
-                                        }}
-                                        className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all flash-input"
-                                    />
-                                    <p className="text-center text-sm text-gray-500">Length of the word to be guessed</p>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <Icons icon="attempt" className="w-6 text-purple-600" />
-                                        <label htmlFor="wordle-attempts" className="block mb-2 font-bold mt-1">Attempts</label>
-                                    </div>
-                                    <input
-                                        id="wordle-attempts"
-                                        type="number"
-                                        min={1}
-                                        max={10}
-                                        value={settings.wordleAttempts || 6}
-                                        onChange={e => setSettings(prev => ({ ...prev, wordleAttempts: e.target.value }))}
-                                        onBlur={e => {
-                                            let num = Number(e.target.value)
-                                            num = Math.floor(num)
-                                            if (num > e.target.max) num = e.target.max
-                                            if (num < e.target.min || isNaN(num)) num = 1
-                                            const newSettings = { ...settings, wordleAttempts: num }
-                                            setSettings(newSettings)
-                                            if (socket) {
-                                                socket.emit("update-settings", { code, settings: newSettings })
-                                            }
-                                        }}
-                                        className=" bg-white mx-auto border-1 border-gray-400 rounded px-2 py-3 font-semibold w-full mb-2 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all flash-input"
-                                    />
-                                    <p className="text-center text-sm text-gray-500">Number of attempts for each word</p>
-                                </div>
-                            </div>
-                        }
+                                <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight">
+                                    {roomTitle}
+                                </h1>
+                                <p className="text-slate-400 font-medium flex items-center gap-2">
+                                    <Icons icon="people" className="w-4 h-4" />
+                                    <span>{participants.length} players ready to start</span>
+                                </p>
+                            </header>
 
-                        <div className="w-full p-4 bg-gray-100 border border-gray-200 hover:border-gray-300 shadow-sm rounded mt-3">
-                            <div className="flex items-center gap-4">
-                                <div className="relative">
-                                    <Avatar size="60px" fontSize="25px" name={host} />
-                                    <div className="absolute right-0 top-0 w-5 h-5 rounded-full bg-purple-500 flex justify-center">
-                                        <Icons icon="crown" className="w-4 text-white" />
+                            {/* Host Card */}
+                            <div className="bg-slate-50/50 rounded-3xl p-6 border border-slate-100 flex items-center justify-between group">
+                                <div className="flex items-center gap-4">
+                                    <div className="relative">
+                                        <Avatar size="64px" fontSize="24px" name={host} />
+                                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-400 rounded-full border-4 border-white flex items-center justify-center shadow-sm">
+                                            <Icons icon="crown" className="w-3 h-3 text-white fill-current" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Host</p>
+                                        <p className="text-xl font-black text-slate-800 tracking-tight">{host}</p>
                                     </div>
                                 </div>
-                                <div className="">
-                                    <p className="text-sm text-gray-500 bg-purple-200 text-gray-600 font-semibold px-2 py-1 rounded-full w-fit">Game Host</p>
-                                    <p className="text-xl font-semibold ">{host}</p>
+                            </div>
+
+                            {/* Participants Grid */}
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between px-2">
+                                    <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest">Participants</h2>
+                                    <div className="h-px flex-1 mx-4 bg-slate-50"></div>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {participants.filter(p => p.username !== host).length > 0 ? (
+                                        participants.filter(p => p.username !== host).map(p => (
+                                            <div key={p.userId} className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 hover:border-indigo-100 hover:shadow-sm transition-all group">
+                                                <Avatar size="48px" fontSize="16px" name={p.username} />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-bold text-slate-700 truncate">{p.username}</p>
+                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Player</p>
+                                                </div>
+                                                {isCreator && (
+                                                    <button
+                                                        onClick={() => removeParticipant(p.username)}
+                                                        className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 flex items-center justify-center transition-colors cursor-pointer"
+                                                    >
+                                                        <Icons icon="bin" className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-12 text-center bg-slate-50/30 rounded-3xl border border-dashed border-slate-200">
+                                            <p className="text-slate-400 font-medium italic">Waiting for friends to join...</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                        <div className="w-full max-w-200 rounded mt-3">
-                            <div className="flex justify-between items-center">
-                                <p className="font-semibold mb-2">Participants</p>
-                                <p className="text-sm text-gray-500">{participants.length} players</p>
+
+                        {/* Right Column: Game Code & Settings */}
+                        <div className="w-full lg:w-96 space-y-6">
+                            {/* Game Pin Card */}
+                            <div className="bg-slate-900 rounded-[2.5rem] p-10 text-center text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-all duration-500"></div>
+                                <p className="text-indigo-300 font-black text-xs uppercase tracking-[0.3em] mb-4 relative z-10">Room Pin</p>
+                                <h3 className="text-6xl md:text-7xl font-black tracking-tighter mb-4 relative z-10">{roomData.roomCode}</h3>
+                                <button className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors relative z-10">
+                                    <Icons icon="share" className="w-3 h-3" />
+                                    <span>Copy Invite Link</span>
+                                </button>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {participants.map(p => (
-                                    p.username !== host && (
-                                        <div key={p.userId} className="flex items-center gap-2 bg-gray-50 rounded-lg p-4 transition-all duration-200 border border-gray-200 hover:border-gray-300">
-                                            <Avatar size="50px" fontSize="15px" name={p.username} />
-                                            <p className="text-clip overflow-hidden flex-1">{p.username}</p>
-                                            {isCreator && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeParticipant(p.username)}
-                                                    className="ml-2 bg-red-100 text-red-500 hover:bg-red-200 hover:text-red-700 p-1 rounded-md cursor-pointer"
-                                                >
-                                                    <Icons icon="bin" className="w-5 my-auto" />
-                                                </button>
-                                            )}
+
+                            {/* Settings Card */}
+                            {isCreator && (
+                                <div className="bg-white rounded-[2.5rem] p-8 border-2 border-slate-100 shadow-sm space-y-8">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                                            <Icons icon="pen" className="w-5 h-5 text-indigo-600" />
                                         </div>
-                                    )
-                                ))}
-                            </div>
-                            <div className="w-full flex mt-5 gap-2">
-                                {isCreator &&
-                                    <button onClick={startGame} className="flex flex-1 justify-center items-center gap-1 text-white bg-green-700 rounded px-8 py-2 cursor-pointer"><Icons icon="play" className="w-4" />Start game</button>
-                                }
-                                <button onClick={leave} className="flex flex-1 justify-center items-center gap-1 bg-white border border-gray-200 hover:bg-gray-100 rounded px-3 py-1 cursor-pointer"><Icons icon="wrong" className="w-4" />{isCreator ? "Delete room" : "Leave room"}</button>
+                                        <h3 className="font-black text-slate-900 uppercase tracking-tighter">Room Settings</h3>
+                                    </div>
+
+                                    {roomData.gameType === "quiz" && (
+                                        <div className="space-y-4">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Question Duration (s)</label>
+                                                <div className="relative group">
+                                                    <input
+                                                        type="number"
+                                                        value={settings.timePerQuestion ?? 30}
+                                                        min="1"
+                                                        max="120"
+                                                        onChange={e => setSettings(prev => ({ ...prev, timePerQuestion: e.target.value }))}
+                                                        onBlur={e => {
+                                                            let num = Math.min(120, Math.max(1, Math.floor(Number(e.target.value))))
+                                                            if (isNaN(num)) num = 30
+                                                            const newS = { ...settings, timePerQuestion: num }
+                                                            setSettings(newS)
+                                                            if (socket) socket.emit("update-settings", { code, settings: newS })
+                                                        }}
+                                                        className="w-full h-14 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 font-black text-slate-800 transition-all focus:outline-none focus:border-indigo-500 focus:bg-white"
+                                                    />
+                                                    <Icons icon="clock" className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 pointer-events-none group-focus-within:text-indigo-400" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {roomData.gameType === "wordle" && (
+                                        <div className="space-y-6">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Word Length</label>
+                                                <input
+                                                    type="number"
+                                                    value={settings.wordLength ?? 5}
+                                                    min="3"
+                                                    max="10"
+                                                    onChange={e => setSettings(prev => ({ ...prev, wordLength: e.target.value }))}
+                                                    onBlur={e => {
+                                                        let num = Math.min(10, Math.max(3, Math.floor(Number(e.target.value))))
+                                                        if (isNaN(num)) num = 5
+                                                        const newS = { ...settings, wordLength: num }
+                                                        setSettings(newS)
+                                                        if (socket) socket.emit("update-settings", { code, settings: newS })
+                                                    }}
+                                                    className="w-full h-14 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 font-black text-slate-800 focus:outline-none focus:border-indigo-500 transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Attempts</label>
+                                                <input
+                                                    type="number"
+                                                    value={settings.wordleAttempts ?? 6}
+                                                    min="1"
+                                                    max="10"
+                                                    onChange={e => setSettings(prev => ({ ...prev, wordleAttempts: e.target.value }))}
+                                                    onBlur={e => {
+                                                        let num = Math.min(10, Math.max(1, Math.floor(Number(e.target.value))))
+                                                        if (isNaN(num)) num = 6
+                                                        const newS = { ...settings, wordleAttempts: num }
+                                                        setSettings(newS)
+                                                        if (socket) socket.emit("update-settings", { code, settings: newS })
+                                                    }}
+                                                    className="w-full h-14 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 font-black text-slate-800 focus:outline-none focus:border-indigo-500 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Actions */}
+                            <div className="space-y-3 pt-4">
+                                {isCreator && (
+                                    <button
+                                        onClick={startGame}
+                                        className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xl shadow-xl shadow-indigo-100 transition-all cursor-pointer flex items-center justify-center gap-3"
+                                    >
+                                        <Icons icon="play" className="w-6 h-6 fill-white" />
+                                        <span>Launch Game</span>
+                                    </button>
+                                )}
+                                <button
+                                    onClick={leave}
+                                    className={`w-full py-5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer border-2
+                                        ${isCreator ? 'bg-white border-rose-100 text-rose-500 hover:bg-rose-50' : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'}`}
+                                >
+                                    <Icons icon="wrong" className="w-5 h-5" />
+                                    <span>{isCreator ? "Cancel Room" : "Leave Lobby"}</span>
+                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
+                </main>
             )}
-        </>
+        </div>
     )
 }

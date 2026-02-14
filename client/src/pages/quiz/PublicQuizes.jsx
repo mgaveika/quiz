@@ -22,6 +22,7 @@ export default function PublicQuizzes() {
             .then(data => {
                 if (data.status === "success") {
                     setPublicQuizzes(data.data.publicQuizzes || [])
+                    console.log(data.data.publicQuizzes)
                     setTotalPages(data.data.totalPages)
                     setTotalQuizzes(data.data.totalQuizzes)
                 } else {
@@ -30,15 +31,9 @@ export default function PublicQuizzes() {
             })
     }, [page, filter, search])
 
-    const handleFilterChange = (c) => {
+    const handleFilterChange = (newFilters) => {
         setSearchParams({ page: 1 })
-        if (filter.includes(c)) {
-            setFilter(prev => (
-                prev.filter(val => val !== c)
-            ))
-        } else {
-            setFilter(prev => ([...prev, c]))
-        }
+        setFilter(newFilters)
     }
 
     const handleSearch = (searchValue) => {
@@ -49,14 +44,21 @@ export default function PublicQuizzes() {
     return (
         <main className="min-h-screen">
             <Navigation />
-            <div className="max-w-5xl mx-auto mt-5 flex flex-col text-gray-700">
-                <div className="flex justify-end mb-3">
-                    <Link to="/create" className="bg-purple-700 hover:bg-purple-800 cursor-pointer text-white px-4 py-2 rounded w-40 font-bold flex items-center justify-center">
-                        <Icons icon="plus" className="w-4 h-4 inline-block mr-1" />
-                        Create Quiz
+            <div className="max-w-7xl mx-auto px-6 py-10">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                    <div>
+                        <h2 className="text-3xl font-black text-slate-800 mb-2">Explore Quizzes</h2>
+                        <p className="text-slate-500 font-medium">Discover new challenges or create your own masterpiece.</p>
+                    </div>
+                    <Link
+                        to="/create"
+                        className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-colors"
+                    >
+                        <Icons icon="plus" className="w-5 h-5" />
+                        <span>Create New Quiz</span>
                     </Link>
                 </div>
-                <h2 className="text-2xl font-bold mb-4">Public quizzes</h2>
+
                 <QuizList
                     quizzes={publicQuizzes}
                     showFilter={true}
@@ -72,3 +74,4 @@ export default function PublicQuizzes() {
         </main>
     )
 }
+

@@ -26,7 +26,7 @@ class QuizService {
 
     static async getUserQuizzes({ userId, page, categories, search }) {
         try {
-            const limit = 10
+            const limit = 12
             if (!page || page < 1 || !Number(page)) {
                 page = 1
             } else {
@@ -42,7 +42,7 @@ class QuizService {
             if (search && search.length > 0) {
                 query.title = { $regex: search, $options: 'i' }
             }
-            const privateQuizzes = await Quiz.find(query).limit(limit).skip((page - 1) * limit)
+            const privateQuizzes = await Quiz.find(query).populate("creator", "username").limit(limit).skip((page - 1) * limit)
             const quizzesCount = await Quiz.countDocuments(query)
             return { privateQuizzes, totalPages: Math.ceil(quizzesCount / limit), totalQuizzes: quizzesCount }
         } catch (err) {
@@ -52,7 +52,7 @@ class QuizService {
 
     static async getPublicQuizzes({ userId, page, categories, search }) {
         try {
-            const limit = 10
+            const limit = 12
             if (!page || page < 1 || !Number(page)) {
                 page = 1
             } else {
@@ -61,8 +61,9 @@ class QuizService {
             const categoryArray = categories ? categories.split(",").map(c => c.trim()) : []
             const query = {
                 $or: [
-                    { visibility: true },
-                    { participants: { user: userId } }
+                    { visibility: false }, // public visibility
+                    { participants: { $elemMatch: { user: userId } } },
+                    { creator: userId }
                 ]
             }
 
@@ -72,7 +73,7 @@ class QuizService {
             if (search && search.length > 0) {
                 query.title = { $regex: search, $options: 'i' }
             }
-            const publicQuizzes = await Quiz.find(query).limit(limit).skip((page - 1) * limit)
+            const publicQuizzes = await Quiz.find(query).populate("creator", "username").limit(limit).skip((page - 1) * limit)
             const quizzesCount = await Quiz.countDocuments(query)
             return { publicQuizzes, totalPages: Math.ceil(quizzesCount / limit), totalQuizzes: quizzesCount }
         } catch (err) {
@@ -98,7 +99,7 @@ class QuizService {
             if (!mongoose.Types.ObjectId.isValid(id)) {
                 throw new Error("Quiz not found")
             }
-            const quiz = await Quiz.findById(id)
+            const quiz = await Quiz.findById(id).populate("creator", "username")
             if (!quiz) {
                 throw new Error("Quiz not found")
             }
@@ -106,19 +107,22 @@ class QuizService {
             if (!quizQuestions) {
                 throw new Error("Quiz questions not found")
             }
-            const user = await User.findById(quiz.creator)
-            const username = user ? user.username : "Unknown"
 
-            if (String(quiz.creator) === userId) {
+            const username = quiz.creator?.username || "Unknown"
+            const creatorId = quiz.creator?._id || quiz.creator
+
+            if (userId && String(creatorId) === String(userId)) {
                 return { quiz, quizQuestions, username, creator: true }
             } else {
                 let allowed = false
-                quiz.participants.map((part) => {
-                    if (String(part.user) === String(userId)) {
-                        allowed = true
-                    }
-                })
-                if (allowed || quiz.visibility) {
+                if (userId) {
+                    quiz.participants.map((part) => {
+                        if (String(part.user) === String(userId)) {
+                            allowed = true
+                        }
+                    })
+                }
+                if (allowed || quiz.visibility === false) {
                     return { quiz, quizQuestions, username, creator: false }
                 } else {
                     throw new Error("You're not allowed to visit this page!")
@@ -129,8 +133,15 @@ class QuizService {
         }
     }
 
-    static async updateQuiz({ id, updatedData }) {
+    static async updateQuiz({ id, userId, updatedData }) {
         try {
+            const quiz = await Quiz.findById(id)
+            if (!quiz) throw new Error("Quiz not found")
+
+            if (String(quiz.creator) !== String(userId)) {
+                throw new Error("You're not allowed to update this quiz!")
+            }
+
             return await Quiz.findByIdAndUpdate(id, updatedData, { new: true })
         } catch (err) {
             throw err
@@ -143,7 +154,7 @@ class QuizService {
             if (!quiz) {
                 throw new Error(`Quiz with id ${id} was not found.`)
             }
-            if (quiz.creator.toString() !== userId) {
+            if (String(quiz.creator) !== String(userId)) {
                 throw new Error("You're not allowed to delete this quiz!")
             }
             await Quiz.findByIdAndDelete(id)

@@ -48,56 +48,85 @@ export default function Quizes() {
         }
     }
     return (
-        <div className='flex flex-col h-screen'>
+        <div className='flex flex-col h-screen bg-slate-50'>
             <Navigation />
             <div className='flex flex-1 overflow-hidden'>
                 <AdminNavigation />
-                <div className='flex-1 overflow-y-auto'>
-                    <div className="w-full bg-white rounded p-5">
-                        <div className="flex gap-2 mb-3">
-                            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search" className="w-full bg-white border-1 border-gray-200 rounded-full px-4 py-1 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all" />
-                            <button onClick={handleSearch} className="flex items-center bg-white border border-gray-200 hover:bg-gray-100 rounded-lg px-2 cursor-pointer">
-                                <Icons icon="search" className="w-5" />
-                            </button>
+                <div className='flex-1 overflow-y-auto p-8'>
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-black text-slate-800">Manage Quizzes</h1>
+                        <p className="text-slate-500 font-medium">View and manage all quizzes on the platform.</p>
+                    </div>
+
+                    <div className="w-full bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
+                        <div className="flex flex-col md:flex-row gap-4 justify-between mb-6">
+                            <div className="relative flex-1">
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Search quizzes..."
+                                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-10 pr-4 py-2 font-medium text-slate-700 focus:outline-none focus:border-indigo-500 focus:bg-white placeholder-slate-400"
+                                />
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                    <Icons icon="search" className="w-5 h-5" />
+                                </div>
+                                <button
+                                    onClick={handleSearch}
+                                    className="absolute right-2 top-1.5 bottom-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 rounded-lg font-bold text-xs"
+                                >
+                                    Search
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex gap-2 mb-3 flex-wrap">
+
+                        <div className="flex gap-2 mb-6 flex-wrap">
                             {categoryOptions.map(c => (
                                 <button
                                     onClick={() => handleFilterChange(c)}
                                     key={c}
-                                    className={`border-1 ${filter.includes(c) ? "bg-gray-200 border-purple-700" : "bg-gray-100 border-gray-200"} border-gray-200 hover:bg-gray-200 transform duration-300 px-2 py-1 rounded-full cursor-pointer`}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-colors ${filter.includes(c)
+                                        ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                                        : "bg-white border-slate-100 text-slate-600 hover:border-slate-200"
+                                        }`}
                                 >
                                     {c}
                                 </button>
                             ))}
                         </div>
+
                         {loading ? (
-                            <div className="flex items-center justify-center h-screen">
-                                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+                            <div className="flex items-center justify-center py-20">
+                                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
                             </div>
                         ) : quizes && quizes.length === 0 ? (
-                            <div className="text-center">No quizes found.</div>
+                            <div className="text-center py-20 text-slate-500">No quizzes found.</div>
                         ) : (
                             <>
-                                <ul className="flex flex-col gap-1">
+                                <div className="flex flex-col gap-3 mb-6">
                                     {quizes.map(q => (
-                                        <li key={q._id} className="bg-white p-3 flex flex-col border border-gray-100 last:border-0">
-                                            <div className="flex justify-between items-center w-full">
-                                                <div className="font-semibold hover:text-purple-700 transition-colors">{q.title}
-                                                    <span className="text-sm rounded-full border-1 border-gray-200 px-2 text-gray-600 ml-2">{q.totalQuestions}</span>
+                                        <div key={q._id} className="bg-white p-4 border border-slate-100 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-indigo-100 transition-colors">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold">
+                                                    {q.title.charAt(0).toUpperCase()}
                                                 </div>
-                                                <div className="flex gap-1">
-                                                    {q.categories.map((c, idx) => (
-                                                        <span key={idx + c} className="text-sm rounded-full border-1 border-gray-200 bg-gray-100 px-2 text-gray-600">{c}</span>
-                                                    ))}
+                                                <div>
+                                                    <h3 className="font-bold text-slate-800 text-lg">{q.title}</h3>
+                                                    <div className="flex gap-2 mt-1">
+                                                        <span className="text-xs font-semibold bg-slate-100 text-slate-500 px-2 py-0.5 rounded">
+                                                            {q.totalQuestions} Questions
+                                                        </span>
+                                                        {q.categories.map((c, idx) => (
+                                                            <span key={idx + c} className="text-xs font-semibold bg-purple-50 text-purple-600 px-2 py-0.5 rounded">
+                                                                {c}
+                                                            </span>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="flex gap-1">
-
-                                            </div>
-                                        </li>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
                                 <Pagination currentPage={page} totalPages={totalPages} totalQuizzes={totalQuizes} />
                             </>
                         )}
@@ -107,3 +136,4 @@ export default function Quizes() {
         </div>
     )
 }
+

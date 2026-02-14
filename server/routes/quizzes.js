@@ -57,7 +57,9 @@ router.put('/:id', async (req, res) => {
         const { title, description, participants, visibility, categories } = req.body
         const { id } = req.params
         const data = await QuizService.updateQuiz({
-            id, updatedData: {
+            id,
+            userId: req.userId,
+            updatedData: {
                 title,
                 description,
                 creator: req.userId,

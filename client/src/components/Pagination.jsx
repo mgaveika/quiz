@@ -42,11 +42,11 @@ export default function Pagination({ currentPage, totalPages, totalQuizzes }) {
     if (totalPages <= 1) return null
 
     const pageNumbers = getPageNumbers()
-    const startRange = (currentPage - 1) * 10 + 1
-    const endRange = Math.min(currentPage * 10, totalQuizzes)
+    const startRange = (currentPage - 1) * 12 + 1
+    const endRange = Math.min(currentPage * 12, totalQuizzes)
 
     return (
-        <div className="flex items-center justify-between py-3 border-t border-gray-200 mt-4">
+        <div className="flex items-center justify-between py-3 border-t border-gray-200 mt-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
             {/* Mobile View */}
             <div className="flex flex-1 justify-between sm:hidden">
                 <Link

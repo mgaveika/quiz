@@ -3,6 +3,19 @@ const GameAttemptService = require('../services/GameAttemptService')
 const MainSession = require('../models/sessions/Main')
 
 const router = express.Router()
+const QuizService = require('../services/gameservices/QuizService')
+
+router.get('/history', async (req, res) => {
+    try {
+        const guest = req.guest || false
+        const userId = req.userId
+        const { page, search } = req.query
+        const data = await QuizService.getUserHistory({ userId, guest, page: Number(page) || 1, search })
+        res.json({ data, message: "History fetched successfully!", status: "success" })
+    } catch (err) {
+        res.json({ data: null, message: err.message, status: "error" })
+    }
+})
 
 router.get('/', async (req, res) => {
     try {

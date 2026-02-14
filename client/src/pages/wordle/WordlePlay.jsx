@@ -41,7 +41,7 @@ export default function WordleGame({ gameData, socket }) {
             body: JSON.stringify({ attempts: newGuesses, finished })
         }).then(res => res.json()).then(data => {
             if (data.status !== "error" && finished) {
-                toast.error(data.message)
+                toast.success(data.message)
             }
         })
     }
@@ -131,17 +131,39 @@ export default function WordleGame({ gameData, socket }) {
     }
 
     return (
-        <div className="flex flex-col md:flex-row gap-8 p-4 justify-center items-start">
-            <div className="flex flex-col items-center gap-4">
-                <h1 className="text-2xl font-bold">WORDLE</h1>
-                <div className="flex flex-col gap-1">
+        <main className="min-h-[calc(100vh-64px)] bg-white flex flex-col items-center py-12 px-4 select-none">
+            {/* Game Container */}
+            <div className="w-full max-w-lg flex flex-col items-center gap-10">
+
+                {/* Header / Info */}
+                <div className="text-center space-y-1">
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tighter">WORDLE</h1>
+                    <div className="flex items-center justify-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
+                        <span className="px-2 py-0.5 border border-slate-100 rounded-md bg-slate-50">{wordLength} Letters</span>
+                        <span>•</span>
+                        <span className="px-2 py-0.5 border border-slate-100 rounded-md bg-slate-50">{wordleAttempts} Attempts</span>
+                    </div>
+                </div>
+
+                {/* The Board */}
+                <div className="flex flex-col gap-2">
                     {Array.from({ length: wordleAttempts }).map((_, r) => (
-                        <div key={r} className="flex gap-1">
+                        <div key={r} className="flex gap-2">
                             {Array.from({ length: wordLength }).map((_, c) => {
                                 const letter = r < guesses.length ? guesses[r][c] : (r === guesses.length ? currentGuess[c] : "")
-                                const style = r < guesses.length ? evaluateGuess(guesses[r])[c] : "border-gray-300"
+                                const evaluationStyle = r < guesses.length ? evaluateGuess(guesses[r])[c] : ""
+                                const isCurrent = r === guesses.length
+                                const isFilled = !!letter
+
                                 return (
-                                    <div key={c} className={`w-12 h-12 border flex items-center justify-center font-bold text-xl uppercase ${style}`}>
+                                    <div
+                                        key={c}
+                                        className={`
+                                            w-14 h-14 md:w-16 md:h-16 flex items-center justify-center text-2xl md:text-3xl font-black rounded-2xl border-2 transition-all duration-300
+                                            ${evaluationStyle || (isFilled ? "border-slate-400 text-slate-800 scale-[1.05] shadow-sm" : "border-slate-100 text-slate-300")}
+                                            ${!evaluationStyle && isCurrent && !letter ? "bg-slate-50/50" : ""}
+                                        `}
+                                    >
                                         {letter}
                                     </div>
                                 )
@@ -150,36 +172,77 @@ export default function WordleGame({ gameData, socket }) {
                     ))}
                 </div>
 
-                <div className="flex flex-col gap-1 mt-4">
-                    {isGameOver && <div className="text-blue-600 font-semibold mb-2 animate-pulse">Waiting for other players...</div>}
+                {/* Status & Feedback */}
+                <div className="min-h-[24px]">
+                    {isGameOver && (
+                        <div className="px-6 py-2 bg-indigo-50 text-indigo-600 rounded-full font-black text-xs uppercase tracking-widest animate-pulse border border-indigo-100">
+                            Waiting for results...
+                        </div>
+                    )}
+                </div>
+
+                {/* Keyboard */}
+                <div className="w-full flex flex-col gap-2 px-2">
                     {["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map((row, i) => (
-                        <div key={i} className="flex gap-1 justify-center">
-                            {i === 2 && <button onClick={() => handleKey("ENTER")} className="px-2 py-1 bg-gray-200 rounded font-bold h-10">ENT</button>}
+                        <div key={i} className="flex gap-1.5 justify-center">
+                            {i === 2 && (
+                                <button
+                                    onClick={() => handleKey("ENTER")}
+                                    className="h-14 px-3 md:px-5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-xs transition-all active:scale-95 border border-slate-200/50"
+                                >
+                                    ENTER
+                                </button>
+                            )}
                             {row.split("").map(k => (
-                                <button key={k} onClick={() => handleKey(k)} className={`w-8 h-10 rounded font-bold ${getKeyStyle(k)}`}>{k}</button>
+                                <button
+                                    key={k}
+                                    onClick={() => handleKey(k)}
+                                    className={`
+                                        w-8 md:w-10 h-14 rounded-xl font-black text-sm transition-all active:scale-95 border border-transparent shadow-sm
+                                        ${getKeyStyle(k).includes("bg-gray-200") ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200/50" : getKeyStyle(k)}
+                                    `}
+                                >
+                                    {k}
+                                </button>
                             ))}
-                            {i === 2 && <button onClick={() => handleKey("BACKSPACE")} className="px-2 py-1 bg-gray-200 rounded font-bold h-10">DEL</button>}
+                            {i === 2 && (
+                                <button
+                                    onClick={() => handleKey("BACKSPACE")}
+                                    className="h-14 px-3 md:px-5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-xs transition-all active:scale-95 border border-slate-200/50"
+                                >
+                                    DEL
+                                </button>
+                            )}
                         </div>
                     ))}
                 </div>
-            </div>
 
-            <div className="w-48">
-                {Object.values(opponents).map((opp, i) => (
-                    <div key={i} className="mb-4">
-                        <div className="text-sm truncate font-medium">{opp.username}</div>
-                        <div className="flex flex-col gap-0.5">
-                            {Array.from({ length: wordleAttempts || 6 }).map((_, r) => (
-                                <div key={r} className="flex gap-0.5">
-                                    {Array.from({ length: wordLength || 5 }).map((_, c) => (
-                                        <div key={c} className={`w-2 h-2 ${opp.progress[r]?.[c] || "bg-white border"}`} />
-                                    ))}
+                {/* Integrated Opponents Progress */}
+                {Object.values(opponents).length > 0 && (
+                    <div className="w-full pt-12 border-t border-slate-100">
+                        <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">Live Opponents</p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                            {Object.values(opponents).map((opp, i) => (
+                                <div key={i} className="flex flex-col items-center gap-3 group">
+                                    <div className="flex flex-col gap-1 items-center">
+                                        {Array.from({ length: wordleAttempts }).map((_, r) => (
+                                            <div key={r} className="flex gap-1">
+                                                {Array.from({ length: wordLength }).map((_, c) => (
+                                                    <div
+                                                        key={c}
+                                                        className={`w-2 h-2 rounded-[2px] ${opp.progress[r]?.[c] || "bg-slate-50 border border-slate-100"}`}
+                                                    />
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <span className="text-[11px] font-black text-slate-500 truncate max-w-[80px] group-hover:text-slate-900 transition-colors uppercase tracking-tighter">{opp.username}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
-                ))}
+                )}
             </div>
-        </div>
+        </main>
     )
 }
