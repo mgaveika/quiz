@@ -107,7 +107,7 @@ export default function QuizPlay({ gameData, socket }) {
                     if (data.status === "success" && data.data) {
                         navigate(`/quiz/result/${data.data._id}`)
                     } else {
-                        navigate("/list")
+                        navigate("/quiz")
                     }
                 })
         })

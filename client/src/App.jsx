@@ -25,6 +25,10 @@ import EditQuiz from "./pages/quiz/EditQuiz.jsx"
 import Main from "./pages/admin/Main.jsx"
 import Quizes from "./pages/admin/Quizes.jsx"
 import Users from "./pages/admin/Users.jsx"
+import DrawHome from "./pages/draw/DrawHome.jsx"
+import DrawPlay from "./pages/draw/DrawPlay.jsx"
+import DrawResult from "./pages/draw/DrawResult.jsx"
+
 
 import { AuthProvider } from "./utils/AuthContext.jsx"
 
@@ -41,13 +45,19 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/forgot-password/:token" element={<VerifyCode />} />
-          <Route path="/list" element={<PublicQuizes />} />
+          <Route path="/quiz" element={<PublicQuizes />} />
           <Route path="/quiz/:quizId" element={<QuizHome />} />
           <Route path="/room/:code" element={<GameRoom />} />
           <Route path="/room/:code/live" element={<Play />} />
-          <Route path="/wordle/result/:attemptId" element={<WordleResult />} />
           <Route path="/quiz/result/:attemptId" element={<QuizRezult />} />
+
+          <Route path="/wordle/result/:attemptId" element={<WordleResult />} />
           <Route path="/wordle" element={<WordleHome />} />
+
+          <Route path="/draw" element={<DrawHome />} />
+          <Route path="/draw/play" element={<DrawPlay />} />
+          <Route path="/draw/result/:attemptId" element={<DrawResult />} />
+
           <Route element={<ProtectedRoutes />} >
             <Route path="/profile" element={<Profile />} />
             <Route path="/create" element={<CreateQuiz />} />

@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const GameAttempt = require('../models/attempts/Main')
 const WordleService = require('./gameservices/WordleService')
 const QuizService = require('./gameservices/QuizService')
+const DrawService = require('./gameservices/DrawService')
+
 
 class GameAttemptService {
     static getService(gameType) {
@@ -10,15 +12,19 @@ class GameAttemptService {
                 return WordleService
             case 'quiz':
                 return QuizService
+            case 'draw':
+                return DrawService
+
         }
     }
 
     static async createGameAttempt({ userId, guest, sessionId, gameType, extraData = {}, players = [] }) {
         try {
             const service = this.getService(gameType)
-            if (gameType === 'wordle') {
+            if (gameType === 'wordle' || gameType === 'draw') {
                 return await service.createAttempt({ sessionId, players, extraData })
             }
+
             return await service.createAttempt({ userId, guest, sessionId, extraData })
         } catch (err) {
             throw err

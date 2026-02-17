@@ -164,10 +164,34 @@ class QuizService {
 
         const questions = await QuizQuestion.find({ quizId: attempt.quizId._id }).sort({ order: 1 })
 
+        let leaderboard = []
+        if (attempt.session) {
+            const sessionAttempts = await QuizAttempt.find({ session: attempt.session })
+            // We need usernames. We can get them from session or users.
+            const session = await GameSession.findById(attempt.session)
+            if (session) {
+                leaderboard = session.participants.map(p => {
+                    const pId = p.user || p.guest
+                    const pAttempt = sessionAttempts.find(a =>
+                        (p.user && String(a.user) === String(p.user)) ||
+                        (p.guest && a.guest === p.guest)
+                    )
+                    return {
+                        id: pId,
+                        name: p.username,
+                        score: pAttempt ? pAttempt.score : 0,
+                        isCurrent: String(pAttempt?._id) === String(attemptId)
+                    }
+                }).sort((a, b) => b.score - a.score)
+            }
+        }
+
         return {
             quiz: attempt.quizId,
             attempt,
-            questions
+            questions,
+            leaderboard,
+            totalQuestions: questions.length
         }
     }
 

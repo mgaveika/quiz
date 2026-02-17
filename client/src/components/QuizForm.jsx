@@ -236,7 +236,7 @@ export default function QuizForm({ quiz = null, isEdit = false }) {
                 }
 
                 toast.success(data.message)
-                navigate("/list")
+                navigate("/quiz")
             } else {
                 toast.error(data.message)
             }

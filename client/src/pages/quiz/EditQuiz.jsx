@@ -18,7 +18,7 @@ export default function EditQuiz() {
                 if (data.status == "success") {
                     if (!data.data.creator) {
                         toast.error("You're not allowed to edit this quiz!")
-                        navigate("/list")
+                        navigate("/quiz")
                         return
                     }
                     setQuizData({
@@ -32,7 +32,7 @@ export default function EditQuiz() {
                     })
                 } else {
                     toast.error(data.message)
-                    navigate("/list")
+                    navigate("/quiz")
                 }
                 setLoading(false)
             })

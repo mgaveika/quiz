@@ -32,8 +32,9 @@ export default function Navigation() {
                 </Link>
 
                 <div className="hidden md:flex items-center gap-6">
-                    <Link to="/list" className="text-gray-600 hover:text-indigo-600 font-semibold">Quizzes</Link>
+                    <Link to="/quiz" className="text-gray-600 hover:text-indigo-600 font-semibold">Quizzes</Link>
                     <Link to="/wordle" className="text-gray-600 hover:text-indigo-600 font-semibold">Wordle</Link>
+                    <Link to="/draw" className="text-gray-600 hover:text-indigo-600 font-semibold">Draw</Link>
                 </div>
             </div>
 

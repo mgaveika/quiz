@@ -2,6 +2,7 @@ const GameSessionSchema = require('../models/sessions/Main')
 const GameAttemptService = require('./GameAttemptService')
 const QuizService = require('./gameservices/QuizService')
 const WordleService = require('./gameservices/WordleService')
+const DrawService = require('./gameservices/DrawService')
 
 class GameSessionService {
     static getGameService(gameType) {
@@ -10,6 +11,8 @@ class GameSessionService {
                 return WordleService
             case 'quiz':
                 return QuizService
+            case 'draw':
+                return DrawService
             default:
                 throw new Error("Unknown game type")
         }

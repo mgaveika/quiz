@@ -19,14 +19,14 @@ export default function QuizHome() {
                     setQuizData(data.data)
                 } else {
                     toast.error(data.message)
-                    navigate("/list")
+                    navigate("/quiz")
                 }
             })
     }, [])
 
     const handleClick = (action) => {
         if (action === "back") {
-            navigate("/list")
+            navigate("/quiz")
         } else if (action === "edit") {
             navigate(`/quiz/${quizId}/edit`)
         } else if (action === "start") {
@@ -44,14 +44,14 @@ export default function QuizHome() {
                         navigate(`/room/${data.data.roomCode}`)
                     } else {
                         toast.error(data.message)
-                        navigate("/list")
+                        navigate("/quiz")
                     }
                 })
         }
     }
 
     return (
-        <main className="min-h-screen bg-white overflow-x-hidden">
+        <main className="min-h-screen overflow-x-hidden">
             <Navigation />
             {!quizData ? (
                 <div className="flex items-center justify-center h-[calc(100vh-64px)]">
@@ -62,10 +62,6 @@ export default function QuizHome() {
                 </div>
             ) : (
                 <div className="relative isolate overflow-hidden min-h-[calc(100vh-64px)] flex flex-col">
-                    {/* Background Decorative Elements */}
-                    <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80 pointer-events-none">
-                        <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-200 to-purple-200 opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
-                    </div>
 
                     <div className="max-w-4xl mx-auto px-6 pt-12 pb-16 text-center flex-1 flex flex-col justify-center">
                         <button
@@ -119,7 +115,7 @@ export default function QuizHome() {
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
                             <button
                                 onClick={() => handleClick("start")}
-                                className="w-full sm:w-auto px-12 py-5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black text-xl shadow-2xl shadow-slate-200 transition-all hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center gap-3"
+                                className="w-full sm:w-auto px-12 py-5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black text-xl shadow-2xl shadow-slate-200 cursor-pointer flex items-center justify-center gap-3"
                             >
                                 <Icons icon="play" className="w-6 h-6 fill-white" />
                                 <span>Start Now</span>
@@ -131,7 +127,7 @@ export default function QuizHome() {
                                     className="w-full sm:w-auto px-10 py-5 bg-white hover:bg-slate-50 text-slate-600 border-2 border-slate-200 rounded-2xl font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
                                 >
                                     <Icons icon="pen" className="w-4 h-4" />
-                                    <span>Settings</span>
+                                    <span>Edit</span>
                                 </button>
                             )}
                         </div>

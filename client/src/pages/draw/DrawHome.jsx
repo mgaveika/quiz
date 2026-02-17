@@ -15,7 +15,7 @@ export default function WordleHome() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ gameType: "wordle" })
+            body: JSON.stringify({ gameType: "draw" })
         }).then(res => res.json())
             .then(data => {
                 if (data.status == "success") {
@@ -35,25 +35,12 @@ export default function WordleHome() {
 
                 <div className="max-w-4xl mx-auto px-6 text-center z-10">
                     <div className="mb-12 space-y-4">
-                        <div className="flex justify-center gap-3 mb-8">
-                            {["W", "O", "R", "D", "L", "E"].map((letter, i) => (
-                                <div
-                                    key={i}
-                                    className={`w-12 h-12 md:w-16 md:h-16 flex items-center justify-center text-2xl md:text-3xl font-black rounded-2xl border-2 transition-all duration-500 shadow-sm
-                                        ${i === 0 ? "bg-emerald-500 border-emerald-500 text-white rotate-[-3deg]" :
-                                            i === 2 ? "bg-amber-400 border-amber-400 text-white rotate-[2deg]" :
-                                                "bg-white border-slate-200 text-slate-800"}`}
-                                >
-                                    {letter}
-                                </div>
-                            ))}
-                        </div>
 
                         <h1 className="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter leading-none">
-                            Wordle Extra
+                            Draw & Guess
                         </h1>
                         <p className="max-w-xl mx-auto text-xl text-slate-500 font-medium leading-relaxed">
-                            Your rules, your game. Customize word length and attempts, then guess the hidden word.
+                            Draw and let your friends guess it.
                         </p>
                     </div>
 
@@ -77,24 +64,24 @@ export default function WordleHome() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center pt-12 border-t border-slate-100">
                         <div className="space-y-3">
                             <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-emerald-100 shadow-sm">
-                                <Icons icon="wordlength" className="w-6 h-6" />
+                                <Icons icon="pen" className="w-6 h-6" />
                             </div>
-                            <h3 className="font-extrabold text-slate-800">Full Control</h3>
-                            <p className="text-sm text-slate-500 font-medium px-4">Adjust word length and number of attempts to suit your style.</p>
+                            <h3 className="font-extrabold text-slate-800">Draw</h3>
+                            <p className="text-sm text-slate-500 font-medium px-4">Create a masterpiece and let your friends guess it.</p>
                         </div>
                         <div className="space-y-3">
                             <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-indigo-100 shadow-sm">
                                 <Icons icon="people" className="w-6 h-6" />
                             </div>
                             <h3 className="font-extrabold text-slate-800">Online Play</h3>
-                            <p className="text-sm text-slate-500 font-medium px-4">Challenge friends or join public rooms for a word battle.</p>
+                            <p className="text-sm text-slate-500 font-medium px-4">Challenge friends or join public rooms for a drawing battle.</p>
                         </div>
                         <div className="space-y-3">
                             <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-amber-100 shadow-sm">
                                 <Icons icon="attempt" className="w-6 h-6" />
                             </div>
-                            <h3 className="font-extrabold text-slate-800">Mental Workout</h3>
-                            <p className="text-sm text-slate-500 font-medium px-4">Improve your vocabulary and logic skills with every single game.</p>
+                            <h3 className="font-extrabold text-slate-800">Creativity</h3>
+                            <p className="text-sm text-slate-500 font-medium px-4">Improve your drawing skills and creativity with every single game.</p>
                         </div>
                     </div>
                 </div>

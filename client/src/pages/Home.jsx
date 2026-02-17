@@ -19,7 +19,7 @@ export default function Home() {
             title: "Trivia Quizzes",
             description: "Test your knowledge on thousands of topics or create your own.",
             icon: "quiz",
-            link: "/list",
+            link: "/quiz",
             color: "from-blue-500 to-indigo-600",
             buttonText: "Browse Quizzes"
         },
@@ -50,7 +50,7 @@ export default function Home() {
 
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Link
-                            to="/list"
+                            to="/quiz"
                             className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-xl shadow-indigo-200"
                         >
                             Explore Games

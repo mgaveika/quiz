@@ -25,6 +25,7 @@ export default function Profile() {
 
     const handleTabSwitch = (tab) => {
         if (activeTab === tab || loading) return
+        setQuizes([])
         setLoading(true)
         setActiveTab(tab)
     }
@@ -137,7 +138,7 @@ export default function Profile() {
     }
 
     return (
-        <main className="min-h-screen bg-slate-50 pb-12">
+        <main className="min-h-screen pb-12">
             {deleteAccount && <DeleteAccount confirm={confirmDeleteAccount} cancel={() => setDeleteAccount(false)} />}
             {(!user || !user.auth) ? (
                 <div className="flex items-center justify-center h-screen">
@@ -190,7 +191,7 @@ export default function Profile() {
                                         className={`w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 ${activeTab === "password" ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-50"
                                             }`}
                                     >
-                                        <Icons icon="lock" className="w-5 h-5" />
+                                        <Icons icon="shield" className="w-5 h-5" />
                                         Security
                                     </button>
 
@@ -265,23 +266,17 @@ export default function Profile() {
                                                 </button>
                                             </div>
 
-                                            {loading ? (
-                                                <div className="flex items-center justify-center h-40">
-                                                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
-                                                </div>
-                                            ) : (
-                                                <QuizList
-                                                    quizzes={quizes}
-                                                    showFilter={true}
-                                                    selectedFilters={filter}
-                                                    onFilterChange={handleFilterChange}
-                                                    onSearchChange={handleSearch}
-                                                    totalPages={totalPages}
-                                                    totalQuizzes={totalQuizzes}
-                                                    currentPage={page}
-                                                    link={"/quiz/"}
-                                                />
-                                            )}
+                                            <QuizList
+                                                quizzes={quizes}
+                                                showFilter={true}
+                                                selectedFilters={filter}
+                                                onFilterChange={handleFilterChange}
+                                                onSearchChange={handleSearch}
+                                                totalPages={totalPages}
+                                                totalQuizzes={totalQuizzes}
+                                                currentPage={page}
+                                                link={"/quiz/"}
+                                            />
                                         </div>
                                     )}
 
@@ -291,21 +286,15 @@ export default function Profile() {
                                                 <h2 className="text-2xl font-black text-slate-800">Quiz History</h2>
                                                 <p className="text-slate-500">Review your past performance.</p>
                                             </div>
-                                            {loading ? (
-                                                <div className="flex items-center justify-center h-40">
-                                                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
-                                                </div>
-                                            ) : (
-                                                <QuizList
-                                                    quizzes={quizes}
-                                                    showFilter={false}
-                                                    onSearchChange={handleSearch}
-                                                    totalPages={totalPages}
-                                                    totalQuizzes={totalQuizzes}
-                                                    currentPage={page}
-                                                    link={"/quiz/result/"}
-                                                />
-                                            )}
+                                            <QuizList
+                                                quizzes={quizes}
+                                                showFilter={false}
+                                                onSearchChange={handleSearch}
+                                                totalPages={totalPages}
+                                                totalQuizzes={totalQuizzes}
+                                                currentPage={page}
+                                                link={"/quiz/result/"}
+                                            />
                                         </div>
                                     )}
                                 </div>

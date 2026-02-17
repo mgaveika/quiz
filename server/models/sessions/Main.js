@@ -25,7 +25,7 @@ const GameSessionSchema = new mongoose.Schema({
     },
     gameType: {
         type: String,
-        enum: ['quiz', 'wordle'],
+        enum: ['quiz', 'wordle', 'draw'],
         required: true
     },
     userHost: {

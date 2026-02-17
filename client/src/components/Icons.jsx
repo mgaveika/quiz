@@ -322,7 +322,43 @@ export default function Icons(props) {
                 />
             </svg>
         )
+    } else if (props.icon === "shield") {
+        return (
+            <svg
+                className={props.className}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M12 3.73169L19.5 5.39836V12.75C19.5 15.6371 17.5419 18.9972 12.2605 20.9533L12 21.0498L11.7395 20.9533C6.45811 18.9972 4.5 15.6371 4.5 12.75V5.39836L12 3.73169ZM6 6.60161V12.75C6 14.8245 7.3659 17.6481 12 19.4479C16.6341 17.6481 18 14.8245 18 12.75V6.60161L12 5.26828L6 6.60161Z"
+                    fill="currentColor"
+                />
+            </svg>
+
+        )
+    } else if (props.icon === "send") {
+        return (
+            <svg className={`${props.className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
+        )
+    } else if (props.icon === "skip") {
+        return (
+            <svg className={`${props.className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+        )
+    } else if (props.icon === "eraser") {
+        return (
+            <svg className={`${props.className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 21l-4-4L15.3 3.6A2 2 0 0 1 18.1 3.6l2.3 2.3a2 2 0 0 1 0 2.8L7 21z M17 7l-3 3" />
+            </svg>
+        )
     } else {
+
         return (
             <span>Unknown icon</span>
         )

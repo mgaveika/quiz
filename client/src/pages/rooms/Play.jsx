@@ -3,24 +3,26 @@ import toast from 'react-hot-toast'
 import { useNavigate, useParams } from 'react-router-dom'
 import QuizPlay from '../quiz/QuizPlay.jsx'
 import WordlePlay from '../wordle/WordlePlay.jsx'
+import DrawPlay from '../draw/DrawPlay.jsx'
+
 import Navigation from '../../components/Navigation.jsx'
 import io from "socket.io-client"
-
-let socket
 
 export default function Play() {
     const [sessionData, setSessionData] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [socket, setSocket] = useState(null)
     const navigate = useNavigate()
     const { code } = useParams()
 
     useEffect(() => {
-        socket = io({
+        const newSocket = io({
             withCredentials: true,
             transports: ["websocket"]
         })
 
-        socket.emit("join-room", { code })
+        setSocket(newSocket)
+        newSocket.emit("join-room", { code })
 
         fetch(`/api/gameSession/${code}`, {
             credentials: 'include'
@@ -39,7 +41,7 @@ export default function Play() {
             })
 
         return () => {
-            if (socket) socket.disconnect()
+            newSocket.disconnect()
         }
     }, [code, navigate])
 
@@ -53,9 +55,12 @@ export default function Play() {
             ) : (
                 sessionData.session.gameType === "quiz" ? (
                     <QuizPlay gameData={sessionData} socket={socket} />
-                ) : (
+                ) : sessionData.session.gameType === "wordle" ? (
                     <WordlePlay gameData={sessionData} socket={socket} />
+                ) : (
+                    <DrawPlay gameData={sessionData} socket={socket} />
                 )
+
             )}
         </>
     )

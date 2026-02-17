@@ -106,4 +106,24 @@ router.get("/:code/status", async (req, res) => {
         res.json({ data: null, message: err.message, status: "error" })
     }
 })
+router.get("/draw/words", async (req, res) => {
+    try {
+        const { roomCode } = req.query
+        const DrawService = require('../services/gameservices/DrawService')
+
+        if (roomCode) {
+            const GameSession = require('../models/sessions/Main')
+            const session = await GameSession.findOne({ roomCode: Number(roomCode) })
+            if (session && session.gameData && session.gameData.wordChoices && session.gameData.wordChoices.length > 0) {
+                return res.json({ data: session.gameData.wordChoices, status: "success" })
+            }
+        }
+
+        const words = await DrawService.getRandomWords(3)
+        res.json({ data: words, status: "success" })
+    } catch (err) {
+        res.json({ data: [], message: err.message, status: "error" })
+    }
+})
+
 module.exports = router
